@@ -1,0 +1,200 @@
+---
+title: "mvMOBSTER Vignette"
+author: "Giulio Caravagna"
+date: "21 February 2019"
+institute: "Institute for Cancer Research"
+email: "giulio.caravagna@ed.ac.uk"
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(mvmobster)
+library(mobster)
+require(pio)
+library(tidyverse)
+library(ggpubr)
+```
+
+This is the vignette of package `mvMOBSTER`, which allows to implement
+a multivariate analysis from multi-region sequencing data with package
+`MOBSTER`, which you find on [GitHub](https://github.com/caravagn/mobster). 
+
+## Example data
+
+Example data is made available within `mvMOBSTER`.
+
+```{r}
+data("example_mvmobster", package = 'mvmobster')
+```
+
+Data consists of mutations, copy number segments and sample names.
+```{r}
+# Printing with functions from the "pio" package
+pio::pioDisp(example_mvmobster$muts)
+pio::pioDisp(example_mvmobster$segments)
+print(example_mvmobster$samples)
+```
+
+We should have sample purity available as well. We make it fake for this dataset assuming 100% tumour
+content in each biopsy.
+
+```{r}
+# Named vector
+pur = rep(1, 6)
+names(pur) = example_mvmobster$samples
+```
+
+We can now xreate a mvMOBSTER object (of class `mbs_data`). This object will map mutations to chromosome segments, and will adjust the observed VAF for tumour purity and copy number states of each mutation. 
+```{r}
+x = mobster_dataset(
+  mutations = example_mvmobster$muts,
+  samples = example_mvmobster$samples[1:3], 
+  segments = example_mvmobster$segments,
+  purity = pur[1:3], 
+  N.min = 0
+)
+```
+
+The resulting object has its own S3 print and plot functions 
+
+```{r}
+print(x)
+```
+
+The plot function shows the VAF and depth of sequencing in different forms.
+```{r, fig.height=7, fig.width = 4.5, warning=FALSE, message=FALSE}
+plot(x)
+```
+
+## Data manipulation
+
+Mutations are associated to ids inside mvMOBSTER objects, and the ids can be used to query the data. The ids are available as `keys(x)`, and to access the data (without modifying it), you can use different types of "getters" which accepts usually the samples and the ids as parameters.
+
+```{r}
+# VAF values, in tow different tidy representations
+VAF(x)
+VAF_table(x)
+```
+
+and similarly one cane use the other functions as well (`DP`, `NV`, `DP_table` and `NV_table`) and a general function to query all data at once.
+```{r}
+# VAF, DP and NV as tables
+Data_table(x)
+```
+
+You have several filter functions to subset the mutations stored in a dataset; they all start as `filter_*` with a keyword for the filter. Some examples are the following
+
+* `filter_minvaf`, which sets to 0 all entries with VAF below a cutoff;
+* `filter_minnv`, which sets to 0 all entries with NV below a cutoff;
+* `filter_dprange`, which sets to 0 all entries with DP outside a range;
+* `filter_vafrange`, which sets to 0 all entries with VAF outside a range;
+
+These can be used to remove outliers etc. before the inference. You can visualize the effects of filters on your data using the function `plot_filters` which highlights in red all points that would be removed applying certain filter parameters. 
+
+```{r, fig.height=2, fig.width = 8, warning=FALSE, message=FALSE}
+plot_filters(x,
+             VAF_min = 0.05, # filter_minvaf
+             NV_min = 3,     # filter_minnv
+             min.DP = 0,     # filter_dprange
+             max.DP = Inf,   # filter_dprange
+             min.VAF = 0.05, # filter_vafrange
+             max.VAF = 0.8,  # filter_vafrange
+             x.lim = NA,
+             y.lim = NA)
+```
+
+We do not apply any filter on the input data.
+
+## Fitting MOBSTER
+
+A wrap to fitting functions from the [MOBSTER](https://github.com/caravagn/mobster) package allows running easily a MOBSTER fit to each one of the samples annotated in the data.
+
+```{r, warning=FALSE, message=FALSE}
+fit = mobster_fit_multivariate(x)
+```
+
+This function includes the fits in the `$fit.MOBSTER` field of `x`. One can use functions from the `MOBSTER` package to visualize and inspect the fits.
+```{r, fig.height=3, fig.width = 4, warning=FALSE, message=FALSE}
+require(mobster)
+plot(fit$fit.MOBSTER$Set6_42$best)
+plot_mixing_proportions(fit$fit.MOBSTER$Set6_42$best)
+```
+
+or can use more complex functions to inspect model selection
+
+```{r, fig.height=6, fig.width = 7, warning=FALSE, message=FALSE}
+plot_model_selection(fit$fit.MOBSTER$Set6_42)
+```
+
+Projecting tail mutations
+
+```{r, warning=FALSE, message=FALSE}
+fit_prj = mobster_flt_projection(fit)
+```
+
+## Fitting read counts with Binomial clusters
+
+mvMOBSTER can interface directly with [VIBER](https://github.com/caravagn/VIBER), a package that we have developed to perform variational inference of Binomial mixture models for read counts clustering. mvMOBSTER contains functions that can be used to call the fits, and plot the results through `VIBER` functions.
+
+mvMOBSTER can also wrap calls to external tools for Binomial clustering of read counts. These are `sciClone` (R package), and `pyClone` (Python package, called through a syscall).
+
+```{r}
+# Call a VIBER fit asking for at most 8 clusters; see ?variational_fit
+fit_prj = mobster_fit_VIBER(fit_prj, K = 8)
+```
+
+The output is stored in field `$fit.Binomial` of the input object. We can print via `VIBER` S3 functions the results of the fit.
+
+```{r, fig.height=2, fig.width = 2, warning=FALSE, message=FALSE}
+require(VIBER)
+print(fit_prj$fit.Binomial)
+```
+
+Because the method is semi-parametric, the fit might have an excess of clusters that we can trim (see the [VIBER](https://github.com/caravagn/VIBER) vignette for instructions).
+```{r, fig.height=3, fig.width = 3, warning=FALSE, message=FALSE}
+fit_prj$fit.Binomial = choose_clusters(fit_prj$fit.Binomial)
+
+# The new object has relabeled clusters
+print(fit_prj$fit.Binomial)
+
+# Plot the fit as pairwise VAF
+plot(fit_prj$fit.Binomial, alpha = 1)
+
+# Plot mixing proportions
+plot_mixing_proportions(fit_prj$fit.Binomial)
+
+# Plot the ELBO statistics
+plot_ELBO(fit_prj$fit.Binomial)
+```
+
+## Standard analysis
+
+A standard analysis would just run read counts clustering on all data.
+
+```{r, fig.height=3, fig.width = 3, warning=FALSE, message=FALSE}
+# Fit original data
+standard = mobster_fit_VIBER(fit)
+
+# Plot the stats
+plot(standard$fit.Binomial)
+plot_mixing_proportions(standard$fit.Binomial)
+plot_ELBO(standard$fit.Binomial)
+```
+## Clustering assingments
+
+The fits are available in `$fit.*` fields of the mvMOBSTER object. They can be accessed with getters
+```{r, warning=FALSE, message=FALSE}
+# MOBSTER (M) clusters, with annotations matched.
+Clusters(fit_prj, cluster = 'M', annotations = TRUE)
+
+# VIBER (B) Binomial clusters, with annotations matched.
+# Clusters(fit_prj, cluster = 'B', annotations = TRUE)
+```
+and similarly for `standard`.
+
+
