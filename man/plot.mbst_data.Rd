@@ -4,7 +4,7 @@
 \alias{plot.mbst_data}
 \title{Plot a dataset (complex figure).}
 \usage{
-\method{plot}{mbst_data}(x, scales = "fixed", cex = 1, ...)
+plot.mbst_data(x, scales = "fixed", cex = 1, ...)
 }
 \arguments{
 \item{x}{A dataset of class \code{"mbst_data"}.}
