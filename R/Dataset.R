@@ -33,12 +33,16 @@
 #' @return An object that represents a dataset from class
 #' \code{mbs_data}.
 #'
+#' @import CNAqc
+#'
 #' @export
 #'
 #' @examples
 #' data(example_mvmobster)
-#' TODO
-mobster_dataset = function(
+#' mutations = example_mvmobster$mutations
+#' segments = example_mvmobster$segments
+#' purity = example_mvmobster$purity
+dataset = function(
   mutations,
   segments,
   samples,
@@ -49,127 +53,113 @@ mobster_dataset = function(
 )
 {
   pio::pioHdr("mvMOBSTER dataset")
-  data = mutations
+
+  # Convert input if it is in the form of list
+  if(is.list(mutations))
+  {
+    conversion =  converted_dataset(
+      mutations,
+      segments,
+      purity,
+      samples
+    )
+
+    mutations = conversion[[1]]
+    segments = conversion[[2]]
+    purity = conversion[[3]]
+    samples = conversion[[4]]
+  }
 
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   # Check input format for data
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  columns_required =
+    check_input_format_df(mutations,
+                          segments,
+                          samples,
+                          purity)
 
-  # data should be dataframe
-  if(!is.data.frame(data)) stop("Data must be a dataframe")
+  mutation_columns_required = columns_required[[1]]
+  segments_columns_required = columns_required[[2]]
 
-  pioStr('Mutations', paste0('N = ', nrow(data)), suffix = '\n')
 
-  # Columns with data
-  DP.columns = paste0(samples, ".DP")
-  NV.columns = paste0(samples, ".NV")
-  VAF.columns = paste0(samples, ".VAF")
+  pioStr('Mutations', paste0('N = ', nrow(mutations)), suffix = '\n')
 
-  Major.columns = paste0(samples, ".Major")
-  minor.columns = paste0(samples, ".minor")
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  # Create IDs for database, and split information to retain in different formats
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  mutations = mutations %>%
+    mutate(id = paste(chr, from, to, ref, alt, sep = ':'))
 
-  all.columns = c(DP.columns, NV.columns, VAF.columns)
-
-  if(any(!(DP.columns %in% colnames(data)))) stop("Missing DP columns in data.")
-  if(any(!(NV.columns %in% colnames(data)))) stop("Missing NV columns in data.")
-  if(any(!(VAF.columns %in% colnames(data)))) stop("Missing VAF columns in data.")
-
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Mutations must have chromosomal coordinated
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-  # mutations must have locations
-  if(any(!(c('chr', 'from', 'to') %in% colnames(data))))
-    stop("Missing location of the annotated mutations: chr, from, to.")
+  # retain only the information we actually need
+  retained = mutations %>% select(-!!mutation_columns_required, id)
+  mutations = mutations %>% select(!!mutation_columns_required, id)
 
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   # NA values in the data are notified
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   # NAs in any of the columns for values
-  if(any(is.na(data[, all.columns, drop = FALSE])))
+  if(any(is.na(mutations)))
   {
-    message("There are NA values in some of the entries for columns: ",
-            paste(all.columns, collapse = ', '),
-            '\nThese will be removed.')
+    message("There are NA values which will be removed.")
 
-    data = data[
-      complete.cases(data[, all.columns, drop = FALSE]), , drop = FALSE
-    ]
+    mutations = mutations[
+      complete.cases(mutations), , drop = FALSE
+      ]
 
-    pioStr('Removed NAs', paste0('N = ', nrow(data)))
+    pioStr('Removed NAs', paste0('N = ', nrow(mutations)), suffix = '\n')
   }
 
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  # Create IDs for database
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  id_col = c('id', 'ID')
+  require(CNAqc)
 
-  if(!all(id_col %in% colnames(data)))
-    data$id = paste0('__mut', 1:nrow(data))
-  else
-  {
-    message("Found 'id' column in data, will use that as identifier.")
+  # Sample-spefic data
+  CNAqc_mappings =
+    lapply(
+      samples,
+      function(s)
+      {
+        pioTit(
+          "Creating CNAqc object for", s
+        )
 
-    if(id_col[2] %in% colnames(data)) data$id = data$ID
-  }
+        data_s = mutations %>% select(chr, from, to, ref, alt, id, starts_with(s))
+        colnames(data_s) = gsub(s, '', colnames(data_s))
+        colnames(data_s) = gsub('\\.', '', colnames(data_s))
 
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  # Check purity and CNA format
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  if(any(!(names(purity) %in% samples)))
-    stop("You forgot to report purity for some samples?")
+        segments_s = segments %>% select(chr, from, to, starts_with(s))
+        colnames(segments_s) = gsub(s, '', colnames(segments_s))
+        colnames(segments_s) = gsub('\\.', '', colnames(segments_s))
 
-  # Copy Number must havea similar format
-  if(
-    !is.data.frame(segments) |
-    !all(c('chr', 'from', 'to') %in% colnames(segments)) |
-    !all(Major.columns %in% colnames(segments)) |
-    !all(minor.columns %in% colnames(segments))
-  ) {
-    stop("Your segments do not look in the right format.")
-  }
+        init(data_s, segments_s, purity[s])
+  })
+  names(CNAqc_mappings) = samples
 
-  tib_data = as_tibble(data)
-  tib_segments = as_tibble(segments)
+  # Mapped mutations from CNAqc
+  mapped_mutations = lapply(
+    names(CNAqc_mappings),
+    function(x)
+      CNAqc_mappings[[x]]$snvs %>%
+      select(VAF, DP, NV, karyotype, id) %>%
+      mutate(sample = x) %>%
+      reshape2::melt(id = c('karyotype', 'id', 'sample')) %>%
+      as_tibble
+    )
 
-  # if(relative.coordinates)
-  # {
-  #   pio::pioStr("Switching to absolute chromosomal coordinates for", 'ref. hg19')
-  #
-  #   data('chr_coordinates_hg19', package = 'mvmobster')
-  #
-  #   starts = chr_coordinate_hg19$from
-  #   names(starts) = chr_coordinate_hg19$chr
-  #
-  #   tib_data = tib_data %>% mutate(
-  #     relative.from = from,
-  #     relative.to = to,
-  #     from = from + starts[chr],
-  #     to = to + starts[chr]
-  #   )
-  #
-  #   tib_segments = tib_segments %>% mutate(
-  #     relative.from = from,
-  #     relative.to = to,
-  #     from = from + starts[chr],
-  #     to = to + starts[chr]
-  #   )
-  # }
+  mapped_mutations = Reduce(bind_rows, mapped_mutations) %>%
+    select(id, sample, variable, value, karyotype)
 
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Melt data
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  # clean up any non-mappable mutations
+  non_mappable = mapped_mutations %>%
+    group_by(id, sample) %>%
+    filter(is.na(karyotype)) %>%
+    pull(id) %>%
+    unique
 
-  # Melt data
-  pioStr("Melting data", "")
+  mapped_mutations = mapped_mutations %>%
+    filter(!(id %in% non_mappable))
 
-  tib_data = tib_data %>%
-    reshape2::melt(id = 'id') %>%
-    as_tibble
-
-  cat("OK\n")
-
-  # make everything a chr
+  # Data tibble, make variable a chr
+  tib_data = mapped_mutations
   tib_data$variable = paste(tib_data$variable)
 
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -182,24 +172,19 @@ mobster_dataset = function(
 
   x$description = description
 
-  # Annotations: anything but VAF/ CN values
-  x$annotations = tib_data %>%
-    filter(!(variable %in%
-               c(all.columns, 'chr', 'from', 'to')))
-
-  # Data: DP, NV and VAF
-  x$data = tib_data %>%
-    filter(variable %in% all.columns)
-
-  x$data$value = as.numeric(x$data$value)
-
-  sp = strsplit(x$data$variable, '\\.')
-  x$data$variable = sapply(sp, function(w) w[2])
-  x$data$sample = sapply(sp, function(w) w[1])
+  # Data: DP, NV and VAF, split to get sample name
+  # x$data = tib_data %>%
+  #   mutate(value = as.numeric(value)) %>%
+  #   separate(col = variable, into = c('sample', 'variable'), sep = '\\.')
+  # x$data$value = as.numeric(x$data$value)
+  #
+  # sp = strsplit(x$data$variable, '\\.')
+  # x$data$variable = sapply(sp, function(w) w[2])
+  # x$data$sample = sapply(sp, function(w) w[1])
 
   # Locations: CN position of mutations
-  x$locations = tib_data %>%
-    filter(variable %in%  c('chr', 'from', 'to'))
+  x$locations = data %>%
+    select(chr, from, to, ref, id)
 
   # Log creation
   x = logOp(x, "Initialization")
@@ -379,31 +364,3 @@ mobster_dataset = function(
 
   return(x)
 }
-
-
-
-
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Private auxiliary functions
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-logOp = function(obj, op)
-{
-  new.entry = tribble(~time, ~operation, Sys.time(),  op)
-  obj$operationLog = bind_rows(obj$operationLog, new.entry)
-
-  obj
-}
-
-
-
-# Conditional mutate
-mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
-  condition <- eval(substitute(condition), .data, envir)
-  .data[condition, ] <- .data[condition, ] %>% mutate(...)
-  .data
-}
-
-
-
