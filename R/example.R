@@ -1,4 +1,5 @@
 data('example_mvmobster')
+require(tidyverse)
 
 m1 = example_mvmobster$muts %>% select(region, gene, chr, from, to, ref, alt, Set6_42.VAF, Set6_42.DP, Set6_42.NV, patient) %>% filter(Set6_42.DP > 0)
 m2 = example_mvmobster$muts %>% select(region, gene, chr, from, to, ref, alt, Set6_44.VAF, Set6_44.DP, Set6_44.NV, patient) %>% filter(Set6_44.DP > 0)

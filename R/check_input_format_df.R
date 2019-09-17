@@ -33,6 +33,19 @@ check_input_format_df = function(mutations,
   if(any(!(seg_all.columns %in% colnames(segments))))
     stop("Missing columns from CNA data. Required: ", paste(seg_all.columns, collapse = ', '))
 
+  # TODO
+  # check that all samples have segments available
+  # if(!all(x$samples %in% unique(x$segments$sample)))
+  #   stop("Some samples are missing from the list of segments, will have to stop.")
+  #
+  # if(any(!(unique(x$segments$sample) %in% x$samples)))
+  # {
+  #   message("Your list of segments contains more sample IDs that those used -- will be dropped.")
+  #
+  #   x$segments = x$segments %>%
+  #     filter(sample %in% x$samples)
+  # }
+
   return(
     list(
       mut_all.columns,

@@ -52,6 +52,12 @@ dataset = function(
   offset_around_centromers = 1e6
 )
 {
+  # Structures to create
+  # - mutations: query-ready tibble with VAF, DP and NV, indexable by sample, with id key
+  # - mutations: location map, with id key
+  # - mutations: all-remaining information(s), indexable by sample, with id key
+  # - CNA: CNAqc objects
+
   pio::pioHdr("mvMOBSTER dataset")
 
   # Convert input if it is in the form of list
@@ -82,7 +88,6 @@ dataset = function(
   mutation_columns_required = columns_required[[1]]
   segments_columns_required = columns_required[[2]]
 
-
   pioStr('Mutations', paste0('N = ', nrow(mutations)), suffix = '\n')
 
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -92,8 +97,9 @@ dataset = function(
     mutate(id = paste(chr, from, to, ref, alt, sep = ':'))
 
   # retain only the information we actually need
-  retained = mutations %>% select(-!!mutation_columns_required, id)
+  mutations_retained = mutations %>% select(-!!mutation_columns_required, id)
   mutations = mutations %>% select(!!mutation_columns_required, id)
+  mutations_locations = mutations %>% select(chr, from, to, ref, alt, id)
 
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   # NA values in the data are notified
@@ -112,7 +118,7 @@ dataset = function(
 
   require(CNAqc)
 
-  # Sample-spefic data
+  # Sample-specific CNA maps data
   CNAqc_mappings =
     lapply(
       samples,
@@ -130,7 +136,7 @@ dataset = function(
         colnames(segments_s) = gsub(s, '', colnames(segments_s))
         colnames(segments_s) = gsub('\\.', '', colnames(segments_s))
 
-        init(data_s, segments_s, purity[s])
+        CNAqc::init(data_s, segments_s, purity[s])
   })
   names(CNAqc_mappings) = samples
 
@@ -142,24 +148,33 @@ dataset = function(
       select(VAF, DP, NV, karyotype, id) %>%
       mutate(sample = x) %>%
       reshape2::melt(id = c('karyotype', 'id', 'sample')) %>%
+      mutate(variable = paste(variable)) %>%
       as_tibble
     )
 
   mapped_mutations = Reduce(bind_rows, mapped_mutations) %>%
     select(id, sample, variable, value, karyotype)
 
-  # clean up any non-mappable mutations
+  # clean up any non-mappable mutation
   non_mappable = mapped_mutations %>%
     group_by(id, sample) %>%
     filter(is.na(karyotype)) %>%
     pull(id) %>%
     unique
 
-  mapped_mutations = mapped_mutations %>%
+  mutations = mapped_mutations %>%
     filter(!(id %in% non_mappable))
 
+  mutations_locations = mutations_locations %>%
+    filter(!(id %in% non_mappable))
+
+  mutations_retained = mutations_retained %>%
+    filter(!(id %in% non_mappable))
+
+  stopifnot(nrow(mutations_retained) == nrow(mutations_locations))
+
   # Data tibble, make variable a chr
-  tib_data = mapped_mutations
+  tib_data = mutations
   tib_data$variable = paste(tib_data$variable)
 
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -172,99 +187,21 @@ dataset = function(
 
   x$description = description
 
-  # Data: DP, NV and VAF, split to get sample name
-  # x$data = tib_data %>%
-  #   mutate(value = as.numeric(value)) %>%
-  #   separate(col = variable, into = c('sample', 'variable'), sep = '\\.')
-  # x$data$value = as.numeric(x$data$value)
-  #
-  # sp = strsplit(x$data$variable, '\\.')
-  # x$data$variable = sapply(sp, function(w) w[2])
-  # x$data$sample = sapply(sp, function(w) w[1])
-
   # Locations: CN position of mutations
-  x$locations = data %>%
-    select(chr, from, to, ref, id)
+  x$locations = mutations_locations
 
   # Log creation
   x = logOp(x, "Initialization")
 
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Mapping mutations to CNAs
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  #  tibble for the segments, we ID them
-  tib_segments$id = paste0("_CN_seg", 1:nrow(tib_segments))
-
-  tib_segments = tib_segments %>%
-    reshape2::melt(id = c('id', 'chr', 'from', 'to')) %>%
-    as_tibble
-
-  tib_segments$variable = paste(tib_segments$variable)
-
-  sp = strsplit(tib_segments$variable, '\\.')
-  tib_segments$variable = sapply(sp, function(w) w[2])
-  tib_segments$sample = sapply(sp, function(w) w[1])
-
-  # store segments in the obj
-  x$segments = tib_segments
-
   # store purity
   x$purity = purity
 
-  # check that all samples have segments available
-  if(!all(x$samples %in% unique(x$segments$sample)))
-    stop("Some samples are missing from the list of segments, will have to stop.")
 
-  if(any(!(unique(x$segments$sample) %in% x$samples)))
-  {
-    message("Your list of segments contains more sample IDs that those used -- will be dropped.")
 
-    x$segments = x$segments %>%
-      filter(sample %in% x$samples)
-  }
 
-  # we create a map for each mutation to each segment
-  pio::pioTit(paste0("Mapping mutations to CN segments."))
-  pio::pioStr("Offset around centromers (hg19)", offset_around_centromers, suffix = '\n', prefix = '')
 
-  if(nrow(segments) > 1) pb = txtProgressBar(min = 0, max = nrow(segments), style = 3)
-  segments_ids = unique(x$segments$id)
 
-  x$map_mut_seg = NULL
 
-  for(s in seq(segments_ids)) {
-    if(nrow(segments) > 1) setTxtProgressBar(pb, s)
-
-    mapped = byLoc(x, segments_ids[s], offset_around_centromers)
-    if(nrow(mapped) == 0) next;
-
-    mapped$seg_id = segments_ids[s]
-
-    x$map_mut_seg = bind_rows(x$map_mut_seg, mapped)
-  }
-
-  if(nrow(x$map_mut_seg) == 0) {
-    stop("None of the input mutations map to a segment, cannot do anything.")
-  }
-
-  # These have not been map to any segment
-  unmapped = VAF(x) %>%
-    filter(!id %in% x$map_mut_seg$id) %>% pull(id)
-  unmapped = unique(unmapped)
-
-  if(length(unmapped) > 0)
-  {
-    num = length(unmapped)
-    pnum = num/N(x) * 100
-
-    pio::pioStr(
-      '\n\nOutside segments',
-      paste0('N = ', num),
-      suffix = paste0('(', round(pnum, 0), '%)\n')
-    )
-
-    x = delete_entries(x, unmapped)
-  }
 
   # A summary table with the number of mutations per segment
   size_table = x$map_mut_seg %>%
