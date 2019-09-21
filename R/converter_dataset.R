@@ -43,14 +43,17 @@ converted_dataset = function(
       )
   }
 
-  mutations_data = Reduce(
-    function(x, y) full_join(x, y),
-    mutations)
+  mutations_data = suppressMessages(
+    Reduce(
+      function(x, y) full_join(x, y),
+      mutations)
+  )
 
-  segments_data = Reduce(
-    function(x, y) full_join(x, y),
-    segments)
-
+  segments_data = suppressMessages(
+    Reduce(
+      function(x, y) full_join(x, y),
+      segments)
+  )
 
   return(list(mutations_data, segments_data, purity, samples))
 }

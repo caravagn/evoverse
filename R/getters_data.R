@@ -14,7 +14,7 @@
 #' @examples
 #' TODO
 keys = function(x) {
-  unique(x$data$id)
+  unique(x$mutations$id)
 }
 
 #' Extract VAF values from a mvMOBSTER dataset.
@@ -39,10 +39,10 @@ VAF = function(x,
                ids = keys(x),
                samples = x$samples)
 {
-  x$data %>%
-        filter(variable == 'VAF' &
-                 id %in% ids &
-                 sample %in% samples)
+  x$mutations %>%
+    filter(variable == 'VAF' &
+             id %in% ids &
+             sample %in% samples)
 }
 
 #' Extract depth values from a MOBSTER dataset.
@@ -68,7 +68,7 @@ DP = function(x,
               ids = keys(x),
               samples = x$samples)
 {
-  x$data %>%
+  x$mutations %>%
     filter(variable == 'DP' &
              id %in% ids &
              sample %in% samples)
@@ -96,7 +96,7 @@ NV = function(x,
               ids = keys(x),
               samples = x$samples)
 {
-  x$data %>%
+  x$mutations %>%
     filter(variable == 'NV' &
              id %in% ids &
              sample %in% samples)
@@ -115,7 +115,6 @@ NV = function(x,
 #'
 #' @param x A mvMOBSTER \code{mbst_data} object.
 #' @param ids The IDs of the mutations to extract, all by default.
-#' @param samples The samples for which we extract the data, all by default.
 #'
 #' @return A tibble of the required entries
 #' @export
@@ -123,12 +122,10 @@ NV = function(x,
 #' @examples
 #' TODO
 Annotations = function(x,
-                       ids = keys(x),
-                       variables = unique(x$annotations$variable))
+                       ids = keys(x))
 {
-  x$annotations %>%
-    filter(variable %in% variables &
-             id %in% ids)
+  x$mutations_annotations %>%
+    filter(id %in% ids)
 }
 
 #' Tabular VAF values.
@@ -150,9 +147,9 @@ Annotations = function(x,
 #' @examples
 #' TODO
 VAF_table = function(x,
-               ids = keys(x),
-               samples = x$samples,
-               suffix = '.VAF')
+                     ids = keys(x),
+                     samples = x$samples,
+                     suffix = '.VAF')
 {
   output = tibble(`id` = ids)
 
@@ -185,9 +182,9 @@ VAF_table = function(x,
 #' @examples
 #' TODO
 NV_table = function(x,
-                     ids = keys(x),
-                     samples = x$samples,
-                     suffix = '.NV')
+                    ids = keys(x),
+                    samples = x$samples,
+                    suffix = '.NV')
 {
   output = tibble(`id` = ids)
 
@@ -259,9 +256,9 @@ DP_table = function(x,
 #' @examples
 #' TODO
 Data_table = function(x,
-                    ids = keys(x),
-                    samples = x$samples,
-                    annotations = FALSE)
+                      ids = keys(x),
+                      samples = x$samples,
+                      annotations = FALSE)
 {
   # Joined data tables
   dt = full_join(
@@ -279,7 +276,6 @@ Data_table = function(x,
   full_join(dt, an, by = 'id')
 }
 
-
 #' Return the number of mutations in the dataset.
 #'
 #' @param x A mvMOBSTER \code{mbst_data} object.
@@ -293,208 +289,17 @@ N = function(x) {
   nrow(VAF(x, samples = x$samples[1]))
 }
 
-# K =
-
-####################### Getters for the clustering computed
-
-#' Getters for clustering results.
+#' Return the number of samples in the dataset.
 #'
 #' @param x A mvMOBSTER \code{mbst_data} object.
-#' @param cluster Use one of MOBSTER (\code{M}), sciClone (\code{S}), pyClone (\code{P})
-#' and Binomial (\code{B}).
-#' @param annotations If the annotations available for the mutations should be returned.
 #'
-#' @return Different types of clustering assigments for every mutation.
-#'
-#' @import mobster
-#' @import VIBER
-#' @import sciClone
-#'
+#' @return The number of samples in the dataset.
 #' @export
 #'
 #' @examples
 #' TODO
-Clusters = function(x, cluster, annotations = FALSE){
-
-  switch(cluster,
-         MOBSTER = return(MClusters(x, annotations)),
-         M = return(MClusters(x, annotations)),
-         sciClone = return(SClusters(x, annotations)),
-         S = return(MClusters(x, annotations)),
-         pyClone = return(PClusters(x, annotations)),
-         P = return(PClusters(x, annotations)),
-         Binomial = return(BClusters(x, annotations)),
-         B = return(BClusters(x, annotations)))
-
-
-  stop("Cluster code not recognized; use one of MOBSTER (M), sciClone (S), pyClone (P), Binomial (B)")
+S = function(x) {
+  length(x$samples)
 }
-
-#' Gettes for MOBSTER clusters
-#'
-#' @param x A mvMOBSTER \code{mbst_data} object.
-#' @param annotations If the annotations available for the mutations should be returned.
-#'
-#' @return MOBSTER clustering assigments for every mutation, if available.
-#'
-#' @import mobster
-#'
-#' @export
-#'
-#' @examples
-#' TODO
-MClusters = function(x, annotations = FALSE)
-{
-  if (is.null(x$fit.MOBSTER))
-    stop("MOBSTER clusters are not available!")
-
-  list.best = lapply(x$fit.MOBSTER,
-                     function(w)
-                       return(w$best$data %>% select(-sample,-VAF)))
-
-  MOBSTER_clusters = list.best %>% purrr::reduce(full_join, by = "id")
-  colnames(MOBSTER_clusters)[2:ncol(MOBSTER_clusters)] = paste0('cluster.', names(x$fit.MOBSTER))
-
-  # Reduce(
-  #   function(w) {full_join},
-  #   list.best
-  # )
-
-  # MOBSTER_clusters = list.best[[1]]
-  #
-  # for (i in 2:length(list.best)) {
-  #   MOBSTER_clusters = full_join(
-  #     MOBSTER_clusters,
-  #     list.best[[i]],
-  #     by = 'id',
-  #     suffix =
-  #       c(paste0('.', names(x$fit.MOBSTER)[i - 1]),
-  #         paste0('.', names(x$fit.MOBSTER)[i]))
-  #   )
-  # }
-
-  if (annotations)
-  {
-    annotations = Annotations(x, ids = MOBSTER_clusters$id) %>%
-      spread(variable, value)
-
-    MOBSTER_clusters = full_join(MOBSTER_clusters, annotations, by = 'id')
-    MOBSTER_clusters = full_join(MOBSTER_clusters, x$map_mut_seg, by = 'id')
-  }
-
-  MOBSTER_clusters
-}
-
-#' Gettes for sciClone clusters
-#'
-#' @param x A mvMOBSTER \code{mbst_data} object.
-#' @param annotations If the annotations available for the mutations should be returned.
-#'
-#' @return sciClone clustering assigments for every mutation, if available.
-#'
-#' @import sciClone
-
-#' @export
-#'
-#' @examples
-#' TODO
-SClusters = function(x, annotations = FALSE)
-{
-  if (is.null(x$fit.sciClone))
-    stop("sciClone clusters are not available!")
-
-  sciClone.fit = x$fit.sciClone
-
-  clusters = as_tibble(sciClone.fit@vafs.merged)
-
-  clusters = clusters %>% select(NA1, cluster, starts_with('cluster'))
-  colnames(clusters)[c(1,2)] = c('id', 'cluster.sciClone')
-
-  if (annotations)
-  {
-    annotations = Annotations(x, ids = clusters$id) %>%
-      spread(variable, value)
-
-    clusters = full_join(clusters, annotations, by = 'id')
-    clusters = full_join(clusters, x$map_mut_seg, by = 'id')
-  }
-
-  clusters
-}
-
-
-#' Gettes for pyClone clusters
-#'
-#' @param x A mvMOBSTER \code{mbst_data} object.
-#' @param annotations If the annotations available for the mutations should be returned.
-#'
-#' @return pyClone clustering assigments for every mutation, if available.
-#'
-#' @export
-#'
-#' @examples
-#' TODO
-PClusters <- function(x, annotations = FALSE) {
-
-  if (is.null(x$fit.pyClone))
-    stop("pyClone clusters are not available!\n")
-
-  fit = x$fit.pyClone
-
-  clusters = unique(fit$loci[,c("mutation_id","cluster_id")])
-  clusters = as_tibble(clusters)
-  colnames(clusters)[c(1,2)] = c("id", "cluster.pyClone")
-
-  clusters = clusters[match(keys(x), clusters$id),]
-
-  if (annotations)
-  {
-    annotations = Annotations(x, ids = clusters$id) %>%
-      spread(variable, value)
-
-    clusters = full_join(clusters, annotations, by = 'id')
-    clusters = full_join(clusters, x$map_mut_seg, by = 'id')
-  }
-
-  return(clusters)
-}
-
-#' Getter for VIBER Binomial clusters
-#'
-#' @param x A mvMOBSTER \code{mbst_data} object.
-#' @param annotations If the annotations available for the mutations should be returned.
-#'
-#' @return VIBER clustering assigments for every mutation, if available.
-#'
-#' @import VIBER
-#' @export
-#'
-#' @examples
-#' TODO
-BClusters <- function(x, annotations = FALSE) {
-
-  stop("IMPLEMENTE VIBER GETTER")
-
-  if (is.null(x$fit.Binomial))
-    stop("Binomial clusters are not available!\n")
-
-  clusters = x$fit.Binomial$X
-
-  if (annotations)
-  {
-    annotations = Annotations(x, ids = clusters$id) %>%
-      spread(variable, value)
-
-    clusters = full_join(clusters, annotations, by = 'id')
-    clusters = full_join(clusters, x$map_mut_seg, by = 'id')
-  }
-
-  clusters
-}
-
-
-
-
-
 
 

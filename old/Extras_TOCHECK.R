@@ -117,47 +117,6 @@ MOBSTER_mplot_mapping2MOBSTER_clusters = function(data,
   ggpubr::as_ggplot(new_plot)
 }
 
-show_VAF_per_segment =  function(segments, muts, cutoff, ...)
-{
-  plots = lapply(1:nrow(segments),
-                 function(s) {
-                   # map SNVs to this segment
-                   map = map_SNV_2_CNA_segment(segments = segments,
-                                               segment.id = s,
-                                               muts = muts,
-                                               ...)
-
-                   map = map[, startsWith(colnames(map), 'VAF')]
-
-                   map = reshape2::melt(map)
-                   map = map[map$value > cutoff,]
-
-                   mxlim = max(1, max(map$value, na.rm = T))
-
-                   # lbl = paste0(
-                   #
-                   # )
-
-                   ggplot(map, aes(value, fill = variable)) +
-                     geom_histogram(binwidth = 0.01) +
-                     facet_wrap( ~ variable, scale = 'free', nrow = 1) +
-                     coord_cartesian(xlim = c(0, mxlim)) +
-                     guides(fill = FALSE) +
-                     labs(title = paste(segments[s, ], collapse = ',')) +
-                     geom_vline(aes(xintercept = 0.5), colour = 'red', linetype = "longdash", size = .3) +
-                     geom_vline(aes(xintercept = 0.25), colour = 'red', linetype = "longdash", size = .3) +
-                     geom_vline(aes(xintercept = 0.33), colour = 'blue', linetype = "longdash", size = .3) +
-                     geom_vline(aes(xintercept = 0.66), colour = 'blue', linetype = "longdash", size = .3)
-                 })
-
-  figure = ggpubr::ggarrange(
-    plotlist = plots,
-    nrow = nrow(segments),
-    ncol = 1
-  )
-
-  figure
-}
 
 #' Title
 #'

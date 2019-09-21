@@ -22,13 +22,7 @@
 #' \code{x.Major} with the minor and major number of copies
 #' of the segment.
 #' @param purity Vector of purities, with samples as names.
-#' @param N.min Minimum number of mutations that need to map to
-#' a segment. If a segment has less than \code{N.min}, the
-#' segment is rejected.
 #' @param description Dataset synopsis.
-#' @param offset_around_centromers When mapping mutations to
-#' around segments, exclude this offset around the centromers
-#' of each chromosome (reference coordinates hg19).
 #'
 #' @return An object that represents a dataset from class
 #' \code{mbs_data}.
@@ -47,9 +41,7 @@ dataset = function(
   segments,
   samples,
   purity,
-  description = "My multi-region MOBSTER dataset",
-  N.min = 500,
-  offset_around_centromers = 1e6
+  description = "My multi-region MOBSTER dataset"
 )
 {
   # Structures to create
@@ -88,8 +80,6 @@ dataset = function(
   mutation_columns_required = columns_required[[1]]
   segments_columns_required = columns_required[[2]]
 
-  pioStr('Mutations', paste0('N = ', nrow(mutations)), suffix = '\n')
-
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   # Create IDs for database, and split information to retain in different formats
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
@@ -107,14 +97,14 @@ dataset = function(
   # NAs in any of the columns for values
   if(any(is.na(mutations)))
   {
-    message("There are NA values which will be removed.")
+    warning("NA values in the DP, NV and VAF fields. Some mutations will be removed, you might want to check your data....")
 
     mutations = mutations[
       complete.cases(mutations), , drop = FALSE
       ]
-
-    pioStr('Removed NAs', paste0('N = ', nrow(mutations)), suffix = '\n')
   }
+
+  pioStr('Mutations', paste0('N = ', nrow(mutations)), suffix = '\n')
 
   require(CNAqc)
 
@@ -124,16 +114,17 @@ dataset = function(
       samples,
       function(s)
       {
+        cat('\n')
         pioTit(
           "Creating CNAqc object for", s
         )
 
-        data_s = mutations %>% select(chr, from, to, ref, alt, id, starts_with(s))
-        colnames(data_s) = gsub(s, '', colnames(data_s))
+        data_s = mutations %>% select(chr, from, to, ref, alt, id, starts_with(paste0(s, '.')))
+        colnames(data_s) = gsub(paste0(s, '\\.'), '', colnames(data_s))
         colnames(data_s) = gsub('\\.', '', colnames(data_s))
 
-        segments_s = segments %>% select(chr, from, to, starts_with(s))
-        colnames(segments_s) = gsub(s, '', colnames(segments_s))
+        segments_s = segments %>% select(chr, from, to, starts_with(paste0(s, '.')))
+        colnames(segments_s) = gsub(paste0(s, '\\.'), '', colnames(segments_s))
         colnames(segments_s) = gsub('\\.', '', colnames(segments_s))
 
         CNAqc::init(data_s, segments_s, purity[s])
@@ -155,13 +146,23 @@ dataset = function(
   mapped_mutations = Reduce(bind_rows, mapped_mutations) %>%
     select(id, sample, variable, value, karyotype)
 
-  # clean up any non-mappable mutation
+  # Non-mappable mutation are cleaned up (removed across all samples)
   non_mappable = mapped_mutations %>%
     group_by(id, sample) %>%
     filter(is.na(karyotype)) %>%
     pull(id) %>%
     unique
 
+  # notify which wkll be removed
+  cat('\n')
+  pioTit('Non-mappable mutations')
+  mapped_mutations %>%
+    filter(id %in% non_mappable, variable == 'VAF') %>%
+    spread(variable, value) %>%
+    spread(sample, id) %>%
+    pioDisp
+
+  # Actual clean up of the data
   mutations = mapped_mutations %>%
     filter(!(id %in% non_mappable))
 
@@ -173,131 +174,25 @@ dataset = function(
 
   stopifnot(nrow(mutations_retained) == nrow(mutations_locations))
 
-  # Data tibble, make variable a chr
-  tib_data = mutations
-  tib_data$variable = paste(tib_data$variable)
-
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   # Create a mbst_data object
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   x = list()
   class(x) <- "mbst_data"
 
+  x$mutations = mutations
+  x$mutations_locations = mutations_locations
+  x$mutations_annotations = mutations_retained
+
   x$samples = samples
+  x$purity = purity
+
+  x$CNAqc = CNAqc_mappings
 
   x$description = description
 
-  # Locations: CN position of mutations
-  x$locations = mutations_locations
-
   # Log creation
   x = logOp(x, "Initialization")
-
-  # store purity
-  x$purity = purity
-
-
-
-
-
-
-
-
-  # A summary table with the number of mutations per segment
-  size_table = x$map_mut_seg %>%
-    group_by(seg_id) %>%
-    summarise(N = length(unique(id)))
-
-  # we reject those with N < N.min
-  rejected = size_table %>%
-    filter(N < !!N.min) %>%
-    arrange(desc(N)) %>%
-    inner_join(y = x$segments, by=c("seg_id" = "id")) %>%
-    select(seg_id, N, chr, from, to) %>%
-    distinct
-
-  accepted = size_table %>%
-    filter(N >= !!N.min) %>%
-    arrange(desc(N)) %>%
-    inner_join(y = x$segments, by=c("seg_id" = "id")) %>%
-    select(seg_id, N, chr, from, to) %>%
-    distinct
-
-  pioTit(paste0("Segments report (cutoff " , N.min, ' muts/seg)'))
-
-  pioStr(paste0("\nN < ", N.min), nrow(rejected), suffix = '(rejected)\n')
-  print(rejected)
-
-  pioStr(paste0("\nN >= ", N.min), nrow(accepted), suffix = '(accepted)')
-  print(accepted)
-
-  if(nrow(accepted) == 0)
-    stop("No segments can be used, aborting.")
-
-  # Subset to match accepted ... Non-accepted mutations can be immediately removed
-  rejected = x$map_mut_seg %>%
-    filter(seg_id %in% rejected$seg_id) %>%
-    pull(id)
-
-  # N(x)
-
-  if(length(rejected) > 0)
-    x = delete_entries(x, unique(rejected))
-
-  pio::pioTit(paste0("Adjusting the VAF for ",
-                     nrow(x$map_mut_seg)," entries across ", length(x$samples), " samples"))
-
-  new.VAF = NULL
-
-  # for every segment to map
-  seg_to_match = unique(x$map_mut_seg$seg_id)
-
-  if(nrow(segments) > 1) pb = txtProgressBar(min = 0, max = length(seg_to_match), style = 3)
-
-  for(seg in seq(seg_to_match))
-  {
-    if(length(seg_to_match) > 1) setTxtProgressBar(pb, seg)
-
-    # for every sample
-    for(s in x$samples)
-    {
-      # get VAF values for these entries
-      values = VAF(x,
-                   ids = x$map_mut_seg %>% filter(seg_id == seg_to_match[seg]) %>% pull(id),
-                   samples = s
-      ) %>% # Adjust VAF according to minor/ Major (CN=m+M)
-        mutate(
-          Major = Major(x, seg_to_match[seg], s),
-          minor = minor(x, seg_to_match[seg], s),
-          CN = Major + minor,
-          purity = purity[s],
-          adj_VAF = vaf_adjustCN(value, minor, Major, purity)
-        )
-
-      new.VAF = bind_rows(new.VAF, values)
-    }
-  }
-
-  # Save a copy of the mapping
-  x$VAF_cn_adjustment = new.VAF
-
-  new.VAF$value = new.VAF$adj_VAF
-  new.VAF = new.VAF %>% select(id, variable, value, sample)
-
-  x$data = bind_rows(
-    new.VAF,
-    DP(x),
-    NV(x)
-  )
-
-  # As CN, we can keep only those accepted
-  x$segments = x$segments %>%
-    filter(id %in% accepted$seg_id)
-
-  # Log update
-  x = logOp(x, "Added CN and adjusted VAF")
-
-  all_zeroes(x)
 
   return(x)
 }

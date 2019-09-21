@@ -153,20 +153,6 @@ plot_count_muts_per_kariotype = function(x, cex = 1)
 
 
 
-# load("/Users/gcaravagna/Downloads/rCGH/data/hg19.rda")
-# hg19 = as_tibble(hg19)
-# hg19 = hg19 %>% mutate(from = cumlen)
-# hg19 = hg19 %>% mutate(to = from + length)
-# hg19 = hg19 %>% mutate(centromerStart = from + centromerStart)
-# hg19 = hg19 %>% mutate(centromerEnd = from + centromerEnd)
-# hg19 = hg19 %>% mutate(chr = paste0('chr', chrom))
-# hg19 = hg19 %>% select(chr, length, from, to, centromerStart, centromerEnd)
-# hg19$chr[hg19$chr == 'chr23'] = 'chrX'
-# hg19$chr[hg19$chr == 'chr24'] = 'chrY'
-# chr_coordinate_hg19 = hg19
-# save(chr_coordinate_hg19, file = 'data/chr_coordinate_hg19.RData')
-
-
 #' Plot copy number segments.
 #'
 #' @description
