@@ -1,0 +1,150 @@
+---
+title: "Analysis of multi-sample datasets"
+author: "Giulio Caravagna"
+date: "September 2019"
+institute: "Institute for Cancer Research"
+email: "giulio.caravagna@icr.ac.uk"
+output: rmarkdown::github_document
+vignette: >
+  %\VignetteIndexEntry{Analysis of multi-sample datasets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This simple vignette discusses how to prepare your data to be analyzed with this package. 
+
+See the Articles for vignettes about data query, modifications, analysis and plots.
+
+```{r, echo=TRUE, message= FALSE}
+require(tidyverse)
+```
+
+## Supported input formats
+
+A mvMOBSTER dataset contains, for *one or more* bulk samples
+
+* **mutation data**, in the usual format of substitutions involving one or more nucleotides;
+* **absolute copy number data**, reported as segments profiles;
+* **sample purity**, as the proportion of tumour cells in each one of the samples.
+
+For mutation and copy number data, two different types of data formats can be used -  the *wide*
+and the *long* formats - and the package will determine automatically which one you are using.
+
+All other parameters have a trivial data type, independently of how you want to pass mutation and copy number data.
+
+```{r}
+# Example input datasets are available just to show the possible
+# formats in which data can be shaped before using mvMOBSTER
+data('example_input_formats', package = 'mvmobster')
+```
+
+> In the future, direct support of VCF input files will be implemented. Untill then you can use use packages like `vcfR` to extract mutation calls from VCF files
+
+#### Wide format
+
+This format is  convenient if you generate joint calls across all samples,
+and you end up with a multi-sample VCF file, for instance.
+
+The minimum information required are: 
+
+* A `dataframe` with mutation locations as `chr`,  `from`, `to` in `hg19` coordinates, plus `ref` and `alt` for the reference and alternative alleles. For every sample `X`,  this dataframe must contain columns `X.DP`, `X.NV` and `X.VAF` for the depth (total number of reads with both alleles), the number of reads
+ with the alternative allele and the allele frequency so that `VAF = NV/DP`. Chromosome names must be in the format `chr1`, `chr2`, etc.; alleles should be characters and all other fields numeric.
+ 
+```{r}
+# Example wide format for mutations - in this case columns region, gene and patient are extra
+example_input_formats$wide_mutations
+```
+ 
+* A `dataframe` that contains copy number segments wkth `chr`, `from`, `to` in `hg19` coordinates, plus `X.Major` and `X.minor` for the number of copies of the major allele, and the minor (B-allele) allele in one of sample `X`'s segments. Chromosome names and other columns must be in the same format used by mutations.
+
+```{r}
+# Example wide format for segments
+example_input_formats$wide_segments
+```
+
+#### Long format
+
+This format is convenient if you generate calls independently for all samples,
+and you end up with a VCF file per sample, for instance.
+
+The minimum information required are the same of the wide format: 
+
+* A list of `dataframes`, where each dataframe contains mutations for a unique sample (instead than for all of the samples, as in the wide format). Mutation genomic coordinates  must follow the same format as for the wide data, but this time the list entry for patient `X` can have columns `DP`, `NV` and `VAF` where the sample name does not appear. However, the list should be named so that the dataframe for sample `X` is named `X`.
+
+* A list of `dataframes`, where each dataframe contains segments. for a unique sample. Segments genomic coordinates  must follow the same format as for the wide data, but this time the list entry for patient `X` can have columns `Major` and `minor` where the sample name does not appear. However, the list should be named so that the dataframe for sample `X` is named `X`.
+
+
+```{r}
+# Example long format for mutations
+example_input_formats$long_mutations
+```
+ 
+* A `dataframe` that contains copy number segments wkth `chr`, `from`, `to` in `hg19` coordinates, plus `X.Major` and `X.minor` for the number of copies of the major allele, and the minor (B-allele) allele in each one of `X`'s segments. 
+
+```{r}
+# Example long format for segments
+example_input_formats$long_segments
+```
+
+#### Important remarks
+
+Data must be consistent, the package will check that raising warnings and error messages.
+
+It is important that the user checks that:
+
+* All mutations are annotated in every sample, **even if absent**. So even if a mutation
+has VAF 0 in a sample, its actual depth, NV, and VAF should be annotated anyway.
+* Copy number segments span the same intervals across all the input samples, i.e. like  segments were joinly called, even if that is not the case. 
+
+The first requirement is necessary to fit Binomial mixtures to the input data with the [VIBER](https://caravagn.github.io/VIBER/) package for tumour subclonal deconvolution. VIBER implements variational fits for Binomial mixture models from read counts. The second requirement permits to easily switch between the wide and long representation of copy number data.
+
+**Important note:** this package uses the [CNAqc](https://caravagn.github.io/CNAqc/) a package, which provide a set of metrics to assess the quality of Copy Number Alteration (CNA) calls. This package provides routines to map mutations to copy number segments, visualising copy number calls and assessing QC with quantitative metrics. 
+
+## Creation of an input dataset
+
+```{r setup, echo=TRUE, warning=FALSE,message=FALSE}
+library(mvmobster)
+```
+
+With one of the associated formats.
+```{r}
+x = dataset(
+  mutations = example_input_formats$long_mutations, 
+  segments = example_input_formats$long_segments, 
+  samples = c('Set42', 'Set44'), 
+  purity =  c(`Set42` = 0.8, `Set44` = 0.8), 
+  description = "A fake dataset"
+)
+```
+
+`x` is an object of class `mbs_data`, which provides different S3 methods to print, visualize and query the loaded data.
+
+```{r}
+# Display basic stats about the data
+print(x)
+
+# Summary of the measurements
+summary(x)
+```
+
+Regardless the input format, mutations are identified using as key the chromosomename, the genome location, the reference and alternative alleles. 
+```{r}
+head(keys(x))
+```
+
+For instance, the SNV with a C>T substitution at chromosome 6, hitting nucleotide 10048079 will have id `"chr6:10048079:10048079:C:T"`. The ids are used to create an internal indexed representation of the data, and the package  provides several query functions to access data. Ids are accessible with function `keys`, and most query function can be subset with ids to retrieve specific mutations. Extra columns in the mutation and copy number data are retained in internal representation of the data, and won't be manipulated.
+
+The CNAqc objects generated when data have been loaded, are available inside `x`.
+
+```{r}
+print(x$CNAqc)
+```
+
+See the Articles for example of data query, modifications and plots.

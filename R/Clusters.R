@@ -6,11 +6,12 @@
 #' Otherwise, the data tibble is augmented to have one column for each one of the available
 #' clusters. If a sample is named `X`, column `X.MOBSTER_clusters` reports the
 #' clustering assigments from a MOBSTER analysis of the sample. Instead, VIBER clusters
-#' (multivariate), are reported as a unique column `VIBER_clusters`.
+#' (multivariate), are reported as a unique column `X_Y_Z.VIBER_clusters` where `X`, `Y`
+#' and `Z` are the sample names of the input dataset.
 #'
 #' @param x A mvMOBSTER \code{mbst_data} object.
 #'
-#' @return Different types of clustering assigments for every mutation.
+#' @return The input data and all computed clustering assigments for every mutation.
 #'
 #' @export
 #'
@@ -49,6 +50,7 @@ Clusters = function(x)
   if (has_viber_fits(x))
   {
     VIBER_clusters = bind_cols(x$fit_VIBER$labels, x$fit_VIBER$fit_data)
+    colnames(VIBER_clusters)[1] = paste0(paste0(x$samples, collapse = '_'), '.MOBSTER_cluster')
 
     dtable = dtable %>%
       full_join(VIBER_clusters, by = 'id')

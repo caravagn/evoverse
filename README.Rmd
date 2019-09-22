@@ -1,0 +1,62 @@
+---
+output: github_document
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+# mvMOBSTER
+
+<!-- badges: start -->
+
+[![Travis build
+status](https://travis-ci.org/caravagn/mvMOBSTER.svg?branch=master)](https://travis-ci.org/caravagn/mvMOBSTER)
+<!-- badges: end -->
+
+mvMOBSTER is a package that provides a set of functions to analyse cancer multi-sample data with MOBSTER and other tools for cancer evolution. This package provides essentially a wrapper to several other packages that implement
+fitting strategies commonly used in cancer evolution studies.
+
+#### Other packages
+
+This packages wraps calls to:
+
+-  [MOBSTER](https://caravagn.github.io/MOBSTER/), a package for tumour subclonal deconvolution which combines Dirichlet  mixtures with distributions predicted by theoretical population genetics;
+
+-  [VIBER](https://caravagn.github.io/VIBER/), a package for tumour subclonal deconvolution that implements 
+variational fits for Binomial mixture models;
+
+- [CNAqc](https://caravagn.github.io/CNAqc/), a package that provide a set of metrics to assess the quality of 
+Copy Number Alteration (CNA) calls
+
+#### Help and support
+
+mvMOBSTER has its own webpage at [GitHub pages](https://caravagn.github.io/mvMOBSTER/).
+
+-----
+
+### Installation
+
+You can install the released version of `mvMOBSTER` from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("caravagn/mvMOBSTER")
+```
+
+-----
+
+#### Copyright and contacts
+
+Giulio Caravagna, PhD. _Institute of Cancer Research, London, UK_.
+
+* Personal webpage: [https://bit.ly/2kc9E6Y](https://sites.google.com/site/giuliocaravagna/), 
+* Email address: [giulio.caravagna@icr.ac.uk](mailto:giulio.caravagna@icr.ac.uk) and [gcaravagn@gmail.com](mailto:gcaravagn@gmail.com)
+* Twitter feed: [@gcaravagna](https://twitter.com/gcaravagna)
+* GitHub space: [caravagn](https://github.com/caravagn)
+

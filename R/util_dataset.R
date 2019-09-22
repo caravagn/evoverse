@@ -7,13 +7,6 @@ logOp = function(obj, op)
   obj
 }
 
-# Conditional mutate
-# mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
-#   condition <- eval(substitute(condition), .data, envir)
-#   .data[condition, ] <- .data[condition, ] %>% mutate(...)
-#   .data
-# }
-
 # Check if the object has certain fields
 has_mobster_fits = function(x)
 {

@@ -1,10 +1,17 @@
-#' Title
+#' Plot a report of the data available for one sample
 #'
-#' @param x
-#' @param sample
-#' @param N_CNA
+#' @description For an input sample, plot a full page figure with
+#' the histograms of VAF, DP and NV data. The joint scatter of
+#' DP against VAF, as well as the CNA segments generated from the
+#' \code{CNAqc} package.
 #'
-#' @return
+#' @param x A mvMOBSTER object.
+#' @param sample The sample to plot.
+#' @param N_CNA The number of mutations to plot in the CNA segment
+#' panel. This parameter is passed to the plotting functions of
+#' the \code{CNAqc} package.
+#'
+#' @return A figure assembled from several \code{ggplot} objects.
 #'
 #' @import ggpubr
 #' @import cowplot
@@ -12,10 +19,11 @@
 #' @export
 #'
 #' @examples
+#' x = 3
 plot_sample = function(x, sample, N_CNA = 10000)
 {
-  require(cowplot)
-  require(ggpubr)
+  # require(cowplot)
+  # require(ggpubr)
 
   # Copy number panel
   CNA = x$CNAqc[[sample]]

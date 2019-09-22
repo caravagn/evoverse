@@ -5,14 +5,30 @@ Version: 0.1.0
 Author: Giulio Caravagna
 Maintainer: Giulio Caravagna <gcaravagn@gmail.com>
 Authors@R: person("Giulio", "Caravagna", role = c("aut", "cre"), email = "gcaravagn@gmail.com")
-Description: MOBSTER is a package that implements a statistical model for tumour subclonal deconvolution
-  from single-sample datasets. mvMOBSTER is a package that allows to run, with MOBSTER, a multivariate 
-  analysis from multiple samples (multi-region data).
+Description: mvMOBSTER is a package that implements functions to prepare multi-sample cancer genomics data to 
+  be analyzed with MOBSTER, a statistical model for tumour subclonal deconvolution which combines Dirichlet 
+  mixtures with distributions predicted by theoretical population genetics. This package also interface with
+  the VIBER package for variational inference of Binomial mixtures, and the CNAqc package to carry out QC of
+  absolute copy number calls. This and all the other packages interoperate to make it easy to implement
+  statistical analyses of cancer evolutionary dynamics.
 License: GPL
 Encoding: UTF-8
 LazyData: true
-Imports: mobster, VIBER, ggplot2, tidyverse, pio, ggpubr
+Imports: 
+  pio, 
+  mobster,  
+  VIBER, 
+  tidyverse, 
+  ggpubr,
+  cowplot
+Remotes: 
+  caravagn/pio,
+  caravagn/mobster
+  caravagn/CNAqc
 RoxygenNote: 6.1.1
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
+URL: https://github.com/caravagn/mvMOBSTER
+BugReports: https://github.com/caravagn/mvMOBSTER/issues
+

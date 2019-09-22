@@ -64,6 +64,7 @@ summary.mbst_data = function(x, ...)
   print(x$CNAqc)
 
   #
+
   print('stats about the fits...?')
 
 
@@ -85,9 +86,6 @@ print.mbst_data = function(x, ...)
 {
   print_header_data(x)
 
-  # Print CNAqc
-  # print(x$CNAqc)
-
   # Print MOBSTER fits
   if (has_mobster_fits(x)) {
     lapply(names(x$fit_MOBSTER), function(w) {
@@ -105,7 +103,6 @@ print.mbst_data = function(x, ...)
   pio::pioTit('LOGGED OPERATIONS')
 
   print(x$operationLog)
-
 }
 
 print_header_data = function(x)

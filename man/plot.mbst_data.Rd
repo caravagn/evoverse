@@ -4,14 +4,10 @@
 \alias{plot.mbst_data}
 \title{Plot a dataset (complex figure).}
 \usage{
-plot.mbst_data(x, scales = "fixed", cex = 1, ...)
+plot.mbst_data(x, ...)
 }
 \arguments{
 \item{x}{A dataset of class \code{"mbst_data"}.}
-
-\item{scales}{Scales for ggplot facets, default is \code{'fixed'} but \code{'free'} can also help.}
-
-\item{cex}{Cex of the plots.}
 
 \item{...}{}
 }

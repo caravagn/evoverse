@@ -50,6 +50,8 @@ analyze_VIBER = function(x, samples = x$samples, ...)
     ...
   )
 
+  message("Use function VIBER::choose_clusters to filter output clusters -- see VIBER.")
+
   # Store data
   x$fit_VIBER$fit_data = nv %>% select(id)
 
