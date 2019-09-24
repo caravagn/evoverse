@@ -206,8 +206,8 @@
 <a class="sourceLine" id="cb2-44" data-line-number="44"><span class="co">#&gt; # A tibble: 2 x 2</span></a>
 <a class="sourceLine" id="cb2-45" data-line-number="45"><span class="co">#&gt;   time                operation                  </span></a>
 <a class="sourceLine" id="cb2-46" data-line-number="46"><span class="co">#&gt;   &lt;dttm&gt;              &lt;chr&gt;                      </span></a>
-<a class="sourceLine" id="cb2-47" data-line-number="47"><span class="co">#&gt; 1 2019-09-22 17:12:37 Initialization             </span></a>
-<a class="sourceLine" id="cb2-48" data-line-number="48"><span class="co">#&gt; 2 2019-09-22 17:12:40 Fit MOBSTER to Set42, Set44</span></a></code></pre></div>
+<a class="sourceLine" id="cb2-47" data-line-number="47"><span class="co">#&gt; 1 2019-09-23 00:43:19 Initialization             </span></a>
+<a class="sourceLine" id="cb2-48" data-line-number="48"><span class="co">#&gt; 2 2019-09-23 00:43:23 Fit MOBSTER to Set42, Set44</span></a></code></pre></div>
 <p>Consequently, the S3 plotting function can now be asked to plot 2D points coloured by MOBSTER cluster (the samples are analyzed independently therefore there are two labels per point).</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(x, <span class="dt">clusters =</span> <span class="st">'MOBSTER'</span>)</a>
 <a class="sourceLine" id="cb3-2" data-line-number="2"><span class="co">#&gt; Printing data augmented with MOBSTER clusters</span></a>
@@ -299,11 +299,11 @@
 <a class="sourceLine" id="cb6-60" data-line-number="60"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb6-61" data-line-number="61"><span class="co">#&gt;     Points N = 81 </span></a>
 <a class="sourceLine" id="cb6-62" data-line-number="62"><span class="co">#&gt; Dimensions W = 2 </span></a>
-<a class="sourceLine" id="cb6-63" data-line-number="63"><span class="co">#&gt;        Fit CONVERGED (34 steps; eps. 1e-10) with Variational </span></a>
+<a class="sourceLine" id="cb6-63" data-line-number="63"><span class="co">#&gt;        Fit CONVERGED (35 steps; eps. 1e-10) with Variational </span></a>
 <a class="sourceLine" id="cb6-64" data-line-number="64"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb6-65" data-line-number="65"><span class="co">#&gt; Binomial parameters (2 digits rounded) </span></a>
 <a class="sourceLine" id="cb6-66" data-line-number="66"><span class="co">#&gt;  # A tibble: 2 x 10</span></a>
-<a class="sourceLine" id="cb6-67" data-line-number="67"><span class="co">#&gt;      C8    C3    C2    C1    C4    C5    C6    C7    C9   C10</span></a>
+<a class="sourceLine" id="cb6-67" data-line-number="67"><span class="co">#&gt;      C1    C7    C9    C2    C3    C4    C5    C6    C8   C10</span></a>
 <a class="sourceLine" id="cb6-68" data-line-number="68"><span class="co">#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></a>
 <a class="sourceLine" id="cb6-69" data-line-number="69"><span class="co">#&gt; 1  0.35  0.14 0.570   0.5   0.5   0.5   0.5   0.5   0.5   0.5</span></a>
 <a class="sourceLine" id="cb6-70" data-line-number="70"><span class="co">#&gt; 2  0.35  0.12 0.53    0.5   0.5   0.5   0.5   0.5   0.5   0.5</span></a>
@@ -312,15 +312,15 @@
 <a class="sourceLine" id="cb6-73" data-line-number="73"><span class="co">#&gt; # A tibble: 10 x 2</span></a>
 <a class="sourceLine" id="cb6-74" data-line-number="74"><span class="co">#&gt;    entry        value</span></a>
 <a class="sourceLine" id="cb6-75" data-line-number="75"><span class="co">#&gt;    &lt;chr&gt;        &lt;dbl&gt;</span></a>
-<a class="sourceLine" id="cb6-76" data-line-number="76"><span class="co">#&gt;  1 C8    0.851       </span></a>
-<a class="sourceLine" id="cb6-77" data-line-number="77"><span class="co">#&gt;  2 C3    0.0771      </span></a>
-<a class="sourceLine" id="cb6-78" data-line-number="78"><span class="co">#&gt;  3 C2    0.0721      </span></a>
-<a class="sourceLine" id="cb6-79" data-line-number="79"><span class="co">#&gt;  4 C1    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-80" data-line-number="80"><span class="co">#&gt;  5 C4    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-81" data-line-number="81"><span class="co">#&gt;  6 C5    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-82" data-line-number="82"><span class="co">#&gt;  7 C6    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-83" data-line-number="83"><span class="co">#&gt;  8 C7    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-84" data-line-number="84"><span class="co">#&gt;  9 C9    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-76" data-line-number="76"><span class="co">#&gt;  1 C1    0.851       </span></a>
+<a class="sourceLine" id="cb6-77" data-line-number="77"><span class="co">#&gt;  2 C7    0.0771      </span></a>
+<a class="sourceLine" id="cb6-78" data-line-number="78"><span class="co">#&gt;  3 C9    0.0721      </span></a>
+<a class="sourceLine" id="cb6-79" data-line-number="79"><span class="co">#&gt;  4 C2    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-80" data-line-number="80"><span class="co">#&gt;  5 C3    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-81" data-line-number="81"><span class="co">#&gt;  6 C4    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-82" data-line-number="82"><span class="co">#&gt;  7 C5    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-83" data-line-number="83"><span class="co">#&gt;  8 C6    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-84" data-line-number="84"><span class="co">#&gt;  9 C8    0.0000000123</span></a>
 <a class="sourceLine" id="cb6-85" data-line-number="85"><span class="co">#&gt; 10 C10   0.0000000123</span></a>
 <a class="sourceLine" id="cb6-86" data-line-number="86"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb6-87" data-line-number="87"><span class="co">#&gt; </span></a>
@@ -369,11 +369,11 @@
 <a class="sourceLine" id="cb6-130" data-line-number="130"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb6-131" data-line-number="131"><span class="co">#&gt;     Points N = 81 </span></a>
 <a class="sourceLine" id="cb6-132" data-line-number="132"><span class="co">#&gt; Dimensions W = 2 </span></a>
-<a class="sourceLine" id="cb6-133" data-line-number="133"><span class="co">#&gt;        Fit CONVERGED (34 steps; eps. 1e-10) with Variational </span></a>
+<a class="sourceLine" id="cb6-133" data-line-number="133"><span class="co">#&gt;        Fit CONVERGED (35 steps; eps. 1e-10) with Variational </span></a>
 <a class="sourceLine" id="cb6-134" data-line-number="134"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb6-135" data-line-number="135"><span class="co">#&gt; Binomial parameters (2 digits rounded) </span></a>
 <a class="sourceLine" id="cb6-136" data-line-number="136"><span class="co">#&gt;  # A tibble: 2 x 10</span></a>
-<a class="sourceLine" id="cb6-137" data-line-number="137"><span class="co">#&gt;      C8    C3    C2    C1    C4    C5    C6    C7    C9   C10</span></a>
+<a class="sourceLine" id="cb6-137" data-line-number="137"><span class="co">#&gt;      C1    C7    C9    C2    C3    C4    C5    C6    C8   C10</span></a>
 <a class="sourceLine" id="cb6-138" data-line-number="138"><span class="co">#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></a>
 <a class="sourceLine" id="cb6-139" data-line-number="139"><span class="co">#&gt; 1  0.35  0.14 0.570   0.5   0.5   0.5   0.5   0.5   0.5   0.5</span></a>
 <a class="sourceLine" id="cb6-140" data-line-number="140"><span class="co">#&gt; 2  0.35  0.12 0.53    0.5   0.5   0.5   0.5   0.5   0.5   0.5</span></a>
@@ -382,15 +382,15 @@
 <a class="sourceLine" id="cb6-143" data-line-number="143"><span class="co">#&gt; # A tibble: 10 x 2</span></a>
 <a class="sourceLine" id="cb6-144" data-line-number="144"><span class="co">#&gt;    entry        value</span></a>
 <a class="sourceLine" id="cb6-145" data-line-number="145"><span class="co">#&gt;    &lt;chr&gt;        &lt;dbl&gt;</span></a>
-<a class="sourceLine" id="cb6-146" data-line-number="146"><span class="co">#&gt;  1 C8    0.851       </span></a>
-<a class="sourceLine" id="cb6-147" data-line-number="147"><span class="co">#&gt;  2 C3    0.0771      </span></a>
-<a class="sourceLine" id="cb6-148" data-line-number="148"><span class="co">#&gt;  3 C2    0.0721      </span></a>
-<a class="sourceLine" id="cb6-149" data-line-number="149"><span class="co">#&gt;  4 C1    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-150" data-line-number="150"><span class="co">#&gt;  5 C4    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-151" data-line-number="151"><span class="co">#&gt;  6 C5    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-152" data-line-number="152"><span class="co">#&gt;  7 C6    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-153" data-line-number="153"><span class="co">#&gt;  8 C7    0.0000000123</span></a>
-<a class="sourceLine" id="cb6-154" data-line-number="154"><span class="co">#&gt;  9 C9    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-146" data-line-number="146"><span class="co">#&gt;  1 C1    0.851       </span></a>
+<a class="sourceLine" id="cb6-147" data-line-number="147"><span class="co">#&gt;  2 C7    0.0771      </span></a>
+<a class="sourceLine" id="cb6-148" data-line-number="148"><span class="co">#&gt;  3 C9    0.0721      </span></a>
+<a class="sourceLine" id="cb6-149" data-line-number="149"><span class="co">#&gt;  4 C2    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-150" data-line-number="150"><span class="co">#&gt;  5 C3    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-151" data-line-number="151"><span class="co">#&gt;  6 C4    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-152" data-line-number="152"><span class="co">#&gt;  7 C5    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-153" data-line-number="153"><span class="co">#&gt;  8 C6    0.0000000123</span></a>
+<a class="sourceLine" id="cb6-154" data-line-number="154"><span class="co">#&gt;  9 C8    0.0000000123</span></a>
 <a class="sourceLine" id="cb6-155" data-line-number="155"><span class="co">#&gt; 10 C10   0.0000000123</span></a>
 <a class="sourceLine" id="cb6-156" data-line-number="156"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb6-157" data-line-number="157"><span class="co">#&gt; =-=-=-=-=-=-=-=-=-=-</span></a>
@@ -399,9 +399,9 @@
 <a class="sourceLine" id="cb6-160" data-line-number="160"><span class="co">#&gt; # A tibble: 3 x 2</span></a>
 <a class="sourceLine" id="cb6-161" data-line-number="161"><span class="co">#&gt;   time                operation                  </span></a>
 <a class="sourceLine" id="cb6-162" data-line-number="162"><span class="co">#&gt;   &lt;dttm&gt;              &lt;chr&gt;                      </span></a>
-<a class="sourceLine" id="cb6-163" data-line-number="163"><span class="co">#&gt; 1 2019-09-22 17:12:37 Initialization             </span></a>
-<a class="sourceLine" id="cb6-164" data-line-number="164"><span class="co">#&gt; 2 2019-09-22 17:12:40 Fit MOBSTER to Set42, Set44</span></a>
-<a class="sourceLine" id="cb6-165" data-line-number="165"><span class="co">#&gt; 3 2019-09-22 17:12:54 Fit VIBER to Set42, Set44</span></a>
+<a class="sourceLine" id="cb6-163" data-line-number="163"><span class="co">#&gt; 1 2019-09-23 00:43:19 Initialization             </span></a>
+<a class="sourceLine" id="cb6-164" data-line-number="164"><span class="co">#&gt; 2 2019-09-23 00:43:23 Fit MOBSTER to Set42, Set44</span></a>
+<a class="sourceLine" id="cb6-165" data-line-number="165"><span class="co">#&gt; 3 2019-09-23 00:43:37 Fit VIBER to Set42, Set44</span></a>
 <a class="sourceLine" id="cb6-166" data-line-number="166"><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot">plot</a></span>(x, <span class="dt">clusters =</span> <span class="st">'VIBER'</span>)</a>
 <a class="sourceLine" id="cb6-167" data-line-number="167"><span class="co">#&gt; Printing data augmented with VIBER clusters - using plotting functions from the VIBER package.</span></a>
 <a class="sourceLine" id="cb6-168" data-line-number="168"><span class="co">#&gt; [[1]]</span></a></code></pre></div>

@@ -13,12 +13,19 @@
 #' @examples
 plot_2D_VAF = function(x,
                        s1 = x$samples[1],
-                       s2 = x$samples[2])
+                       s2 = x$samples[2],
+                       N = 10000)
 {
   px = VAF(x, samples = s1)
   py = VAF(x, samples = s2)
 
   points = full_join(px, py, by = 'id')
+
+  N_all = nrow(points)
+  if(nrow(points) > N)
+    points = points %>% sample_n(N)
+
+  label = paste0("N = ", N, ' (', round(N/N_all * 100), '%)')
 
   ggplot(points,
          aes(x = value.x, y = value.y)) +
@@ -32,5 +39,7 @@ plot_2D_VAF = function(x,
     my_ggplot_theme() +
     xlim(0, 1) +
     ylim(0, 1) +
-    geom_rug()
+    geom_rug() +
+    annotate("label", fill = 'white', x = .9, y = .9, label = label, size = 2, hjust = 1)
+
 }
