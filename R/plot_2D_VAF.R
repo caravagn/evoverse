@@ -1,17 +1,27 @@
-#' Plot a 2-dimensional VAF scatterplot
+#' Plot a 2-dimensional VAF scatterplot.
 #'
-#' @description For 2 input samples, this plots a 2D scatterplot
-#' of the input VAF in `s1` versus `s2`.
+#' @description This function plots a 2D scatterplot
+#' of the input VAF values in sample`s1` versus `s2`.
+#' This function can also subsample the number of plot
+#' points, which helps to allow for a faster rendering
+#' of the returned plot. The number of mutations shown
+#' is always reported, as well as the proportion with
+#' respect to the total number of mutations.
 #'
 #' @param x A `mvMOSTER` object.
 #' @param s1 The first sample name, by default `x$samples[1]` the first sample in the data.
 #' @param s1 The second sample name, by default `x$samples[1]` the second sample in the data.
 #' @param N Maximum number of points to plot, the overall percentage is reported.
 #'
-#' @return
+#' @return A `ggplot` object plot.
+#'
+#' @seealso Function \link{\code{plot_2D_VAF_MOBSTER}} extends this plot visualizing also
+#' MOBSTER clusters' results.
+#'
 #' @export
 #'
 #' @examples
+#' TODO
 plot_2D_VAF = function(x,
                        s1 = x$samples[1],
                        s2 = x$samples[2],

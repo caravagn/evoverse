@@ -1,19 +1,24 @@
 #' Plot a 1-dimensional VAF histogram.
 #'
-#' @description For an input sample, this plots a one dimensional
-#' histogam of the input VAF, coloured by mutation karyotype.
+#' @description This function plots a one dimensional
+#' histogam of the input VAF, coloured by mutation karyotype,
+#' for a required input sample.
 #'
-#' @param x A `mvMOSTER` object.
-#' @param s The sample name, by default `x$samples[1]` the first sample in the data.
+#' @param x A `evoverse` object.
+#' @param s The sample name, by default `x$samples[1]` is the first sample in the data.
 #'
-#' @return
+#' @return A ggplot object.
+#'
 #' @export
 #'
 #' @examples
+#' TODO
 plot_1D_VAF = function(x,
                        s = x$samples[1])
 {
-  ggplot(VAF(x, samples = s),
+  check_is_mobster_mvdata(x)
+
+  ggplot(VAF(x, samples = s) %>% filter(value > 0),
          aes(value, fill = karyotype)) +
     geom_histogram(binwidth = 0.01) +
     labs(title = paste0(s),

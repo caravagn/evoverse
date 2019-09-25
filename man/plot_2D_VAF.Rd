@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_2D_VAF.R
 \name{plot_2D_VAF}
 \alias{plot_2D_VAF}
-\title{Plot a 2-dimensional VAF scatterplot}
+\title{Plot a 2-dimensional VAF scatterplot.}
 \usage{
 plot_2D_VAF(x, s1 = x$samples[1], s2 = x$samples[2], N = 10000)
 }
@@ -15,7 +15,22 @@ plot_2D_VAF(x, s1 = x$samples[1], s2 = x$samples[2], N = 10000)
 
 \item{s1}{The second sample name, by default `x$samples[1]` the second sample in the data.}
 }
+\value{
+A `ggplot` object plot.
+}
 \description{
-For 2 input samples, this plots a 2D scatterplot
-of the input VAF in `s1` versus `s2`.
+This function plots a 2D scatterplot
+of the input VAF values in sample`s1` versus `s2`.
+This function can also subsample the number of plot
+points, which helps to allow for a faster rendering
+of the returned plot. The number of mutations shown
+is always reported, as well as the proportion with
+respect to the total number of mutations.
+}
+\examples{
+TODO
+}
+\seealso{
+Function \link{\code{plot_2D_VAF_MOBSTER}} extends this plot visualizing also
+MOBSTER clusters' results.
 }

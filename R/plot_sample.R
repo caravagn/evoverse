@@ -1,9 +1,18 @@
-#' Plot a report of the data available for one sample
+#' Plot a report of the data available for a sample.
 #'
-#' @description For an input sample, plot a full page figure with
-#' the histograms of VAF, DP and NV data. The joint scatter of
-#' DP against VAF, as well as the CNA segments generated from the
-#' \code{CNAqc} package.
+#' @description This function creates a multi-plot figure from
+#' different visualizations available in `evoverse`, and in the
+#' other packages that are `evoverse` interfaces to. The plot
+#' regards only one sample in the dataset and shows:
+#'
+#' \itemize{
+#' \item The histogram of the alelleic frequency (VAF) for the sample;
+#' \item The histogram of the depth (DP) for the sample;
+#' \item The histogram of the number of reads with the variant (NV) for the sample;
+#' \item The joint scatter of DP against VAF;
+#' \item The copy number segments, plot via the \code{CNAqc} package
+#' available at \url{https://github.com/caravagn/CNAqc}.
+#' }
 #'
 #' @param x A mvMOBSTER object.
 #' @param sample The sample to plot.
@@ -19,12 +28,9 @@
 #' @export
 #'
 #' @examples
-#' x = 3
+#' TODO
 plot_sample = function(x, sample, N_CNA = 10000)
 {
-  # require(cowplot)
-  # require(ggpubr)
-
   # Copy number panel
   CNA = x$CNAqc[[sample]]
 

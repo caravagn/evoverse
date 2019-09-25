@@ -7,11 +7,18 @@
 plot_1D_VAF(x, s = x$samples[1])
 }
 \arguments{
-\item{x}{A `mvMOSTER` object.}
+\item{x}{A `evoverse` object.}
 
-\item{s}{The sample name, by default `x$samples[1]` the first sample in the data.}
+\item{s}{The sample name, by default `x$samples[1]` is the first sample in the data.}
+}
+\value{
+A ggplot object.
 }
 \description{
-For an input sample, this plots a one dimensional
-histogam of the input VAF, coloured by mutation karyotype.
+This function plots a one dimensional
+histogam of the input VAF, coloured by mutation karyotype,
+for a required input sample.
+}
+\examples{
+TODO
 }

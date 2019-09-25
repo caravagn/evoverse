@@ -2,22 +2,47 @@
 % Please edit documentation in R/plot_2D_VAF_MOBSTER.R
 \name{plot_2D_VAF_MOBSTER}
 \alias{plot_2D_VAF_MOBSTER}
-\title{Plot a 2-dimensional VAF scatterplot, augmented with MOBSTER cluster}
+\title{Plot a 2-dimensional VAF scatterplot, augmented with `MOBSTER` cluster}
 \usage{
 plot_2D_VAF_MOBSTER(x, s1 = x$samples[1], s2 = x$samples[2],
   N = 10000, ...)
 }
 \arguments{
-\item{x}{A `mvMOSTER` object.}
+\item{x}{A `evoverse` object.}
 
 \item{s1}{The first sample name, by default `x$samples[1]` the first sample in the data.}
 
 \item{N}{Maximum number of points to plot, the overall percentage is reported.}
 
+\item{...}{Extra parameters, not used.}
+
 \item{s1}{The second sample name, by default `x$samples[1]` the second sample in the data.}
 }
+\value{
+A `ggplot` object plot.
+}
 \description{
-For 2 input samples, this plots a 2D scatterplot
-of the input VAF in `s1` versus `s2`. The colour of each point
-represents the result of running MOBSTER on the input data.
+This function plots a 2D scatterplot
+of the input VAF values in sample`s1` versus `s2`.
+Compared to function \link{\code{plot_2D_VAF}}, this
+function colours the points according to `MOBSTER`
+clusters (with a double label mechanism `A ~ B`
+meaning that the point is in cluster `A` in one sample
+and `B` in the other). Similarly to \link{\code{plot_2D_VAF}},
+this function can also subsample the number of plot
+points, which helps to allow for a faster rendering
+of the returned plot. The number of mutations shown
+is always reported, as well as the proportion with
+respect to the total number of mutations.
+}
+\note{
+This function throws an error if the object `x` does
+not contain `MOBSTER` clusters.
+}
+\examples{
+TODO
+}
+\seealso{
+Function \link{\code{plot_2D_VAF}} is a simpler version of this plot
+which does not visualize `MOBSTER` clusters.
 }
