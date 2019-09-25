@@ -75,11 +75,18 @@ plot_peaks_analysis(qc)
 
 qc$peaks_analysis$plots$`1:1` + ylim(0, 5)
 
-y = analyze_mobster(x, parallel = F, epsilon = 1e-5, K = c(1, 2))
+x = analyze_mobster(x, parallel = F, epsilon = 1e-5, K = c(1, 2))
 save(y, file = '../y_Set7.RData')
 
+load(file = '../y_Set7.RData')
 
-f = plot.mbst_data(y, clusters = 'MOBSTER')
+f = mvmobster::plot.mbst_data(y, clusters = 'MOBSTER', N = 2000)
 f[[3]]
 
+f = mvmobster::plot.mbst_data(y, N = 2000)
+f[[3]]
+
+plot(y$fit_MOBSTER$Set7_62$best)
+plot_model_selection(y$fit_MOBSTER$Set7_62)
+plot_latent_variables(y$fit_MOBSTER$Set7_62$best)
 

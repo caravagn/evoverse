@@ -6,6 +6,7 @@
 #' @param x A `mvMOSTER` object.
 #' @param s1 The first sample name, by default `x$samples[1]` the first sample in the data.
 #' @param s1 The second sample name, by default `x$samples[1]` the second sample in the data.
+#' @param N Maximum number of points to plot, the overall percentage is reported.
 #'
 #' @return
 #' @export
@@ -19,11 +20,16 @@ plot_2D_VAF = function(x,
   px = VAF(x, samples = s1)
   py = VAF(x, samples = s2)
 
-  points = full_join(px, py, by = 'id')
+  points = full_join(px, py, by = 'id') %>%
+    filter(value.x > 0 & value.y > 0)
 
   N_all = nrow(points)
   if(nrow(points) > N)
+  {
+    message("N =", N, ' - using only a subset of the data points.')
     points = points %>% sample_n(N)
+  }
+  else N = nrow(points)
 
   label = paste0("N = ", N, ' (', round(N/N_all * 100), '%)')
 

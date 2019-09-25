@@ -4,12 +4,14 @@
 \alias{plot_2D_VAF}
 \title{Plot a 2-dimensional VAF scatterplot}
 \usage{
-plot_2D_VAF(x, s1 = x$samples[1], s2 = x$samples[2])
+plot_2D_VAF(x, s1 = x$samples[1], s2 = x$samples[2], N = 10000)
 }
 \arguments{
 \item{x}{A `mvMOSTER` object.}
 
 \item{s1}{The first sample name, by default `x$samples[1]` the first sample in the data.}
+
+\item{N}{Maximum number of points to plot, the overall percentage is reported.}
 
 \item{s1}{The second sample name, by default `x$samples[1]` the second sample in the data.}
 }

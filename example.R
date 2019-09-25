@@ -3,6 +3,7 @@ R.utils::sourceDirectory("old", modifiedOnly=FALSE)
 R.utils::sourceDirectory("R", modifiedOnly=FALSE)
 
 data('example_mvmobster')
+require(mvmobster)
 require(tidyverse)
 require(pio)
 
@@ -33,7 +34,7 @@ x = dataset(
 )
 
 VAF(x)
-plot(x)
+plot(x, N = 100)
 
 x = analyze_mobster(x, parallel = F, K = 1,  init = 'random')
 

@@ -35,7 +35,7 @@ plot.mbst_data = function(x, ...)
 
       figures = apply(pairs, 2, function(w)
       {
-        plot_2D_VAF(x, w[1], w[2])
+        plot_2D_VAF(x, w[1], w[2], ...)
       })
     }
     else
@@ -58,7 +58,7 @@ plot.mbst_data = function(x, ...)
 
       figures = apply(pairs, 2, function(w)
       {
-        plot_2D_VAF_MOBSTER(x, w[1], w[2])
+        plot_2D_VAF_MOBSTER(x, w[1], w[2], ...)
       })
     }
     else

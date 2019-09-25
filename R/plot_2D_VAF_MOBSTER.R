@@ -8,6 +8,7 @@
 #' @param x A `mvMOSTER` object.
 #' @param s1 The first sample name, by default `x$samples[1]` the first sample in the data.
 #' @param s1 The second sample name, by default `x$samples[1]` the second sample in the data.
+#' @param N Maximum number of points to plot, the overall percentage is reported.
 #'
 #' @return
 #' @export
@@ -15,7 +16,9 @@
 #' @examples
 plot_2D_VAF_MOBSTER = function(x,
                        s1 = x$samples[1],
-                       s2 = x$samples[2])
+                       s2 = x$samples[2],
+                       N = 10000,
+                       ...)
 {
   check_is_mobster_mvdata(x)
 
@@ -38,10 +41,22 @@ plot_2D_VAF_MOBSTER = function(x,
   s2_col_vaf = paste0(s2, '.VAF')
 
   points = points %>%
+    filter(!!s1_col_vaf > 0 & !!s2_col_vaf > 0) %>%
     mutate(
       label = paste0(!!s1_col, ' ~ ', !!s2_col)
     ) %>%
     select(!!s1_col, !!s1_col_vaf, !!s2_col, !!s2_col_vaf, label)
+
+  # Subset if required
+  N_all = nrow(points)
+  if(nrow(points) > N)
+  {
+    message("N =", N, ' - using only a subset of the data points.')
+    points = points %>% sample_n(N)
+  }
+  else N = nrow(points)
+
+  label = paste0("N = ", N, ' (', round(N/N_all * 100), '%)')
 
   points$label = paste0(
     points %>% pull(!!s1_col), ' ~ ',
@@ -59,5 +74,6 @@ plot_2D_VAF_MOBSTER = function(x,
     my_ggplot_theme() +
     xlim(0, 1) +
     ylim(0, 1) +
-    geom_rug()
+    geom_rug() +
+    annotate("label", fill = 'white', x = .9, y = .9, label = label, size = 2, hjust = 1)
 }
