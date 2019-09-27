@@ -2,21 +2,23 @@
 % Please edit documentation in R/S3_methods_print.R
 \name{print.mbst_data}
 \alias{print.mbst_data}
-\title{Print for mvMOBSTER objects.}
+\title{Print for an \code{evoverse} dataset.}
 \usage{
 \method{print}{mbst_data}(x, ...)
 }
 \arguments{
-\item{x}{A mvMOBSTER \code{mbst_data} object.}
+\item{x}{An  \code{evoverse} object.}
 
-\item{...}{}
+\item{...}{S3 parameters}
 }
 \value{
-Nothing
+Nothing.
 }
 \description{
-Print for mvMOBSTER objects.
+The print reports basic statistics on the stored
+fits available in the input object.
 }
 \examples{
-TODO
+data('example_evoverse')
+print(example_evoverse)
 }

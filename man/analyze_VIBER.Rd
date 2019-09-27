@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyze_VIBER.R
 \name{analyze_VIBER}
 \alias{analyze_VIBER}
-\title{Compute VIBER Binomial fits from counts data.}
+\title{Compute \code{VIBER} Binomial fits from counts data.}
 \usage{
 analyze_VIBER(x, samples = x$samples, ...)
 }

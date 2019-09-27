@@ -2,10 +2,10 @@
 % Please edit documentation in R/dataset.R
 \name{dataset}
 \alias{dataset}
-\title{Create a mvMOBSTER dataset.}
+\title{Create an \code{evoverse} dataset.}
 \usage{
 dataset(mutations, segments, samples, purity,
-  description = "My multi-region MOBSTER dataset")
+  description = "My evoverse dataset")
 }
 \arguments{
 \item{mutations}{Dataframe of mutations in all samples, or list of dataframes of
@@ -24,8 +24,8 @@ copy number segments, one entry per sample. The formats and requirements are des
 An object that represents a dataset from class \code{mbs_data}.
 }
 \description{
-A mvMOBSTER dataset contains, for one or more bulk samples
-of the same tumour, the following informations:
+An \code{evoverse} dataset contains, for one or more bulk samples
+of the same tumour, the following sequencing information:
 \enumerate{
 \item mutation data, in the usual format of substitutions involving
 one or more nucleotides;
@@ -101,7 +101,7 @@ webpage \url{https://github.com/caravagn/CNAqc} for how to use this
 package to asses the quality of your copy number calls.
 }
 \examples{
-data(example_mvmobster)
+data('example_evoverse')
 mutations = example_mvmobster$mutations
 segments = example_mvmobster$segments
 purity = example_mvmobster$purity

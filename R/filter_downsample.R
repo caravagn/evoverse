@@ -1,17 +1,22 @@
-#' Downample data.
+#' Randomly downsample a dataset.
 #'
-#' @description Randomly downsample the data contained in a dataset to a
-#' certain number of mutations.
+#' @description Randomly downsample a dataset to contain a certain number of mutations.
+#' If the dataset contains less than the requirednumber of mutations, the input object is returned.
 #'
-#' @param x A dataset of class \code{"mbst_data"}.
-#' @param N The number of mutations to retain. If \code{x} contains less
-#' than \code{N} mutations, \code{x} is returned.
+#' @param x An `evoverse` object.
+#' @param n The number of mutations to retain. If \code{x} contains less
+#' than \code{n} mutations, \code{x} is returned.
 #'
-#' @return A dataset with at most \code{N} mutations.
+#' @return A dataset with at most \code{n} mutations.
+#'
 #' @export
 #'
 #' @examples
-#' TODO
+#' data('example_evoverse')
+#'
+#' N(example_evoverse)
+#'
+#' N(filter_downsample(example_evoverse, n = 100))
 filter_downsample = function(x, n)
 {
   check_is_mobster_mvdata(x)
@@ -19,12 +24,12 @@ filter_downsample = function(x, n)
 
   if(n < N(x))
   {
-    pioStr(paste0("Subsampling ", n, "entries out of ", N(x)))
+    pioStr("Subsampling mutations:", n, "out of", N(x), suffix = '\n')
 
     k = keys(x)
-    ids = sample(k, length(k) - n)
+    ids = sample(k, n)
 
-    x = delete_entries(x, ids)
+    x = delete_entries(x, ids = setdiff(k, ids))
     x = logOp(x, paste0("Subsampled to N = ", n, ""))
   }
 

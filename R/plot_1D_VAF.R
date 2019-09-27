@@ -4,7 +4,7 @@
 #' histogam of the input VAF, coloured by mutation karyotype,
 #' for a required input sample.
 #'
-#' @param x A `evoverse` object.
+#' @param x An `evoverse` object.
 #' @param s The sample name, by default `x$samples[1]` is the first sample in the data.
 #'
 #' @return A ggplot object.
@@ -12,7 +12,13 @@
 #' @export
 #'
 #' @examples
-#' TODO
+#' data('example_evoverse')
+#'
+#' # Plot the 1st (default parameters)
+#' plot_1D_VAF(example_evoverse)
+#'
+# Plot the 2nd
+#' plot_1D_VAF(example_evoverse, s = example_evoverse$samples[2])
 plot_1D_VAF = function(x,
                        s = x$samples[1])
 {

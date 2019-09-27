@@ -16,6 +16,7 @@
 filter_tails = function(x)
 {
   check_is_mobster_mvdata(x)
+
   if (!has_mobster_fits(x))
   {
     warning("There are no MOBSTER clusters coputed for this dataset, will return just the object.")

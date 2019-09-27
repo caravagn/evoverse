@@ -7,7 +7,7 @@
 plot_2D_VAF(x, s1 = x$samples[1], s2 = x$samples[2], N = 10000)
 }
 \arguments{
-\item{x}{A `mvMOSTER` object.}
+\item{x}{An `evoverse` object.}
 
 \item{s1}{The first sample name, by default `x$samples[1]` the first sample in the data.}
 
@@ -16,7 +16,7 @@ plot_2D_VAF(x, s1 = x$samples[1], s2 = x$samples[2], N = 10000)
 \item{s1}{The second sample name, by default `x$samples[1]` the second sample in the data.}
 }
 \value{
-A `ggplot` object plot.
+A `ggplot` object
 }
 \description{
 This function plots a 2D scatterplot
@@ -28,7 +28,10 @@ is always reported, as well as the proportion with
 respect to the total number of mutations.
 }
 \examples{
-TODO
+data('example_evoverse')
+
+# Plot the 1st vs the 2nd sample (default parameters)
+plot_2D_VAF(example_evoverse)
 }
 \seealso{
 Function \link{\code{plot_2D_VAF_MOBSTER}} extends this plot visualizing also

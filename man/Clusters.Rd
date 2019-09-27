@@ -23,5 +23,7 @@ clustering assigments from a MOBSTER analysis of the sample. Instead, VIBER clus
 and `Z` are the sample names of the input dataset.
 }
 \examples{
-TODO
+data('example_evoverse')
+
+Clusters(example_evoverse)
 }

@@ -16,7 +16,9 @@
 #' @export
 #'
 #' @examples
-#' TODO
+#' data('example_evoverse')
+#'
+#' Clusters(example_evoverse)
 Clusters = function(x)
 {
   check_is_mobster_mvdata(x)
@@ -50,7 +52,7 @@ Clusters = function(x)
   if (has_viber_fits(x))
   {
     VIBER_clusters = bind_cols(x$fit_VIBER$labels, x$fit_VIBER$fit_data)
-    colnames(VIBER_clusters)[1] = paste0(paste0(x$samples, collapse = '_'), '.MOBSTER_cluster')
+    colnames(VIBER_clusters)[1] = paste0(paste0(x$samples, collapse = '_'), '.VIBER_cluster')
 
     dtable = dtable %>%
       full_join(VIBER_clusters, by = 'id')

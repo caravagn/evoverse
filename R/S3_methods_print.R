@@ -1,14 +1,19 @@
-#' Summary for mvMOBSTER objects.
+#' Summary for an \code{evoverse} dataset.
 #'
-#' @param x A mvMOBSTER \code{mbst_data} object.
-#' @param ...
+#' @description The summary reports basic statistics on the stored
+#' input values concerning both mutations, segments, and fits if
+#' available
 #'
-#' @return Nothing
+#' @param x An  \code{evoverse} object.
+#' @param ... S3 parameters
+#'
+#' @return Nothing.
 #'
 #' @export
 #'
 #' @examples
-#' TODO
+#' data('example_evoverse')
+#' summary(example_evoverse)
 summary.mbst_data = function(x, ...)
 {
   print_header_data(x)
@@ -63,25 +68,35 @@ summary.mbst_data = function(x, ...)
   pioTit('Copy Number Alteration data')
   print(x$CNAqc)
 
-  #
+  # Print MOBSTER fits
+  if (has_mobster_fits(x)) {
+    lapply(names(x$fit_MOBSTER), function(w) {
+      pioTit('MOBSTER fit for sample', w)
+      print(x$fit_MOBSTER[[w]]$best)
+    })
+  }
 
-  print('stats about the fits...?')
-
-
-
+  # Print VIBER fits
+  if (has_viber_fits(x)) {
+    print(x$fit_VIBER)
+  }
 }
 
-#' Print for mvMOBSTER objects.
+#' Print for an \code{evoverse} dataset.
 #'
-#' @param x A mvMOBSTER \code{mbst_data} object.
-#' @param ...
+#' @description The print reports basic statistics on the stored
+#' fits available in the input object.
 #'
-#' @return Nothing
+#' @param x An  \code{evoverse} object.
+#' @param ... S3 parameters
+#'
+#' @return Nothing.
 #'
 #' @export
 #'
 #' @examples
-#' TODO
+#' data('example_evoverse')
+#' print(example_evoverse)
 print.mbst_data = function(x, ...)
 {
   print_header_data(x)

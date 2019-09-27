@@ -2,11 +2,14 @@
 #'
 #' @description This function creates a multi-plot figure from
 #' different visualizations available in `evoverse`, and in the
-#' other packages that are `evoverse` interfaces to. The plot
-#' regards only one sample in the dataset and shows:
+#' other packages that `evoverse` interfaces with. The plot is
+#' assembled using functions from two packages: \code{cowplot}
+#' and \code{ggpubr}.
+#'
+#' The plot regards only one sample in the dataset, and shows:
 #'
 #' \itemize{
-#' \item The histogram of the alelleic frequency (VAF) for the sample;
+#' \item The histogram of the variant allele frequency (VAF) for the sample;
 #' \item The histogram of the depth (DP) for the sample;
 #' \item The histogram of the number of reads with the variant (NV) for the sample;
 #' \item The joint scatter of DP against VAF;
@@ -14,13 +17,16 @@
 #' available at \url{https://github.com/caravagn/CNAqc}.
 #' }
 #'
-#' @param x A mvMOBSTER object.
+#' @param x An  \code{evoverse} object.
 #' @param sample The sample to plot.
 #' @param N_CNA The number of mutations to plot in the CNA segment
 #' panel. This parameter is passed to the plotting functions of
-#' the \code{CNAqc} package.
+#' the \code{CNAqc} package. By default up to 10,000 mutations are
+#' shown.
 #'
-#' @return A figure assembled from several \code{ggplot} objects.
+#' @return A figure assembled from several \code{ggplot} objects,
+#' combined with functions from the \code{cowplot} and \code{ggpubr}
+#' packages.
 #'
 #' @import ggpubr
 #' @import cowplot
@@ -28,7 +34,13 @@
 #' @export
 #'
 #' @examples
-#' TODO
+#' data('example_evoverse')
+#'
+#' # Plot the data
+#' plot_sample(example_evoverse, sample = example_evoverse$samples[1])
+#'
+#' # Plot the data - only 100 mutations in the segments plot, faster rendering
+#' plot_sample(example_evoverse, sample = example_evoverse$samples[1], N_CNA = 100)
 plot_sample = function(x, sample, N_CNA = 10000)
 {
   # Copy number panel
@@ -50,6 +62,7 @@ plot_sample = function(x, sample, N_CNA = 10000)
 
   # VAF, DP and NV data
   vp = VAF(x, samples = sample) %>%
+    filter(value > 0) %>%
     ggplot(aes(value, fill = karyotype)) +
     geom_histogram(binwidth = 0.01) +
     xlim(0, 1) +
@@ -63,12 +76,14 @@ plot_sample = function(x, sample, N_CNA = 10000)
     labs(title = 'DP')
 
   np = NV(x, samples = sample) %>%
+    filter(value > 0) %>%
     ggplot(aes(value, fill = karyotype)) +
     geom_histogram(bins = 100) +
     my_ggplot_theme() +
     labs(title = 'NV')
 
   vdp = VAF(x, samples = sample) %>%
+    filter(value > 0) %>%
     full_join(DP(x, samples = sample), by = 'id') %>%
     ggplot(aes(x = value.x, y = value.y)) +
     geom_point(size = .5, aes(color = karyotype.x)) +

@@ -7,7 +7,7 @@
 plot_1D_VAF(x, s = x$samples[1])
 }
 \arguments{
-\item{x}{A `evoverse` object.}
+\item{x}{An `evoverse` object.}
 
 \item{s}{The sample name, by default `x$samples[1]` is the first sample in the data.}
 }
@@ -20,5 +20,10 @@ histogam of the input VAF, coloured by mutation karyotype,
 for a required input sample.
 }
 \examples{
-TODO
+data('example_evoverse')
+
+# Plot the 1st (default parameters)
+plot_1D_VAF(example_evoverse)
+
+plot_1D_VAF(example_evoverse, s = example_evoverse$samples[2])
 }

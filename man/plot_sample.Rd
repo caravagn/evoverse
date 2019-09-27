@@ -2,28 +2,49 @@
 % Please edit documentation in R/plot_sample.R
 \name{plot_sample}
 \alias{plot_sample}
-\title{Plot a report of the data available for one sample}
+\title{Plot a report of the data available for a sample.}
 \usage{
 plot_sample(x, sample, N_CNA = 10000)
 }
 \arguments{
-\item{x}{A mvMOBSTER object.}
+\item{x}{An  \code{evoverse} object.}
 
 \item{sample}{The sample to plot.}
 
 \item{N_CNA}{The number of mutations to plot in the CNA segment
 panel. This parameter is passed to the plotting functions of
-the \code{CNAqc} package.}
+the \code{CNAqc} package. By default up to 10,000 mutations are
+shown.}
 }
 \value{
-A figure assembled from several \code{ggplot} objects.
+A figure assembled from several \code{ggplot} objects,
+combined with functions from the \code{cowplot} and \code{ggpubr}
+packages.
 }
 \description{
-For an input sample, plot a full page figure with
-the histograms of VAF, DP and NV data. The joint scatter of
-DP against VAF, as well as the CNA segments generated from the
-\code{CNAqc} package.
+This function creates a multi-plot figure from
+different visualizations available in `evoverse`, and in the
+other packages that `evoverse` interfaces with. The plot is
+assembled using functions from two packages: \code{cowplot}
+and \code{ggpubr}.
+
+The plot regards only one sample in the dataset, and shows:
+
+\itemize{
+\item The histogram of the variant allele frequency (VAF) for the sample;
+\item The histogram of the depth (DP) for the sample;
+\item The histogram of the number of reads with the variant (NV) for the sample;
+\item The joint scatter of DP against VAF;
+\item The copy number segments, plot via the \code{CNAqc} package
+available at \url{https://github.com/caravagn/CNAqc}.
+}
 }
 \examples{
-x = 3
+data('example_evoverse')
+
+# Plot the data
+plot_sample(example_evoverse, sample = example_evoverse$samples[1])
+
+# Plot the data - only 100 mutations in the segments plot, faster rendering
+plot_sample(example_evoverse, sample = example_evoverse$samples[1], N_CNA = 100)
 }

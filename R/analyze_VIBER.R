@@ -1,4 +1,4 @@
-#' Compute VIBER Binomial fits from counts data.
+#' Compute \code{VIBER} Binomial fits from counts data.
 #'
 #' @description
 #'

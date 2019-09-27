@@ -1,7 +1,7 @@
-#' Create a mvMOBSTER dataset.
+#' Create an \code{evoverse} dataset.
 #'
-#' @description A mvMOBSTER dataset contains, for one or more bulk samples
-#' of the same tumour, the following informations:
+#' @description An \code{evoverse} dataset contains, for one or more bulk samples
+#' of the same tumour, the following sequencing information:
 #' \enumerate{
 #' \item mutation data, in the usual format of substitutions involving
 #' one or more nucleotides;
@@ -101,7 +101,7 @@
 #' @export
 #'
 #' @examples
-#' data(example_mvmobster)
+#' data('example_evoverse')
 #' mutations = example_mvmobster$mutations
 #' segments = example_mvmobster$segments
 #' purity = example_mvmobster$purity
@@ -110,7 +110,7 @@ dataset = function(
   segments,
   samples,
   purity,
-  description = "My multi-region MOBSTER dataset"
+  description = "My evoverse dataset"
 )
 {
   # Structures to create
@@ -119,10 +119,10 @@ dataset = function(
   # - mutations: all-remaining information(s), indexable by sample, with id key
   # - CNA: CNAqc objects
 
-  pio::pioHdr("mvMOBSTER dataset")
+  pio::pioHdr("evoverse dataset")
 
-  # Convert input if it is in the form of list
-  if(is.list(mutations))
+  # Convert input if it is in the form of list (not tibble)
+  if(is.list(mutations) & !is_tibble(mutations))
   {
     conversion =  converted_dataset(
       mutations,

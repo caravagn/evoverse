@@ -10,7 +10,7 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-# mvMOBSTER
+# evoverse <img src='man/figures/logo.png' align="right" height="139" />
 
 <!-- badges: start -->
 
@@ -19,6 +19,8 @@ status](https://travis-ci.org/caravagn/evoverse.svg?branch=master)](https://trav
 <!-- badges: end -->
 
 `evoverse` is a package that provides a set of functions to perform cancer evolution analyses on cancer sequencing data of multiple biopsies. This package offers a simple interface to the implementation of pipelines that seek to exploit MOBSTER, VIBER and other packages that can be used to perform multi-sample analyses.
+
+# <img src='man/figures/evoverse_diagram.png' align="centre" height="339" />
 
 #### Other packages
 
@@ -35,6 +37,7 @@ Copy Number Alteration (CNA) calls
 #### Help and support
 
 `evoverse` has its own webpage at [GitHub pages](https://caravagn.github.io/evoverse/).
+
 
 -----
 

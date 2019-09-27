@@ -2,21 +2,24 @@
 % Please edit documentation in R/S3_methods_print.R
 \name{summary.mbst_data}
 \alias{summary.mbst_data}
-\title{Summary for mvMOBSTER objects.}
+\title{Summary for an \code{evoverse} dataset.}
 \usage{
 \method{summary}{mbst_data}(x, ...)
 }
 \arguments{
-\item{x}{A mvMOBSTER \code{mbst_data} object.}
+\item{x}{An  \code{evoverse} object.}
 
-\item{...}{}
+\item{...}{S3 parameters}
 }
 \value{
-Nothing
+Nothing.
 }
 \description{
-Summary for mvMOBSTER objects.
+The summary reports basic statistics on the stored
+input values concerning both mutations, segments, and fits if
+available
 }
 \examples{
-TODO
+data('example_evoverse')
+summary(example_evoverse)
 }

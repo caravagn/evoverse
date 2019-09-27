@@ -2,23 +2,27 @@
 % Please edit documentation in R/filter_downsample.R
 \name{filter_downsample}
 \alias{filter_downsample}
-\title{Downample data.}
+\title{Randomly downsample a dataset.}
 \usage{
 filter_downsample(x, n)
 }
 \arguments{
-\item{x}{A dataset of class \code{"mbst_data"}.}
+\item{x}{An `evoverse` object.}
 
-\item{N}{The number of mutations to retain. If \code{x} contains less
-than \code{N} mutations, \code{x} is returned.}
+\item{n}{The number of mutations to retain. If \code{x} contains less
+than \code{n} mutations, \code{x} is returned.}
 }
 \value{
-A dataset with at most \code{N} mutations.
+A dataset with at most \code{n} mutations.
 }
 \description{
-Randomly downsample the data contained in a dataset to a
-certain number of mutations.
+Randomly downsample a dataset to contain a certain number of mutations.
+If the dataset contains less than the requirednumber of mutations, the input object is returned.
 }
 \examples{
-TODO
+data('example_evoverse')
+
+N(example_evoverse)
+
+N(filter_downsample(example_evoverse, n = 100))
 }

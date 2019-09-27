@@ -8,12 +8,12 @@
 #' is always reported, as well as the proportion with
 #' respect to the total number of mutations.
 #'
-#' @param x A `mvMOSTER` object.
+#' @param x An `evoverse` object.
 #' @param s1 The first sample name, by default `x$samples[1]` the first sample in the data.
 #' @param s1 The second sample name, by default `x$samples[1]` the second sample in the data.
 #' @param N Maximum number of points to plot, the overall percentage is reported.
 #'
-#' @return A `ggplot` object plot.
+#' @return A `ggplot` object
 #'
 #' @seealso Function \link{\code{plot_2D_VAF_MOBSTER}} extends this plot visualizing also
 #' MOBSTER clusters' results.
@@ -21,7 +21,10 @@
 #' @export
 #'
 #' @examples
-#' TODO
+#' data('example_evoverse')
+#'
+#' # Plot the 1st vs the 2nd sample (default parameters)
+#' plot_2D_VAF(example_evoverse)
 plot_2D_VAF = function(x,
                        s1 = x$samples[1],
                        s2 = x$samples[2],
@@ -36,7 +39,7 @@ plot_2D_VAF = function(x,
   N_all = nrow(points)
   if(nrow(points) > N)
   {
-    message("N =", N, ' - using only a subset of the data points.')
+    message("N = ", N, ' - using only a subset of the data points.')
     points = points %>% sample_n(N)
   }
   else N = nrow(points)

@@ -1,40 +1,46 @@
-#' Filter all mutations in a DP range
+#' Filter mutations outside a range of coverage values.
 #'
-#' @description Filter all mutations that, when they have
-#' DP above 0, they are not in a certain range, given by
-#' \code{min.DP}, \code{max.DP}.
-#
-#' @param x A dataset of class \code{"mbst_data"}.
+#'  @description This function filters mutations by DP (depth).
+#'
+#' The filter deletes all mutations that, at least in one sample,
+#' have read depth DP outside a desired range.
+#'
+#' @param x An `evoverse` object.
 #' @param min.DP Minimum DP
 #' @param max.DP Maximum DP
 #'
 #' @return A dataset with no mutations outside the
 #' required DP range.
+#'
 #' @export
 #'
 #' @examples
-#' TODO
+#' data('example_evoverse')
+#'
+#' N(example_evoverse)
+#'
+#' N(filter_dp_range(example_evoverse, 50, 200))
 filter_dp_range = function(x, min.DP, max.DP)
 {
   check_is_mobster_mvdata(x)
 
-  pioStr("Remove mutations with DP outside range ", min.DP, ' - ', max.DP)
+  pioStr("Remove mutations with DP outside range ", min.DP, ' - ', max.DP, suffix = '\n')
 
-  ids = DP(x) %>%
-    filter(value > 0 &
-             (value > min.DP | value < max.DP)) %>%
-    select(id) %>%
-    distinct() %>%
-    pull(id)
+  # Group by mutation, take entries > 0 and compute min and max
+  ids_to_cancel = DP(x) %>%
+    group_by(id) %>%
+    filter(value > 0) %>%
+    summarise(m = min(value), M = max(value)) %>%
+    filter(m < min.DP | M > max.DP) %>%
+    pull(id) %>%
+    unique
 
-  all_ids = keys(x)
+  pioStr("Mutations to remove ", length(ids_to_cancel), suffix = '\n')
 
-  pioStr("Mutations to remove ", length(setdiff(all_ids, ids)))
-
-  x = delete_entries(x, setdiff(all_ids, ids))
+  x = delete_entries(x, ids_to_cancel)
 
   # Log update
-  x = logOp(x, paste0("Entries with VAF outside range ", min.DP, '-', max.DP, ' removed.'))
+  x = logOp(x, paste0("Entries with DP outside range ", min.DP, '-', max.DP, ' removed.'))
 
   x
 }

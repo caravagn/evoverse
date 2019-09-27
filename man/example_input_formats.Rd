@@ -3,19 +3,20 @@
 \docType{data}
 \name{example_input_formats}
 \alias{example_input_formats}
-\title{Example data in the wide and long formts supported by mvMOBSTER}
+\title{Example data in the wide and long formts supported by the
+\code{evoverse} package.}
 \format{4 tibbles, wide/long and mutations/copy number that
-show the format required to create a mvMOBSTER object with
+show the format required to create an  \code{evoverse} object with
 function \link{\code{dataset}}.}
 \usage{
 data(example_input_formats)
 }
 \description{
-Example data in the wide and long formts supported by mvMOBSTER
+Example data in the wide and long formts supported by the
+\code{evoverse} package.
 }
 \examples{
 data(example_input_formats)
 head(example_input_formats)
 }
-\keyword{#'}
 \keyword{datasets}
