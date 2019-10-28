@@ -5,37 +5,37 @@
 
 [![Travis build
 status](https://travis-ci.org/caravagn/evoverse.svg?branch=master)](https://travis-ci.org/caravagn/evoverse)
+[![](https://img.shields.io/badge/Part%20of-evoverse-blue.svg)](https://caravagn.github.io/evoverse)
+
 <!-- badges: end -->
 
-`evoverse` is a package that provides a set of functions to perform
-cancer evolution analyses on cancer sequencing data of multiple
-biopsies. This package offers a simple interface to the implementation
-of pipelines that seek to exploit MOBSTER, VIBER and other packages that
-can be used to perform multi-sample
-analyses.
+The `evoverse` collects multiple R packages to implement Cancer
+Evolution analyses on cancer bulk sequencing data, which can be used to
+reconcile tumour heterogeneity (TH).
 
-# <img src='man/figures/evoverse_diagram.png' align="centre" height="339" />
+With the `evoverse` functions you can study TH across patients
+(inter-patient heterogeneity), or within a patient (intra-tumour
+heterogeneity).
 
-#### Other packages
+#### Features
 
-The `evoverse` integrates the following packages:
+  - functions to QC somatic calls (mutation and copy number segments)
+    for a Cancer Evolution analysis;
 
-  - [MOBSTER](https://caravagn.github.io/MOBSTER/), a package for tumour
-    subclonal deconvolution which combines Dirichlet mixtures with
-    distributions predicted by theoretical population genetics;
+  - functions to determine subclonal architectures integrating both
+    Population Genetics and Machine Learning (model based subclonal
+    deconvolution);
 
-  - [VIBER](https://caravagn.github.io/VIBER/), a package for tumour
-    subclonal deconvolution that implements variational fits for
-    Binomial mixtures;
+  - determine repeated evolution across patients, comparing tumours for
+    their evolutionary trajectories (repeated evolutionary
+    trajectories).
 
-  - [CNAqc](https://caravagn.github.io/CNAqc/), a package that provide a
-    set of metrics to assess the quality of Copy Number Alteration (CNA)
-    calls
+[![](https://img.shields.io/badge/Available-Pipelines-yellow.svg)](https://caravagn.github.io/evoverse/articles/pipelines.html)
+[![](https://img.shields.io/badge/Available-Packages-yellow.svg)](https://caravagn.github.io/evoverse/articles/packages.html)
 
 #### Help and support
 
-`evoverse` has its own webpage at [GitHub
-pages](https://caravagn.github.io/evoverse/).
+[![](https://img.shields.io/badge/GitHub%20Pages-https://caravagn.github.io/evoverse/-yellow.svg)](https://caravagn.github.io/evoverse)
 
 -----
 
@@ -53,11 +53,10 @@ devtools::install_github("caravagn/evoverse")
 
 #### Copyright and contacts
 
-Giulio Caravagna, PhD. *Institute of Cancer Research, London, UK*.
+Giulio Caravagna, PhD. *Institute of Cancer Research, London,
+UK*.
 
-  - Personal webpage:
-    [https://bit.ly/2kc9E6Y](https://sites.google.com/site/giuliocaravagna/),
-  - Email address: <giulio.caravagna@icr.ac.uk> and
-    <gcaravagn@gmail.com>
-  - Twitter feed: \[@gcaravagna\](<https://twitter.com/gcaravagna>)
-  - GitHub space: [caravagn](https://github.com/caravagn)
+[![](https://img.shields.io/badge/Github-caravagn-seagreen.svg)](https://github.com/caravagn)
+[![](https://img.shields.io/badge/Email-gcaravagn@gmail.com-seagreen.svg)](mailto:gcaravagn@gmail.com)
+[![](https://img.shields.io/badge/Twitter-@gcaravagna-steelblue.svg)](https://twitter.com/gcaravagna)
+[![](https://img.shields.io/badge/Personal%20webpage-https://bit.ly/2kc9E6Y-red.svg)](https://sites.google.com/site/giuliocaravagna/)
