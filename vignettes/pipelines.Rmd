@@ -2,7 +2,7 @@
 title: "Pipeline available with the `evoverse` packages"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Packages in the `evoverse`}
+  %\VignetteIndexEntry{Pipeline available with the `evoverse` packages}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -29,4 +29,5 @@ knitr::opts_chunk$set(
  <img src='../man/figures/evoverse_diagram.png' align="centre" height="339" />
  
  Subclonal deconvolution with MOBSTER.
+</div>
 

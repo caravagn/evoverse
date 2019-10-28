@@ -70,15 +70,6 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
-      <a href="articles/Analysis.html">Cancer Evolution Analysis</a>
-    </li>
-    <li>
-      <a href="articles/Filtering.html">Query, filter, re-shape and plot datasets</a>
-    </li>
-    <li>
-      <a href="articles/mvmobster.html">Analysis of multi-sample datasets</a>
-    </li>
-    <li>
       <a href="articles/packages.html">Packages in the `evoverse`</a>
     </li>
     <li>
@@ -112,18 +103,23 @@
 </h1></div>
 <!-- badges: start -->
 
-<p><code>evoverse</code> is a a collaction of packages to implement Cancer Evolution analyses on cancer bulk sequencing data.</p>
-<p>Using the <code>evoverse</code> packages you can run a number of analyses to extract evolutionary trajectories both between patients (inter-patient heterogeneity), and within patients (intra-tumour heterogeneity).</p>
+<!-- badges: end -->
+<p>The <code>evoverse</code> collects multiple R packages to implement Cancer Evolution analyses on cancer bulk sequencing data, which can be used to reconcile tumour heterogeneity (TH).</p>
+<p>With the <code>evoverse</code> functions you can study TH across patients (inter-patient heterogeneity), or within a patient (intra-tumour heterogeneity).</p>
+<div id="features" class="section level4">
+<h4 class="hasAnchor">
+<a href="#features" class="anchor"></a>Features</h4>
 <ul>
-<li><p>assess data qualuty to setup a Cancer Evolution analysis;</p></li>
-<li><p>determine subclonal architectures integrating both Population Genetics and Machine Learning (model based);</p></li>
-<li><p>determine repeated evolution across patients, comparing tumours for their evolutionary trajectories.</p></li>
+<li><p>functions to QC somatic calls (mutation and copy number segments) for a Cancer Evolution analysis;</p></li>
+<li><p>functions to determine subclonal architectures integrating both Population Genetics and Machine Learning (model based subclonal deconvolution);</p></li>
+<li><p>determine repeated evolution across patients, comparing tumours for their evolutionary trajectories (repeated evolutionary trajectories).</p></li>
 </ul>
-<p>See the available <a href="https://caravagn.github.io/evover/articles/pipelines.html">pipelines</a> and the <a href="https://caravagn.github.io/evover/articles/packages.html">list of packages</a> inside <code>evoverse</code>.</p>
+<p><a href="https://caravagn.github.io/evoverse/articles/pipelines.html"><img src="https://img.shields.io/badge/Available-Pipelines-yellow.svg"></a> <a href="https://caravagn.github.io/evoverse/articles/packages.html"><img src="https://img.shields.io/badge/Available-Packages-yellow.svg"></a></p>
+</div>
 <div id="help-and-support" class="section level4">
 <h4 class="hasAnchor">
 <a href="#help-and-support" class="anchor"></a>Help and support</h4>
-<p><code>evoverse</code> has its own webpage at <a href="https://caravagn.github.io/evoverse/">GitHub pages</a>.</p>
+<p><a href="https://caravagn.github.io/evoverse"><img src="https://img.shields.io/badge/GitHub%20Pages-https://caravagn.github.io/evoverse/-yellow.svg"></a></p>
 <hr>
 </div>
 <div id="installation" class="section level3">
@@ -137,8 +133,7 @@
 <h4 class="hasAnchor">
 <a href="#copyright-and-contacts" class="anchor"></a>Copyright and contacts</h4>
 <p>Giulio Caravagna, PhD. <em>Institute of Cancer Research, London, UK</em>.</p>
-<!-- Place this tag in your head or just before your close body tag. -->
-<script async defer src="https://buttons.github.io/buttons.js"></script><!-- Place this tag where you want the button to render. --><p><a class="github-button" href="https://github.com/caravagn" aria-label="Follow @caravagn on GitHub">Follow @caravagn</a> <a href="mailto:gcaravagn@gmail.com"><img src="https://img.shields.io/badge/Email-gcaravagn@gmail.com-seagreen.svg"></a> <a href="https://twitter.com/gcaravagna"><img src="https://img.shields.io/badge/Twitter-@gcaravagna-steelblue.svg"></a> <a href="https://sites.google.com/site/giuliocaravagna/"><img src="https://img.shields.io/badge/Personal%20webpage-https://bit.ly/2kc9E6Y-red.svg"></a></p>
+<p><a href="https://github.com/caravagn"><img src="https://img.shields.io/badge/Github-caravagn-seagreen.svg"></a> <a href="mailto:gcaravagn@gmail.com"><img src="https://img.shields.io/badge/Email-gcaravagn@gmail.com-seagreen.svg"></a> <a href="https://twitter.com/gcaravagna"><img src="https://img.shields.io/badge/Twitter-@gcaravagna-steelblue.svg"></a> <a href="https://sites.google.com/site/giuliocaravagna/"><img src="https://img.shields.io/badge/Personal%20webpage-https://bit.ly/2kc9E6Y-red.svg"></a></p>
 </div>
 </div>
 </div>
@@ -171,6 +166,7 @@
 <h2>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://travis-ci.org/caravagn/evoverse"><img src="https://travis-ci.org/caravagn/evoverse.svg?branch=master" alt="Travis build status"></a></li>
+<li><a href="https://caravagn.github.io/evoverse"><img src="https://img.shields.io/badge/Part%20of-evoverse-blue.svg"></a></li>
 </ul>
 </div>
 </div>

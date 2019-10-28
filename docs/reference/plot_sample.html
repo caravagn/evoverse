@@ -6,8 +6,15 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot a report of the data available for one sample — plot_sample • mvmobster</title>
+<title>Plot a report of the data available for a sample. — plot_sample • evoverse</title>
 
+<!-- favicons -->
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png" />
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png" />
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png" />
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png" />
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -18,13 +25,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
 
-<!-- sticky kit -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script>
+<!-- headroom.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -33,11 +42,23 @@
 
 
 
-<meta property="og:title" content="Plot a report of the data available for one sample — plot_sample" />
-<meta property="og:description" content="For an input sample, plot a full page figure with
-the histograms of VAF, DP and NV data. The joint scatter of
-DP against VAF, as well as the CNA segments generated from the
-CNAqc package." />
+<meta property="og:title" content="Plot a report of the data available for a sample. — plot_sample" />
+<meta property="og:description" content="This function creates a multi-plot figure from
+different visualizations available in `evoverse`, and in the
+other packages that `evoverse` interfaces with. The plot is
+assembled using functions from two packages: cowplot
+and ggpubr.
+The plot regards only one sample in the dataset, and shows:
+
+The histogram of the variant allele frequency (VAF) for the sample;
+The histogram of the depth (DP) for the sample;
+The histogram of the number of reads with the variant (NV) for the sample;
+The joint scatter of DP against VAF;
+The copy number segments, plot via the CNAqc package
+available at https://github.com/caravagn/CNAqc.
+
+" />
+<meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -51,6 +72,7 @@ CNAqc package." />
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]-->
+
 
 
   </head>
@@ -68,7 +90,7 @@ CNAqc package." />
         <span class="icon-bar"></span>
       </button>
       <span class="navbar-brand">
-        <a class="navbar-link" href="../index.html">mvmobster</a>
+        <a class="navbar-link" href="../index.html">evoverse</a>
         <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
       </span>
     </div>
@@ -77,12 +99,12 @@ CNAqc package." />
       <ul class="nav navbar-nav">
         <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
 <li>
-  <a href="../articles/mvmobster.html">Get started</a>
+  <a href="../articles/evoverse.html">Get started</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -95,18 +117,18 @@ CNAqc package." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/Analysis.html">Cancer Evolution Analysis</a>
+      <a href="../articles/packages.html">Packages in the `evoverse`</a>
     </li>
     <li>
-      <a href="../articles/Filtering.html">Query, filter, re-shape and plot datasets</a>
+      <a href="../articles/pipelines.html">Pipeline available with the `evoverse` packages</a>
     </li>
   </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
-  <a href="https://github.com/caravagn/mvMOBSTER">
-    <span class="fa fa-github fa-lg"></span>
+  <a href="https://github.com/caravagn/evoverse">
+    <span class="fab fa fab fa-github fa-lg"></span>
      
   </a>
 </li>
@@ -117,21 +139,33 @@ CNAqc package." />
 </div><!--/.navbar -->
 
       
+
       </header>
 
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plot a report of the data available for one sample</h1>
-    <small class="dont-index">Source: <a href='https://github.com/caravagn/mvMOBSTER/blob/master/R/plot_sample.R'><code>R/plot_sample.R</code></a></small>
+    <h1>Plot a report of the data available for a sample.</h1>
+    <small class="dont-index">Source: <a href='https://github.com/caravagn/evoverse/blob/master/R/plot_sample.R'><code>R/plot_sample.R</code></a></small>
     <div class="hidden name"><code>plot_sample.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>For an input sample, plot a full page figure with
-the histograms of VAF, DP and NV data. The joint scatter of
-DP against VAF, as well as the CNA segments generated from the
-<code>CNAqc</code> package.</p>
+    <p>This function creates a multi-plot figure from
+different visualizations available in `evoverse`, and in the
+other packages that `evoverse` interfaces with. The plot is
+assembled using functions from two packages: <code>cowplot</code>
+and <code>ggpubr</code>.</p>
+<p>The plot regards only one sample in the dataset, and shows:</p>
+<ul>
+<li><p>The histogram of the variant allele frequency (VAF) for the sample;</p></li>
+<li><p>The histogram of the depth (DP) for the sample;</p></li>
+<li><p>The histogram of the number of reads with the variant (NV) for the sample;</p></li>
+<li><p>The joint scatter of DP against VAF;</p></li>
+<li><p>The copy number segments, plot via the <code>CNAqc</code> package
+available at <a href='https://github.com/caravagn/CNAqc'>https://github.com/caravagn/CNAqc</a>.</p></li>
+</ul>
+
     </div>
 
     <pre class="usage"><span class='fu'>plot_sample</span>(<span class='no'>x</span>, <span class='no'>sample</span>, <span class='kw'>N_CNA</span> <span class='kw'>=</span> <span class='fl'>10000</span>)</pre>
@@ -141,7 +175,7 @@ DP against VAF, as well as the CNA segments generated from the
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>A mvMOBSTER object.</p></td>
+      <td><p>An  <code>evoverse</code> object.</p></td>
     </tr>
     <tr>
       <th>sample</th>
@@ -151,16 +185,24 @@ DP against VAF, as well as the CNA segments generated from the
       <th>N_CNA</th>
       <td><p>The number of mutations to plot in the CNA segment
 panel. This parameter is passed to the plotting functions of
-the <code>CNAqc</code> package.</p></td>
+the <code>CNAqc</code> package. By default up to 10,000 mutations are
+shown.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>A figure assembled from several <code>ggplot</code> objects.</p>
+    <p>A figure assembled from several <code>ggplot</code> objects,
+combined with functions from the <code>cowplot</code> and <code>ggpubr</code>
+packages.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>x</span> <span class='kw'>=</span> <span class='fl'>3</span></div></pre>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)
+
+<span class='co'># Plot the data</span>
+<span class='fu'>plot_sample</span>(<span class='no'>example_evoverse</span>, <span class='kw'>sample</span> <span class='kw'>=</span> <span class='no'>example_evoverse</span>$<span class='no'>samples</span>[<span class='fl'>1</span>])</div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 26959 rows containing missing values (geom_point).</span></div><div class='img'><img src='plot_sample-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'># Plot the data - only 100 mutations in the segments plot, faster rendering</span>
+<span class='fu'>plot_sample</span>(<span class='no'>example_evoverse</span>, <span class='kw'>sample</span> <span class='kw'>=</span> <span class='no'>example_evoverse</span>$<span class='no'>samples</span>[<span class='fl'>1</span>], <span class='kw'>N_CNA</span> <span class='kw'>=</span> <span class='fl'>100</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 26959 rows containing missing values (geom_point).</span></div><div class='img'><img src='plot_sample-2.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -173,19 +215,23 @@ the <code>CNAqc</code> package.</p></td>
   </div>
 </div>
 
+
       <footer>
       <div class="copyright">
   <p>Developed by Giulio Caravagna.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
+
       </footer>
    </div>
 
   
 
+
   </body>
 </html>
+
 

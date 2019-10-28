@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Filter mutations outside a range of coverage values. — filter_dp_range • evoverse</title>
+<title>Filter mutations with VAF outside a range. — filter_vaf_range • evoverse</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,8 +42,11 @@
 
 
 
-<meta property="og:title" content="Filter mutations outside a range of coverage values. — filter_dp_range" />
-<meta property="og:description" content="@description This function filters mutations by DP (depth)." />
+<meta property="og:title" content="Filter mutations with VAF outside a range. — filter_vaf_range" />
+<meta property="og:description" content="This function filters mutations by VAF.
+The filter deletes all mutations that, when they have
+VAF above 0 in a sample (and so they are &quot;called&quot; in that sample),
+have a VAF value outside a desired range." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -131,16 +134,19 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Filter mutations outside a range of coverage values.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/caravagn/evoverse/blob/master/R/filter_dp_range.R'><code>R/filter_dp_range.R</code></a></small>
-    <div class="hidden name"><code>filter_dp_range.Rd</code></div>
+    <h1>Filter mutations with VAF outside a range.</h1>
+    <small class="dont-index">Source: <a href='https://github.com/caravagn/evoverse/blob/master/R/filter_vaf_range.R'><code>R/filter_vaf_range.R</code></a></small>
+    <div class="hidden name"><code>filter_vaf_range.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>@description This function filters mutations by DP (depth).</p>
+    <p>This function filters mutations by VAF.</p>
+<p>The filter deletes all mutations that, when they have
+VAF above 0 in a sample (and so they are "called" in that sample),
+have a VAF value outside a desired range.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>filter_dp_range</span>(<span class='no'>x</span>, <span class='no'>min.DP</span>, <span class='no'>max.DP</span>)</pre>
+    <pre class="usage"><span class='fu'>filter_vaf_range</span>(<span class='no'>x</span>, <span class='no'>min.vaf</span>, <span class='no'>max.vaf</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -150,38 +156,31 @@
       <td><p>An `evoverse` object.</p></td>
     </tr>
     <tr>
-      <th>min.DP</th>
-      <td><p>Minimum DP</p></td>
+      <th>min.vaf</th>
+      <td><p>Minimum VAF.</p></td>
     </tr>
     <tr>
-      <th>max.DP</th>
-      <td><p>Maximum DP</p></td>
+      <th>max.vaf</th>
+      <td><p>Maximum VAF.</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A dataset with no mutations outside the
-required DP range.</p>
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>The filter deletes all mutations that, at least in one sample,
-have read depth DP outside a desired range.</p>
+required VAF range.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)
 
 <span class='fu'><a href='N.html'>N</a></span>(<span class='no'>example_evoverse</span>)</div><div class='output co'>#&gt; [1] 57317</div><div class='input'>
-<span class='fu'><a href='N.html'>N</a></span>(<span class='fu'>filter_dp_range</span>(<span class='no'>example_evoverse</span>, <span class='fl'>50</span>, <span class='fl'>200</span>))</div><div class='output co'>#&gt; <span style='color: #000000;background-color: #BBBB00;'>Remove mutations with DP outside range </span><span> 50  -  200 </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; Mutations to remove </span><span> 3574 </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; </span><span></div><div class='output co'>#&gt; <span class='warning'>Warning: By deleting mutations CNAqc objects will be outdated - please re-map remaining mutations if required.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: There are MOBSTER clusters, deleting mutations requires to re-compute the clusters.</span></div><div class='output co'>#&gt; [1] 53743</div></span></pre>
+<span class='fu'><a href='N.html'>N</a></span>(<span class='fu'>filter_vafrange</span>(<span class='no'>example_evoverse</span>, <span class='fl'>.1</span>, <span class='fl'>.6</span>))</div><div class='output co'>#&gt; <span class='error'>Error in filter_vafrange(example_evoverse, 0.1, 0.6): could not find function "filter_vafrange"</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
       <li><a href="#value">Value</a></li>
-      <li><a href="#details">Details</a></li>
       <li><a href="#examples">Examples</a></li>
     </ul>
 
