@@ -224,12 +224,14 @@ dataset = function(
 
   # notify which wkll be removed
   cat('\n')
-  pioTit('Non-mappable mutations')
-  mapped_mutations %>%
-    filter(id %in% non_mappable, variable == 'VAF') %>%
-    spread(variable, value) %>%
-    spread(sample, id) %>%
-    pioDisp
+  pioTit('Non-mappable mutations per chromosome')
+
+  strsplit(non_mappable, split = ':') %>%
+    lapply(FUN = function(x) x[[1]]) %>%
+    unlist %>%
+    table %>%
+    table %>%
+    print
 
   # Actual clean up of the data
   mutations = mapped_mutations %>%

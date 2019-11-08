@@ -24,15 +24,16 @@ filter_tails = function(x)
   }
 
   # get clusters
-  clusters = Clusters(x) %>%
+  clusters = evoverse::Clusters(x) %>%
     select(ends_with('.MOBSTER_cluster'), id)
 
   colnames(clusters) = gsub('.MOBSTER_cluster', '', colnames(clusters))
 
-  clusters = clusters %>%
-    mutate(
-      is_tail = any(!!x$samples == 'Tail')
-    )
+  # clusters = clusters %>%
+  #   mutate(
+  #     is_tail = any(!!x$samples == 'Tail')
+  #   )
+  clusters$is_tail = apply(clusters, 1, function(x) any(x == 'Tail', na.rm = T))
 
   pioStr("MOBSTER clusters counts", suffix = '\n')
   print(sapply(clusters[1:(ncol(clusters) - 2)], table))
