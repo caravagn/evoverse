@@ -1,5 +1,5 @@
 ---
-title: "MSeq 2.0"
+title: "Subclonal deconvolution of MSeq multi-region WGS colorectal cancer data"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{MSeq 2.0}
@@ -14,240 +14,157 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup, echo=FALSE, message=FALSE, warning=FALSE, include=F}
+```{r setup, echo=T, message=FALSE, warning=FALSE, include=T}
 library(evoverse)
-library(knitr)
-library(kableExtra)
-library(tidyverse) 
+library(evoverse.datasets)
 ```
 
+This vignette describes the analysis of the MSeq data released with the paper 
 
-To prepare the data we use the Excel Supplementary Table file that comes with the paper, and that contains all required mutation and copy number calls.
+* Caravagna et al. Model-based tumor subclonal reconstruction. biorxiv 2019, [doi:10.1101/586560](https://www.biorxiv.org/content/10.1101/586560v1).
 
-# Preamble
+The data is also released as Excel Supplementary Table with the paper.
+
+
+### Available data
+
+Mutation, copy nunmber ad purity estimates for both analysed multi-region samples - `Set6` and `Set7` - are part of the data released with the `evoverse.datasets` [package](https://github.com/caravagn/evoverse.datasets).
+
+
 
 ````{r}
-# Requirements
-library(tidyverse)
-require(CNAqc)
-require(evoverse)
-require(ggpubr)
+# All available data
+evoverse.datasets::available_data()
 
-#####################
-# Extract columns from Excel file
-#####################
-extract_from_RDS = function(x, sample)
-{
-  loc_data = x$an_standard$locations %>% spread(variable, value)
-  ann_data = x$an_standard$annotations %>% spread(variable, value)
-  
-  noncounts_data = loc_data %>%
-    left_join(ann_data, by = 'id') %>%
-    mutate(from = relative.from, to = relative.to) %>%
-    select(-starts_with('relative.'))
-    
-  x$an_standard$data %>%
-    filter(sample == !!sample) %>%
-    spread(variable, value) %>%
-    left_join(noncounts_data, by = 'id') %>%
-    select(-id, -sample)
-}
-
-extract_CNA_long = function(x, sample)
-{
-  x = x %>%
-    select(chr, from, to, starts_with(sample)) 
-  colnames(x)[4:5] = c('minor', 'Major')
-  x
-}
-
-#####################
-# Extract columns from oldRDS
-#####################
-extract_from_excel = function(x, muts)
-{
-  w = muts %>% 
-    select(starts_with(x)) %>%
-    select(ends_with('_original')) %>%
-    select(-ends_with('VAF_original'))
-  
-  w = apply(w, 2, as.numeric) %>% as_tibble()
-  
-  colnames(w) = gsub(colnames(w), pattern = '_original', replacement = '')
-  w[[3]] = w[[2]]/ w[[1]]
-  
-  colnames(w)[3] = paste0(x, '.VAF')
-  w
-}
-
-#####################
-# Plotting raw data
-#####################
-plotting_data = function(x, ids = keys(x), f)
-{
-  figure = lapply(
-    x$samples,
-    function(s)
-      VAF(x, samples = s, ids = ids) %>%
-      filter( value > 0) %>%
-      ggplot(aes(value)) + geom_histogram(binwidth = 0.01) + labs(title = s) +
-      geom_vline(xintercept = c(0.03, 0.05, 0.06), color = c('red', 'orange', 'blue'))
-  ) 
-  
-  ggsave(plot = ggarrange(plotlist = figure),
-         filename = f, width = 9, height = 9)
-}
-
-#####################
-# Mobster (fast)
-#####################
-fast_mobster_analysis = function(x, f, ...)
-{
-  x = evoverse::analyze_mobster(x, ...)
-  
-  figure = lapply(x$fit_MOBSTER, mobster::plot_model_selection) 
-  
-  pdf(f, width = 11, height = 9)
-  lapply(figure, print)
-  dev.off()
-  
-  x
-}
-
-#####################
-# VIBER (fast)
-#####################
-fast_viber_analysis = function(x, f, ...)
-{
-  x = evoverse::analyze_VIBER(x, ...)
-  save(x, file = paste0(f, ".RData"))
-  
-  pdf(paste0(f, "_raw.pdf"), width = 4, height = 3)
-  lapply(plot.mbst_data(x, clusters = 'VIBER'), print)
-  dev.off()
-  
-  M_VIBER = VIBER::choose_clusters(x$fit_VIBER)
-  
-  pdf(paste0(f, "_heur.pdf"), width = 4, height = 3)
-  lapply(VIBER:::plot.vb_bmm(M_VIBER), print)
-  dev.off()
-}
-
-# x = Set7_CNA
-
-
+# Set7
+data('MSEQ_CRC_ADENOCARCINOMA_SET7', package = 'evoverse.datasets')
 ```
 
+Sneak peek to mutations, copy number, purity data and sample estimates
 
-<!-- library(tidyverse) -->
-<!-- require(CNAqc) -->
+```{r}
+print(MSEQ_CRC_ADENOCARCINOMA_SET7)
+```
 
-<!-- source('library.R') -->
+### Analysis
 
-<!-- ###########  -->
-<!-- #  SET 7  #   -->
-<!-- ###########  -->
+First create a dataset from the `evoverse`, retaining only diploid chromosomes.
 
-<!-- # Load samples and purity (from previous analysis) -->
-<!-- Set7_samples = paste0('Set7_', c(55, 57, 59, 62)) -->
-<!-- Set7_purity = pio:::nmfy(Set7_samples, c(.88, .88, .88, .8)) -->
+```{r}
+# Diploid segments 
+segments_karyo_diploid = MSEQ_CRC_ADENOCARCINOMA_SET7$CNA %>% 
+  select(-chr, -from, -to) %>% 
+  apply(1, function(x) all(x == 1))
 
-<!-- # Load mutation data -->
-<!-- # Set7_mutations = readr::read_tsv('../data/Set.07.WGS.snv.somatic.annoVar.comp.txt') %>% -->
-<!-- #   filter( -->
-<!-- #     !(chr %in% c('chrX', 'chrY')) -->
-<!-- #   ) %>% -->
-<!-- #   rename( -->
-<!-- #     from = start, -->
-<!-- #     to = end -->
-<!-- #   ) -->
-<!-- #  -->
-<!-- # colnames(Set7_mutations) = gsub( -->
-<!-- #   colnames(Set7_mutations),  -->
-<!-- #   pattern = '.NR', -->
-<!-- #   replacement = '.DP' -->
-<!-- # ) -->
+print(segments_karyo_diploid)
 
+# Actual dataset
+Set7 = evoverse::dataset(
+  mutations = MSEQ_CRC_ADENOCARCINOMA_SET7$mutations, 
+  segments = MSEQ_CRC_ADENOCARCINOMA_SET7$CNA[segments_karyo_diploid, ],
+  samples = MSEQ_CRC_ADENOCARCINOMA_SET7$samples,
+  purity = MSEQ_CRC_ADENOCARCINOMA_SET7$purity,
+  description = "Set7 Sample from MSeq (multi-region WGS ~100x)"  
+  )
 
-<!-- # From the first submission -->
-<!-- Set7_mutations = readxl::read_xlsx( -->
-<!--   "Supplementary_Table_S1.xlsx", -->
-<!--   sheet = 2) -->
+print(Set7)
+```
 
-<!-- Set7_mutations = Set7_mutations %>%  -->
-<!--   select(-starts_with('Set7'), -starts_with('MOBSTER'), -Binomial_cluster) %>% -->
-<!--   bind_cols( -->
-<!--     Reduce(bind_cols, lapply(Set7_samples, extract_from_excel)) -->
-<!--   ) -->
+Basic information can be accessed through the other functions of the `evoverse` packages. For instance, you can visualise CNA data through
+the  `CNAqc` [package](https://caravagn.github.op/CNAq).
 
-<!-- # Load CNA data -->
-<!-- # Set7_CNA = readr::read_tsv('../data/Set.07.penalty0.95.baf.gt.txt') %>% -->
-<!-- #   mutate( -->
-<!-- #     chr = paste0('chr', chr) -->
-<!-- #   ) -->
-<!-- # colnames(Set7_CNA)[1:4] = c('chr', 'from', 'length', 'to') -->
-<!-- # Read the Excel file and change its format -->
-<!-- Set7_CNA = readxl::read_xlsx( -->
-<!--   path = "Supplementary_Table_S1.xlsx",  -->
-<!--   sheet = 3) %>% -->
-<!--   mutate( -->
-<!--     chr = paste(paste0('chr', chr)) -->
-<!--   ) %>% -->
-<!--   rename( -->
-<!--     from = `first-locus`, -->
-<!--     length = nloci, -->
-<!--     to = `last-locus` -->
-<!--   ) -->
+```{r, fig.width=10, fig.height=8, warning=F}
+# Example CNA rofiles with CNAqc
+print(Set7$CNAqc$Set7_55)
 
-<!-- # Replace every _ with a . -->
-<!-- colnames(Set7_CNA) = gsub(colnames(Set7_CNA), pattern = '_Minor', replacement = '.minor') -->
-<!-- colnames(Set7_CNA) = gsub(colnames(Set7_CNA), pattern = '_Major', replacement = '.Major') -->
+# CNA segments plot
+ggpubr::ggarrange(
+  plotlist = lapply(Set7$CNAqc, function(x) { CNAqc::plot_segments(x) + ylim(0, 3) }),
+  ncol = 1, 
+  nrow = 4
+)
+```
 
-<!-- Set7_CNA = Set7_CNA %>% select(chr, from, to, starts_with(Set7_samples[1]), starts_with(Set7_samples[2]), starts_with(Set7_samples[3]), starts_with(Set7_samples[4])) -->
+We can print also the VAF of the annotated mutations, in both 2D and 1D type of plots using `evoverse`.
 
-<!-- # CNA Calls -->
-<!-- print(Set7_CNA) -->
+```{r, fig.width=9, fig.height=6, warning=F}
+# plot by default is 2D
+ggpubr::ggarrange(
+  plotlist = plot(Set7),
+  ncol = 3, 
+  nrow = 2
+)
+```
 
-<!-- # All data -->
-<!-- Set7 = evoverse::dataset( -->
-<!--   mutations = Set7_mutations, -->
-<!--   segments = Set7_CNA, -->
-<!--   samples = Set7_samples, -->
-<!--   purity = Set7_purity, -->
-<!--   description = "Set7 from the MSeq study (Cross et al.)" -->
-<!-- ) -->
+``` {r, fig.width = 6, fig.height=6, warning=F}
+# Using evoverse plot_1D_VAF (1D)
+ggpubr::ggarrange(
+  plotlist = lapply(Set7$samples, evoverse::plot_1D_VAF, x = Set7),
+  ncol = 2, 
+  nrow = 2
+)
+```
 
-<!-- save(Set7, file = "Set7_all_data.RData") -->
+The following steps can be run to analyse the cohort (here, they are not run).
+On a standard laptop this analysis takes about 10 minutes.
 
-<!-- # Diploid segments (from one representative samples as they are all the same) with at least 500 SNVs -->
-<!-- s = Set7_samples[4] -->
+```{r,eval=FALSE}
+# MOBSTER analysis with default parameters
+Set7 =  evoverse::analyze_mobster(Set7)
 
-<!-- CNA_calls = Set7_CNA %>% select(chr, from, to, starts_with(s)) -->
-<!-- colnames(CNA_calls)[4:5] = c('minor', 'Major') -->
+# Save results
+save(Set7, file = "MOBSTER_Set7_fits.RData")
 
-<!-- SNV_calls = Set7_mutations %>% select(chr, from, to, ref, alt, starts_with(s)) -->
-<!-- colnames(SNV_calls)[6:8] = c('DP', 'NV', 'VAF') -->
+# Plots of model selection that can be saved as PDF 
+figure = lapply(Set7$fit_MOBSTER, mobster::plot_model_selection) 
+  
+pdf("MOBSTER_Set7_fits.pdf", width = 11, height = 9)
+lapply(figure, print)
+dev.off()
 
-<!-- CNAqc_object = init(snvs = SNV_calls, cna = CNA_calls, purity = Set7_purity[s]) -->
+# Remove tail mutations and replot the data
+Set7_notail = filter_tails(Set7)
 
-<!-- Selected_segments = CNAqc_object$cna %>%  -->
-<!--   filter(n > 500, minor == 1, Major == 1) %>%  -->
-<!--   mutate(id = paste(chr, from, to, sep = ':')) %>% -->
-<!--   pull(id) -->
+plot(Set7_notail)
 
-<!-- Set7_CNA = Set7_CNA %>%  -->
-<!--   mutate(id = paste(chr, from, to, sep = ':')) %>% -->
-<!--   filter(id %in% Selected_segments) -->
+# VIBER clustering of Binomial mixtures for non-tail mutations
+Set7_notail = evoverse::analyze_VIBER(Set7_notail, K = 7, alpha_0 = 1e-06, max_iter = 200)
 
-<!-- # reduced dataset -->
-<!-- Set7 = evoverse::dataset( -->
-<!--   mutations = Set7_mutations, -->
-<!--   segments = Set7_CNA %>% select(-id), -->
-<!--   samples = Set7_samples, -->
-<!--   purity = Set7_purity, -->
-<!--   description = "Set7 from the MSeq study (Cross et al.) ~ diploid segments with > 500 SNVs" -->
-<!-- ) -->
-<!-- save(Set7, file = "Set7_diploid_CNA.RData") -->
+save(Set7_notail, file = 'MOBSTER_VIBER_Set7_fits.RData')
+  
+# Plot 
+pdf("MOBSTER_VIBER_Set7_fits_raw.pdf", width = 4, height = 3)
+lapply(plot(Set7_notail, clusters = 'VIBER'), print)
+dev.off()
+  
+# Apply heuristic (default parameters for instance) and replot
+reduced_mv = VIBER::choose_clusters(Set7_notail$fit_VIBER)
 
- 
-load('~/Documents/Github/test.dbpmm/Real Data/[Used] MSeq2.0 - Cross et al/Rebuttal/Set6_diploid_MOBSTER_VIBER.RData')
+pdf("MOBSTER_VIBER_Set7_fits_heuristics.pdf", width = 4, height = 3)
+lapply(VIBER:::plot.vb_bmm(reduced_mv), print)
+dev.off()
+```
+
+### Without MOBSTER
+
+For comparison, run this.
+
+```{r,eval=FALSE}
+# VIBER clustering of Binomial mixtures for all mutations
+Set7_standard = evoverse::analyze_VIBER(Set7, K = 9, alpha_0 = 1e-06, max_iter = 200)
+
+save(Set7_standard, file = 'VIBER_Set7_fits.RData')
+  
+# Plot 
+pdf("VIBER_Set7_fits_raw.pdf", width = 4, height = 3)
+lapply(plot(Set7_standard, clusters = 'VIBER'), print)
+dev.off()
+  
+# Apply heuristic (default parameters) and replot
+reduced_mv = VIBER::choose_clusters(Set7_standard$fit_VIBER)
+
+pdf("VIBER_Set7_fits_heuristics.pdf", width = 4, height = 3)
+lapply(VIBER:::plot.vb_bmm(reduced_mv), print)
+dev.off()
+```
+

@@ -4,7 +4,7 @@
 \alias{Data_table}
 \title{Extract all the data stored in an \code{evoverse} dataset, in the wide format.}
 \usage{
-Data_table(x, ids = keys(x), samples = x$samples)
+Data_table(x, ids = keys(x), samples = x$samples, coordinates = TRUE)
 }
 \arguments{
 \item{x}{An `evoverse` object.}
@@ -12,6 +12,8 @@ Data_table(x, ids = keys(x), samples = x$samples)
 \item{ids}{The id of the mutations to extract, all by default.}
 
 \item{samples}{The samples for which we extract the data, all by default.}
+
+\item{coordinates}{If `TRUE`, returns also the genomic coordinates of the annotated mutations (`TRUE` by default).}
 }
 \value{
 A spread tibble of the required entries.

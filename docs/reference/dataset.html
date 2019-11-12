@@ -169,6 +169,9 @@ package to asses the quality of your copy number calls." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/Colorectal_Cross.html">Subclonal deconvolution of MSeq multi-region WGS colorectal cancer data</a>
+    </li>
+    <li>
       <a href="../articles/packages.html">Packages in the `evoverse`</a>
     </li>
     <li>
@@ -198,7 +201,7 @@ package to asses the quality of your copy number calls." />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Create an <code>evoverse</code> dataset.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/caravagn/evoverse/blob/master/R/dataset.R'><code>R/dataset.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/caravagn/evoverse/blob/master/R/Dataset.R'><code>R/Dataset.R</code></a></small>
     <div class="hidden name"><code>dataset.Rd</code></div>
     </div>
 
@@ -316,8 +319,7 @@ data, available at <a href='https://github.com/caravagn/MOBSTER'>https://github.
 </div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)
-<span class='no'>mutations</span> <span class='kw'>=</span> <span class='no'>example_mvmobster</span>$<span class='no'>mutations</span></div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'example_mvmobster' not found</span></div><div class='input'><span class='no'>segments</span> <span class='kw'>=</span> <span class='no'>example_mvmobster</span>$<span class='no'>segments</span></div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'example_mvmobster' not found</span></div><div class='input'><span class='no'>purity</span> <span class='kw'>=</span> <span class='no'>example_mvmobster</span>$<span class='no'>purity</span></div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'example_mvmobster' not found</span></div></pre>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘example_evoverse’ not found</span></div><div class='input'><span class='no'>mutations</span> <span class='kw'>=</span> <span class='no'>example_mvmobster</span>$<span class='no'>mutations</span></div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'example_mvmobster' not found</span></div><div class='input'><span class='no'>segments</span> <span class='kw'>=</span> <span class='no'>example_mvmobster</span>$<span class='no'>segments</span></div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'example_mvmobster' not found</span></div><div class='input'><span class='no'>purity</span> <span class='kw'>=</span> <span class='no'>example_mvmobster</span>$<span class='no'>purity</span></div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'example_mvmobster' not found</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -338,7 +340,7 @@ data, available at <a href='https://github.com/caravagn/MOBSTER'>https://github.
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
 </div>
 
       </footer>

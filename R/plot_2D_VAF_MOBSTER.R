@@ -68,19 +68,25 @@ plot_2D_VAF_MOBSTER = function(x,
     select(!!s1_col, !!s1_col_vaf, !!s2_col, !!s2_col_vaf, label)
 
   # Subset if required
-  N_all = nrow(points)
-  if(nrow(points) > N)
-  {
-    message("N = ", N, ' - using only a subset of the data points.')
-    points = points %>% sample_n(N)
-  }
-  else N = nrow(points)
+  # N_all = nrow(points)
+  # if(nrow(points) > N)
+  # {
+  #   message("N = ", N, ' - using only a subset of the data points.')
+  #   points = points %>% sample_n(N)
+  # }
+  # else
+  # label = paste0("N = ", N, ' (', round(N/N_all * 100), '%)')
 
-  label = paste0("N = ", N, ' (', round(N/N_all * 100), '%)')
+  N = nrow(points)
+  label = paste0("n = ", N)
 
   points$label = paste0(
     points %>% pull(!!s1_col), ' ~ ',
     points %>% pull(!!s2_col))
+
+  points = points %>%
+    mutate(s1_col_vaf = round(s1_col_vaf, 4), s2_col_vaf = round(s2_col_vaf, 4)) %>%
+    distinct(s1_col_vaf, s2_col_vaf)
 
   ggplot(points,
          aes_string(x = s1_col_vaf, y = s2_col_vaf, color = "label")) +

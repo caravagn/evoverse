@@ -103,6 +103,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
+      <a href="../articles/Colorectal_Cross.html">Subclonal deconvolution of MSeq multi-region WGS colorectal cancer data</a>
+    </li>
+    <li>
       <a href="../articles/packages.html">Packages in the `evoverse`</a>
     </li>
     <li>
@@ -169,8 +172,7 @@ required NV range.</p>
 a number of variants NV outside a desired range.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)
-
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘example_evoverse’ not found</span></div><div class='input'>
 <span class='fu'><a href='N.html'>N</a></span>(<span class='no'>example_evoverse</span>)</div><div class='output co'>#&gt; [1] 57317</div><div class='input'>
 <span class='fu'><a href='N.html'>N</a></span>(<span class='fu'>filter_nv_range</span>(<span class='no'>example_evoverse</span>, <span class='fl'>50</span>, <span class='fl'>100</span>))</div><div class='output co'>#&gt; <span style='color: #000000;background-color: #BBBB00;'>Remove mutations with NV outside range </span><span> 50  -  100 </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt; Mutations to remove </span><span> 47242 </span><span style='color: #000000;background-color: #BBBB00;'>
@@ -195,7 +197,7 @@ a number of variants NV outside a desired range.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
 </div>
 
       </footer>

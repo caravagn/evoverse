@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Extract clustering results. — Clusters • evoverse</title>
+<title>Impose minimum VAF and NV (read counts) value for mutations. — filter_vaf_nv_min • evoverse</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -42,15 +42,9 @@
 
 
 
-<meta property="og:title" content="Extract clustering results. — Clusters" />
-<meta property="og:description" content="This function extracts the data included into the dataset object by using
-function Data_table, and then attempts extracting clustering from both MOBSTER
-and VIBER analyses. If none of these are found, a warning is raised and data are returned.
-Otherwise, the data tibble is augmented to have one column for each one of the available
-clusters. If a sample is named `X`, column `X.MOBSTER_clusters` reports the
-clustering assigments from a MOBSTER analysis of the sample. Instead, VIBER clusters
-(multivariate), are reported as a unique column `X_Y_Z.VIBER_clusters` where `X`, `Y`
-and `Z` are the sample names of the input dataset." />
+<meta property="og:title" content="Impose minimum VAF and NV (read counts) value for mutations. — filter_vaf_nv_min" />
+<meta property="og:description" content="This function sets the VAF and NV of mutations below a minimum cutoff to 0.
+The mutation is not removed from the dataset." />
 <meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
@@ -141,40 +135,47 @@ and `Z` are the sample names of the input dataset." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Extract clustering results.</h1>
-    <small class="dont-index">Source: <a href='https://github.com/caravagn/evoverse/blob/master/R/Clusters.R'><code>R/Clusters.R</code></a></small>
-    <div class="hidden name"><code>Clusters.Rd</code></div>
+    <h1>Impose minimum VAF and NV (read counts) value for mutations.</h1>
+    <small class="dont-index">Source: <a href='https://github.com/caravagn/evoverse/blob/master/R/filter_vaf_nv_min.R'><code>R/filter_vaf_nv_min.R</code></a></small>
+    <div class="hidden name"><code>filter_vaf_nv_min.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>This function extracts the data included into the dataset object by using
-function <code>Data_table</code>, and then attempts extracting clustering from both MOBSTER
-and VIBER analyses. If none of these are found, a warning is raised and data are returned.
-Otherwise, the data tibble is augmented to have one column for each one of the available
-clusters. If a sample is named `X`, column `X.MOBSTER_clusters` reports the
-clustering assigments from a MOBSTER analysis of the sample. Instead, VIBER clusters
-(multivariate), are reported as a unique column `X_Y_Z.VIBER_clusters` where `X`, `Y`
-and `Z` are the sample names of the input dataset.</p>
+    <p>This function sets the VAF and NV of mutations below a minimum cutoff to 0.
+The mutation is not removed from the dataset.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>Clusters</span>(<span class='no'>x</span>)</pre>
+    <pre class="usage"><span class='fu'>filter_vaf_nv_min</span>(<span class='no'>x</span>, <span class='no'>min.vaf</span>, <span class='no'>min.nv</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>A mvMOBSTER <code>mbst_data</code> object.</p></td>
+      <td><p>An `evoverse` object.</p></td>
+    </tr>
+    <tr>
+      <th>min.vaf</th>
+      <td><p>Minimum VAF.</p></td>
+    </tr>
+    <tr>
+      <th>min.NV</th>
+      <td><p>Minimum NV</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>The input data and all computed clustering assigments for every mutation.</p>
+    <p>A dataset where any VAF entry below <code>min.vaf</code>, and any NV entry below
+<code>min.nv</code> are changed to 0.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘example_evoverse’ not found</span></div><div class='input'>
-<span class='fu'>Clusters</span>(<span class='no'>example_evoverse</span>)</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 57,317 x 28</span><span>
+<span class='fu'><a href='N.html'>N</a></span>(<span class='no'>example_evoverse</span>)</div><div class='output co'>#&gt; [1] 57317</div><div class='input'>
+<span class='fu'><a href='N.html'>N</a></span>(<span class='fu'>filter_vaf_nv_min</span>(<span class='no'>example_evoverse</span>, <span class='fl'>.05</span>, <span class='fl'>5</span>))</div><div class='output co'>#&gt; <span style='color: #000000;background-color: #BBBB00;'>Changinng mutation entries to have minimum VAF/NV </span><span> 0.05 / 5 will become 0 </span><span style='color: #000000;background-color: #BBBB00;'>
+#&gt; Mutations to edit</span><span> n = 14718 (0.26% of 57317) </span><span style='color: #000000;background-color: #BBBB00;'>
+#&gt; </span><span></div><div class='output co'>#&gt; [1] 57317</div><div class='input'>
+<span class='fu'><a href='Data_table.html'>Data_table</a></span>(<span class='no'>example_evoverse</span>)</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 57,317 x 24</span><span>
 #&gt;    id    Set7_55.VAF Set7_57.VAF Set7_59.VAF Set7_62.VAF Set7_55.DP Set7_57.DP
 #&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>       </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>       </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>       </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>       </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
 #&gt; </span><span style='color: #555555;'> 1</span><span> chr1…       0.166      0           0.074</span><span style='text-decoration: underline;'>5</span><span>      0.117          48         67
@@ -187,13 +188,31 @@ and `Z` are the sample names of the input dataset.</p>
 #&gt; </span><span style='color: #555555;'> 8</span><span> chr1…       0          0           0           0.062</span><span style='text-decoration: underline;'>5</span><span>         88        100
 #&gt; </span><span style='color: #555555;'> 9</span><span> chr1…       0          0.146       0           0              86         78
 #&gt; </span><span style='color: #555555;'>10</span><span> chr1…       0          0           0           0.114          96         76
-#&gt; </span><span style='color: #555555;'># … with 57,307 more rows, and 21 more variables: Set7_59.DP </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>,
+#&gt; </span><span style='color: #555555;'># … with 57,307 more rows, and 17 more variables: Set7_59.DP </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>,
 #&gt; #   Set7_62.DP </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, Set7_55.NV </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, Set7_57.NV </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, Set7_59.NV </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>,
 #&gt; #   Set7_62.NV </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, gene </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, vaf_normal </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, cosmic </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>,
 #&gt; #   function. </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, mutlocation </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, region </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, chr </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, from </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>,
-#&gt; #   to </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, ref </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, alt </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, Set7_55.MOBSTER_cluster </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>,
-#&gt; #   Set7_57.MOBSTER_cluster </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, Set7_59.MOBSTER_cluster </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>,
-#&gt; #   Set7_62.MOBSTER_cluster </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span></div></span></pre>
+#&gt; #   to </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, ref </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, alt </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span></div><div class='input'>
+<span class='fu'><a href='Data_table.html'>Data_table</a></span>(<span class='fu'>filter_vaf_nv_min</span>(<span class='no'>example_evoverse</span>, <span class='fl'>.05</span>, <span class='fl'>5</span>))</div><div class='output co'>#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>Changinng mutation entries to have minimum VAF/NV </span><span> 0.05 / 5 will become 0 </span><span style='color: #000000;background-color: #BBBB00;'>
+#&gt; Mutations to edit</span><span> n = 14718 (0.26% of 57317) </span><span style='color: #000000;background-color: #BBBB00;'>
+#&gt; </span><span></div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 57,317 x 24</span><span>
+#&gt;    id    Set7_55.VAF Set7_57.VAF Set7_59.VAF Set7_62.VAF Set7_55.DP Set7_57.DP
+#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>       </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>       </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>       </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>       </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #555555;'> 1</span><span> chr1…       0.166      0           0.074</span><span style='text-decoration: underline;'>5</span><span>      0.117          48         67
+#&gt; </span><span style='color: #555555;'> 2</span><span> chr1…       0          0.097</span><span style='text-decoration: underline;'>0</span><span>      0           0.103          66         82
+#&gt; </span><span style='color: #555555;'> 3</span><span> chr1…       0          0           0           0.133         105         69
+#&gt; </span><span style='color: #555555;'> 4</span><span> chr1…       0          0           0.063</span><span style='text-decoration: underline;'>1</span><span>      0.091</span><span style='text-decoration: underline;'>9</span><span>         50         61
+#&gt; </span><span style='color: #555555;'> 5</span><span> chr1…       0          0           0           0.068</span><span style='text-decoration: underline;'>7</span><span>         87         81
+#&gt; </span><span style='color: #555555;'> 6</span><span> chr1…       0          0           0           0.179          94         91
+#&gt; </span><span style='color: #555555;'> 7</span><span> chr1…       0.111      0           0.072</span><span style='text-decoration: underline;'>5</span><span>      0.122          51         34
+#&gt; </span><span style='color: #555555;'> 8</span><span> chr1…       0          0           0           0.062</span><span style='text-decoration: underline;'>5</span><span>         88        100
+#&gt; </span><span style='color: #555555;'> 9</span><span> chr1…       0          0.146       0           0              86         78
+#&gt; </span><span style='color: #555555;'>10</span><span> chr1…       0          0           0           0.114          96         76
+#&gt; </span><span style='color: #555555;'># … with 57,307 more rows, and 17 more variables: Set7_59.DP </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>,
+#&gt; #   Set7_62.DP </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, Set7_55.NV </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, Set7_57.NV </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, Set7_59.NV </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>,
+#&gt; #   Set7_62.NV </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, gene </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, vaf_normal </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, cosmic </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>,
+#&gt; #   function. </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, mutlocation </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, region </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, chr </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, from </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>,
+#&gt; #   to </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, ref </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span style='color: #555555;'>, alt </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span></div></span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

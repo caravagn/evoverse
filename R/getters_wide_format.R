@@ -159,6 +159,7 @@ DP_table = function(x,
 #' @param x An `evoverse` object.
 #' @param ids The id of the mutations to extract, all by default.
 #' @param samples The samples for which we extract the data, all by default.
+#' @param coordinates If `TRUE`, returns also the genomic coordinates of the annotated mutations (`TRUE` by default).
 #'
 #' @return A spread tibble of the required entries.
 #' @export
@@ -168,7 +169,8 @@ DP_table = function(x,
 #' Data_table(example_evoverse)
 Data_table = function(x,
                       ids = keys(x),
-                      samples = x$samples)
+                      samples = x$samples,
+                      coordinates = TRUE)
 {
   # Joined data tables
   dt = full_join(
@@ -183,5 +185,9 @@ Data_table = function(x,
   # All variables
   an = Annotations(x, ids)
 
-  full_join(dt, an, by = 'id')
+  fj = full_join(dt, an, by = 'id')
+
+  if(coordinates) fj = fj %>% full_join(x$mutations_locations, by = 'id')
+
+  return(fj)
 }
