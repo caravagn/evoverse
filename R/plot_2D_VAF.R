@@ -28,7 +28,8 @@
 plot_2D_VAF = function(x,
                        s1 = x$samples[1],
                        s2 = x$samples[2],
-                       N = 10000)
+                       N = 10000
+                       )
 {
   px = VAF(x, samples = s1)
   py = VAF(x, samples = s2)
@@ -36,15 +37,20 @@ plot_2D_VAF = function(x,
   points = full_join(px, py, by = 'id') %>%
     filter(value.x > 0 & value.y > 0)
 
-  N_all = nrow(points)
-  if(nrow(points) > N)
-  {
-    message("N = ", N, ' - using only a subset of the data points.')
-    points = points %>% sample_n(N)
-  }
-  else N = nrow(points)
+  N = nrow(points)
+  # if(nrow(points) > N)
+  # {
+  #   # message("N = ", N, ' - using only a subset of the data points.')
+  #   # points = points %>% sample_n(N)
+  # }
+  # else N = nrow(points)
 
-  label = paste0("N = ", N, ' (', round(N/N_all * 100), '%)')
+  # label = paste0("N = ", N, ' (', round(N/N_all * 100), '%)')
+  label = paste0("n = ", N)
+
+  points = points %>%
+    mutate(value.x = round(value.x, 4), value.y = round(value.y, 4)) %>%
+    distinct(value.x, value.y)
 
   ggplot(points,
          aes(x = value.x, y = value.y)) +
@@ -55,7 +61,7 @@ plot_2D_VAF = function(x,
     labs(title = paste0(s1, ' vs ', s2),
          x = s1,
          y = s2) +
-    my_ggplot_theme() +
+    # my_ggplot_theme() +
     xlim(0, 1) +
     ylim(0, 1) +
     geom_rug() +
