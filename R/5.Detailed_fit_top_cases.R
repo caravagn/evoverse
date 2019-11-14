@@ -41,5 +41,5 @@ cases = results %>% mutate(
 zz = sapply(cases$samplename %>% unique, FUN = copy_from_davros, DATA = TRUE, FOLDER = '~/Documents/Andrea/')
 zz = de_novo_plots(cases)
 
-assemble_image(x, frontpage, output_file, add_timon = TRUE)
+assemble_image(cases, "Top 20 quality rank - with Timon plots", 'Top_20_with_Timon_plot.pdf', add_timon = TRUE)
 
