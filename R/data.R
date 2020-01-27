@@ -1,22 +1,3 @@
-#' Coordinates for hg19 chromosomes.
-#'
-#' @docType data
-#'
-#' @usage data(chr_coordinates_hg19)
-#'
-#' @format A tibble that represents the coorinates for hg19 chromosome
-#' (chr, length, from, to, centromerStart and centromerEnd)
-#'
-#' @keywords datasets
-#'
-#' @references hg19
-#'
-#' @examples
-#' data(chr_coordinates_hg19)
-#' chr_coordinates_hg19
-#'
-"chr_coordinates_hg19"
-
 #' Example \code{evoverse} dataset.
 #'
 #' @docType data
@@ -51,3 +32,17 @@
 #' data(example_input_formats)
 #' head(example_input_formats)
 "example_input_formats"
+
+#' QC pre-trained Logistic classifier for timing of CNA with MOBSTER.
+#'
+#' @docType data
+#'
+#' @usage data(qc_timing_model)
+#'
+#' @format A logistic classifier.... describe training ......
+#'
+#' @keywords datasets
+#'
+#' @examples
+#' print(qc_timing_model)
+"qc_timing_model"
