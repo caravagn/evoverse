@@ -4,8 +4,14 @@
 \alias{pipeline_chromosome_timing}
 \title{Pipeline to time aneuploidy with MOBSTER.}
 \usage{
-pipeline_chromosome_timing(mutations, cna = NULL, purity = NULL,
-  timeable = c("2:0", "2:1", "2:2"), min_muts = 50, ...)
+pipeline_chromosome_timing(
+  mutations,
+  cna = NULL,
+  purity = NULL,
+  timeable = c("2:0", "2:1", "2:2"),
+  min_muts = 50,
+  ...
+)
 }
 \arguments{
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
@@ -20,6 +26,9 @@ are the following states \code{timeable = c('2:0', '2:1', '2:2')}.}
 \item{min_muts}{Skip analysing karyotypes with less than \code{min_muts} mutations.}
 
 \item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
+}
+\value{
+
 }
 \description{
 For a list of input mutations, CNA and purity data from a tumour sample,

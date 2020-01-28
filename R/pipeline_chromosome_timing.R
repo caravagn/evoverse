@@ -66,6 +66,11 @@ pipeline_chromosome_timing = function(mutations,
     cna_obj = CNAqc::init(mutations, cna, purity)
     mutations = cna_obj$snvs
 
+    available_karyo = cna_obj$n_karyotype[timeable]
+    available_karyo = available_karyo[!is.na(available_karyo)]
+    timeable = names(available_karyo)
+
+    cat("\n")
     cli::cli_process_done()
   }
 
@@ -91,26 +96,30 @@ pipeline_chromosome_timing = function(mutations,
                                )
                            )
   qc_clocks_table = Reduce(bind_rows, qc_clocks_table)
+  qc_clocks_table$karyotype = names(mfits)
 
   for(l in seq(qc_clocks_table$QC))
   {
     if(qc_clocks_table$QC[l] == "PASS")
-      cli::cli_alert_success("Karyotype {.field {qc_clocks_table$karyotype[l]}} QC PASS. p = {.value {qc_clocks_table$QC_prob[l]}}")
+      cli::cli_alert_success("Mutations in {.field {qc_clocks_table$karyotype[l]}} QC PASS. p = {.value {qc_clocks_table$QC_prob[l]}}")
     else
-      cli::cli_alert_danger("Karyotype {.field {red(qc_clocks_table$karyotype[l])}} QC FAIL. p = {.value {qc_clocks_table$QC_prob[l]}}")
+      cli::cli_alert_danger("Mutations in {.field {red(qc_clocks_table$karyotype[l])}} QC FAIL. p = {.value {qc_clocks_table$QC_prob[l]}}")
   }
 
   # Produce plots
-  cli::cli_process_start("Preparing plots and tables for MOBSTER fits.")
+  # cli::cli_process_start("Preparing plots and tables for MOBSTER fits.")
+  cat('\n')
+  cli::cli_h1("Preparing plots and tables for MOBSTER fits.")
+  cat('\n')
 
   mfits_plot = lapply(qc_clocks, function(y) qc_mobster_plot(y))
 
   cna_plot = ggplot() + geom_blank()
-  timeable = c("WG", timeable)
+  timeable = c("CNA", timeable)
 
   if(!is.null(cna)) cna_plot = CNAqc::plot_icon_CNA(cna_obj)
 
-  mfits_plot =  append(cna_plot, list(mfits_plot))
+  mfits_plot =  append(list(cna_plot), mfits_plot)
   mfits_plot = ggpubr::ggarrange(plotlist = mfits_plot,
                                  nrow = 1, ncol = length(mfits_plot), labels = timeable)
 
@@ -125,14 +134,14 @@ pipeline_chromosome_timing = function(mutations,
                           mobster::Clusters(x$best)
                         }))
 
-  cli::cli_process_done()
+  # cli::cli_process_done()
 
   return(
     list(
       input = list(mutations = mutations, cna = cna, purity = purity),
       mobster = list(fits = mfits, plots = mfits_plot),
       assignments = atab,
-      qc_clocks = qc_clocks
+      qc = qc_clocks
       )
     )
 }

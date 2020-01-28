@@ -4,11 +4,17 @@
 \alias{plot_icon_CNA}
 \title{Title}
 \usage{
-plot_icon_CNA(x, colors = c(`0` = "steelblue", `1` = "forestgreen", `2` =
-  "darkorange", `3` = "red", `3+` = "darkred"))
+plot_icon_CNA(
+  x,
+  colors = c(`0` = "steelblue", `1` = "forestgreen", `2` = "darkorange", `3` = "red",
+    `3+` = "darkred")
+)
 }
 \arguments{
 \item{colors}{}
+}
+\value{
+
 }
 \description{
 Title

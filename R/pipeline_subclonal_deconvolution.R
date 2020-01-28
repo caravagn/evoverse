@@ -36,12 +36,13 @@
 #' mutations = CNAqc::example_dataset_CNAqc$snvs
 #' purity = CNAqc::example_dataset_CNAqc$purity
 #'
-#' x = pipeline_chromosome_timing(mutations, cna = cna, purity = purity, auto_setup = 'FAST')
+#' x = pipeline_subclonal_deconvolution(mutations, cna = cna, purity = purity, auto_setup = 'FAST')
 #' print(x)
-pipeline_chromosome_timing = function(mutations,
+pipeline_subclonal_deconvolution = function(mutations,
                                       cna = NULL,
                                       purity = NULL,
-                                      karyotypes = c('2:0', '2:1', '2:2'),
+                                      karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
+                                      CCF_karyotypes = karyotypes,
                                       min_muts = 50,
                                       ...
 )
@@ -62,61 +63,83 @@ pipeline_chromosome_timing = function(mutations,
   # Apply CNA mapping and retain only mappable mutations
   if(!is.null(cna))
   {
-    cli::cli_process_start("Using CNA data to subset mutations.")
+    # cli::cli_process_start("Using CNA data to subset mutations.")
+    cli::cli_h1("Using CNA data to subset mutations.")
     cat("\n")
 
     cna_obj = CNAqc::init(mutations, cna, purity)
     mutations = cna_obj$snvs
 
-    cli::cli_process_done()
+    # available_karyo = cna_obj$n_karyotype[karyotypes]
+    # available_karyo = available_karyo[!is.na(available_karyo)]
+    # karyotypes = names(available_karyo)
+
+    # cli::cli_process_done()
   }
 
   # Deconvolution function
-  mfits = deconvolution_mobster_karyotypes(
-    mutations = mutations,
-    karyotypes = timeable,
-    min_muts = min_muts,
-    ...
-  )
+  mfits = NULL
 
-  if(CCF) {
+  mfits = deconvolution_mobster_karyotypes(   # For NULL karyotypes, thi analyses all the genome
+      mutations = mutations,
+      karyotypes = karyotypes,
+      min_muts = min_muts,
+      ...
+    )
 
+  if(!is.null(CCF_karyotypes) | !is.na(CCF_karyotypes))
+  {
+    CCF_fit = deconvolution_mobster_CCF(cna_obj, CCF_karyotypes = CCF_karyotypes, min_muts = min_muts, ...)
+    cna_obj = CCF_fit$cna_obj
+
+    mfits = append(mfits, list(`CCF` = CCF_fit$fits))
   }
 
   # QC with the trained classifier evoverse::qc_timing_model (type = 'T')
   cat("\n")
   cli::cli_rule("QC MOBSTER fits results")
 
-  qc_clocks =  lapply(mfits, function(d) qc_deconvolution_mobster(d$best, type = 'T'))
+  best_fits = lapply(mfits, function(x) x$best)
 
-  qc_clocks_table = lapply(qc_clocks,
-                           function(x)
+  qc_clones =  lapply(best_fits, qc_deconvolution_mobster,  type = 'D')
+
+  qc_table = lapply(qc_clones %>% names,
+                    function(x)
+                    {
+                      if(qc_clones[[x]] %>% is.null %>% all) return(NULL)
+
+                      k = x
+                      x = qc_clones[[x]]
+
                              bind_cols(
                                mobster::to_string(x),
-                               data.frame(QC = x$QC, QC_prob = x$QC_prob, QC_type = x$QC_type)
+                               data.frame(QC = x$QC, QC_prob = x$QC_prob, QC_type = x$QC_type, karyotype = k, stringsAsFactors = F)
                              )
+                           }
   )
-  qc_clocks_table = Reduce(bind_rows, qc_clocks_table)
+  qc_table = Reduce(bind_rows, qc_table)
 
-  for(l in seq(qc_clocks_table$QC))
+  for(l in seq(qc_table$QC))
   {
-    if(qc_clocks_table$QC[l] == "PASS")
-      cli::cli_alert_success("Karyotype {.field {qc_clocks_table$karyotype[l]}} QC PASS. p = {.value {qc_clocks_table$QC_prob[l]}}")
+    if(qc_table$QC[l] == "PASS")
+      cli::cli_alert_success("Mutations in {.field {qc_table$karyotype[l]}} QC PASS. p = {.value {qc_table$QC_prob[l]}}")
     else
-      cli::cli_alert_danger("Karyotype {.field {red(qc_clocks_table$karyotype[l])}} QC FAIL. p = {.value {qc_clocks_table$QC_prob[l]}}")
+      cli::cli_alert_danger("Mutations in {.field {red(qc_table$karyotype[l])}} QC FAIL. p = {.value {qc_table$QC_prob[l]}}")
   }
 
   # Produce plots
-  cli::cli_process_start("Preparing plots and tables for MOBSTER fits.")
+  cat('\n')
+  cli::cli_h1("Preparing plots and tables for MOBSTER fits.")
+  cat('\n')
 
-  mfits_plot = lapply(qc_clocks, function(y) qc_mobster_plot(y))
+  mfits_plot = lapply(karyotypes, function(y) qc_mobster_plot(qc_clones[[y]]))
 
   cna_plot = ggplot() + geom_blank()
-  timeable = c("WG", timeable)
+  timeable = c("CNA", names(qc_clones))
 
   if(!is.null(cna)) cna_plot = CNAqc::plot_icon_CNA(cna_obj)
 
-  mfits_plot =  append(cna_plot, list(mfits_plot))
+  mfits_plot =  append(list(cna_plot), mfits_plot)
   mfits_plot = ggpubr::ggarrange(plotlist = mfits_plot,
                                  nrow = 1, ncol = length(mfits_plot), labels = timeable)
 
@@ -131,14 +154,14 @@ pipeline_chromosome_timing = function(mutations,
                           mobster::Clusters(x$best)
                         }))
 
-  cli::cli_process_done()
+  # cli::cli_process_done()
 
   return(
     list(
       input = list(mutations = mutations, cna = cna, purity = purity),
       mobster = list(fits = mfits, plots = mfits_plot),
       assignments = atab,
-      qc_clocks = qc_clocks
+      qc = qc_table
     )
   )
 }

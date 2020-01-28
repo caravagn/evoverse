@@ -26,10 +26,9 @@ Remotes:
   caravagn/pio,
   caravagn/mobster,
   caravagn/CNAqc
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.0
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr
 URL: https://github.com/caravagn/evoverse
 BugReports: https://github.com/caravagn/evoverse/issues
-
