@@ -88,7 +88,7 @@ pipeline_subclonal_deconvolution = function(mutations,
   }
 
   # Assemble tables, plots and perform QC
-  results = wrap_up_pipeline_mobster(mfits, qc_type = "D", cna_obj)
+  results = wrap_up_pipeline_mobster(mfits, qc_type = "D", cna_obj, karyotypes = karyotypes)
   results$mobster = mfits
   results$input = list(mutations = mutations, cna = cna, purity = purity)
 

@@ -196,7 +196,7 @@ qc_mobster_plot = function(x)
           ))
 }
 
-wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj)
+wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
 {
   cat("\n")
   cli::cli_h2("QC MOBSTER fits results")

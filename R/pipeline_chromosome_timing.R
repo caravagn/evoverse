@@ -84,7 +84,7 @@ pipeline_chromosome_timing = function(mutations,
   )
 
   # Assemble tables, plots and perform QC
-  results = wrap_up_pipeline_mobster(mfits, qc_type = "T", cna_obj)
+  results = wrap_up_pipeline_mobster(mfits, qc_type = "T", cna_obj, karyotypes = karyotypes)
   results$mobster = mfits
   results$input = list(mutations = mutations, cna = cna, purity = purity)
 
