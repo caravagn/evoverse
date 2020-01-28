@@ -249,7 +249,7 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
 
   # If any, a CNA plot
   cna_plot = ggplot() + geom_blank()
-  timeable = c("CNA", names(qc_clones))
+  timeable = c("CNA", names(qc))
 
   if(!is.null(cna)) cna_plot = CNAqc::plot_icon_CNA(cna_obj)
 
