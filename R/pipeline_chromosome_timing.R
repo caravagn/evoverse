@@ -58,6 +58,7 @@ pipeline_chromosome_timing = function(mutations,
     stop("Purity must be in 0/1.")
 
   # Apply CNA mapping and retain only mappable mutations
+  cna_obj = NULL
   if(!is.null(cna))
   {
     cli::cli_process_start("Using CNA data to subset mutations.")
@@ -82,67 +83,12 @@ pipeline_chromosome_timing = function(mutations,
     ...
   )
 
-  # QC with the trained classifier evoverse::qc_timing_model (type = 'T')
-  cat("\n")
-  cli::cli_rule("QC MOBSTER fits results")
-
-  qc_clocks =  lapply(mfits, function(d) qc_deconvolution_mobster(d$best, type = 'T'))
-
-  qc_clocks_table = lapply(qc_clocks,
-                           function(x)
-                             bind_cols(
-                               mobster::to_string(x),
-                               data.frame(QC = x$QC, QC_prob = x$QC_prob, QC_type = x$QC_type)
-                               )
-                           )
-  qc_clocks_table = Reduce(bind_rows, qc_clocks_table)
-  qc_clocks_table$karyotype = names(mfits)
-
-  for(l in seq(qc_clocks_table$QC))
-  {
-    if(qc_clocks_table$QC[l] == "PASS")
-      cli::cli_alert_success("Mutations in {.field {qc_clocks_table$karyotype[l]}} QC PASS. p = {.value {qc_clocks_table$QC_prob[l]}}")
-    else
-      cli::cli_alert_danger("Mutations in {.field {red(qc_clocks_table$karyotype[l])}} QC FAIL. p = {.value {qc_clocks_table$QC_prob[l]}}")
-  }
-
-  # Produce plots
-  # cli::cli_process_start("Preparing plots and tables for MOBSTER fits.")
-  cat('\n')
-  cli::cli_h1("Preparing plots and tables for MOBSTER fits.")
-  cat('\n')
-
-  mfits_plot = lapply(qc_clocks, function(y) qc_mobster_plot(y))
-
-  cna_plot = ggplot() + geom_blank()
-  timeable = c("CNA", timeable)
-
-  if(!is.null(cna)) cna_plot = CNAqc::plot_icon_CNA(cna_obj)
-
-  mfits_plot =  append(list(cna_plot), mfits_plot)
-  mfits_plot = ggpubr::ggarrange(plotlist = mfits_plot,
-                                 nrow = 1, ncol = length(mfits_plot), labels = timeable)
+  # Assemble tables, plots and perform QC
+  results = wrap_up_pipeline_mobster(mfits, qc_type = "R", cna_obj)
+  results$mobster = mfits
+  results$input = list(mutations = mutations, cna = cna, purity = purity)
 
 
-  # Table of assignments
-  atab =  Reduce(bind_rows,
-                 lapply(mfits,
-                        function(x) {
-                          if (all(is.null(x)))
-                            return(NULL)
-
-                          mobster::Clusters(x$best)
-                        }))
-
-  # cli::cli_process_done()
-
-  return(
-    list(
-      input = list(mutations = mutations, cna = cna, purity = purity),
-      mobster = list(fits = mfits, plots = mfits_plot),
-      assignments = atab,
-      qc = qc_clocks
-      )
-    )
+  return(results)
 }
 

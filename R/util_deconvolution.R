@@ -191,3 +191,79 @@ qc_mobster_plot = function(x)
             size = 5
           ))
 }
+
+wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj)
+{
+  cat("\n")
+  cli::cli_h2("QC MOBSTER fits results")
+  cat("\n")
+
+  best_fits = lapply(mfits,
+                     {
+                       function(x)
+                         if (x %>% is.null %>% all)
+                           return(NULL)
+                       x$best
+                     })
+
+  qc =  lapply(best_fits, qc_deconvolution_mobster,  type = qc_type)
+
+  qc_table = lapply(qc %>% names,
+                    function(x)
+                    {
+                      if(qc[[x]] %>% is.null %>% all) return(NULL)
+
+                      k = x
+                      x = qc[[x]]
+
+                      bind_cols(
+                        mobster::to_string(x),
+                        data.frame(QC = x$QC, QC_prob = x$QC_prob, QC_type = x$QC_type, karyotype = k, stringsAsFactors = F)
+                      )
+                    }
+  )
+  qc_table = Reduce(bind_rows, qc_table)
+
+  for(l in seq(qc_table$QC))
+  {
+    if(qc_table$QC[l] == "PASS")
+      cli::cli_alert_success("Mutations in {.field {qc_table$karyotype[l]}} QC PASS. p = {.value {qc_table$QC_prob[l]}}")
+    else
+      cli::cli_alert_danger("Mutations in {.field {red(qc_table$karyotype[l])}} QC FAIL. p = {.value {qc_table$QC_prob[l]}}")
+  }
+
+  # Produce plots
+  cat('\n')
+  cli::cli_h1("Preparing plots and tables for MOBSTER fits.")
+  cat('\n')
+
+  mfits_plot = lapply(karyotypes, function(y) qc_mobster_plot(qc_clones[[y]]))
+
+  cna_plot = ggplot() + geom_blank()
+  timeable = c("CNA", names(qc_clones))
+
+  if(!is.null(cna)) cna_plot = CNAqc::plot_icon_CNA(cna_obj)
+
+  mfits_plot =  append(list(cna_plot), mfits_plot)
+  mfits_plot = ggpubr::ggarrange(plotlist = mfits_plot,
+                                 nrow = 1, ncol = length(mfits_plot), labels = timeable)
+
+
+  # Table of assignments
+  atab =  Reduce(bind_rows,
+                 lapply(mfits,
+                        function(x) {
+                          if (all(is.null(x)))
+                            return(NULL)
+
+                          mobster::Clusters(x$best)
+                        }))
+
+  return(
+    list(
+      figure =  mfits_plot,
+      assignments = atab,
+      qc = qc_table
+    ))
+
+}
