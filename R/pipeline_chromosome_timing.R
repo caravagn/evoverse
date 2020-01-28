@@ -63,18 +63,11 @@ pipeline_chromosome_timing = function(mutations,
   cna_obj = NULL
   if(!is.null(cna))
   {
-    cli::cli_process_start("Using CNA data to subset mutations.")
+    cli::cli_h1("Using CNA data to subset mutations.")
     cat("\n")
 
     cna_obj = CNAqc::init(mutations, cna, purity)
     mutations = cna_obj$snvs
-
-    # available_karyo = cna_obj$n_karyotype[timeable]
-    # available_karyo = available_karyo[!is.na(available_karyo)]
-    # timeable = names(available_karyo)
-
-    cat("\n")
-    cli::cli_process_done()
   }
 
   # Deconvolution function

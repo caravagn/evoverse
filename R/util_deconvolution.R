@@ -131,7 +131,7 @@ qc_deconvolution_mobster = function(x, type)
     }
 
     input = input  %>%
-      mutate(
+      dplyr::mutate(
         ratioM = abs((Mean_C1 / Mean_C2) - 2),
         ratioV = max(Variance_C1, Variance_C2) / min(Variance_C1, Variance_C2),
         ratioN = (max(N_C1, N_C2) + 1) / (min(N_C2, N_C1) + 1),
@@ -146,7 +146,7 @@ qc_deconvolution_mobster = function(x, type)
       qc_model = evoverse::qc_deconvolution_monoclonal
 
       input = input %>%
-        select(starts_with('sse'),
+        dplyr::select(starts_with('sse'),
                Variance_C1,
                reduced.entropy,
                entropy,
@@ -157,7 +157,7 @@ qc_deconvolution_mobster = function(x, type)
       qc_model = evoverse::qc_deconvolution_polyclonal
 
       input = input %>%
-        select(starts_with('sse'),
+        dplyr::select(starts_with('sse'),
                Variance_C1,
                Variance_C2,
                reduced.entropy,
