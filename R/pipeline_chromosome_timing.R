@@ -57,6 +57,8 @@ pipeline_chromosome_timing = function(mutations,
   if(!is.null(purity) & (purity > 1 | purity <= 0))
     stop("Purity must be in 0/1.")
 
+  # Add further extra checks on timeable, it cannot be anything...
+
   # Apply CNA mapping and retain only mappable mutations
   cna_obj = NULL
   if(!is.null(cna))
@@ -67,9 +69,9 @@ pipeline_chromosome_timing = function(mutations,
     cna_obj = CNAqc::init(mutations, cna, purity)
     mutations = cna_obj$snvs
 
-    available_karyo = cna_obj$n_karyotype[timeable]
-    available_karyo = available_karyo[!is.na(available_karyo)]
-    timeable = names(available_karyo)
+    # available_karyo = cna_obj$n_karyotype[timeable]
+    # available_karyo = available_karyo[!is.na(available_karyo)]
+    # timeable = names(available_karyo)
 
     cat("\n")
     cli::cli_process_done()
@@ -84,7 +86,7 @@ pipeline_chromosome_timing = function(mutations,
   )
 
   # Assemble tables, plots and perform QC
-  results = wrap_up_pipeline_mobster(mfits, qc_type = "T", cna_obj, karyotypes = karyotypes)
+  results = wrap_up_pipeline_mobster(mfits, qc_type = "T", cna_obj, karyotypes = timeable)
   results$mobster = mfits
   results$input = list(mutations = mutations, cna = cna, purity = purity)
 

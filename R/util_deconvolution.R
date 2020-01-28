@@ -202,6 +202,7 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
   cli::cli_h2("QC MOBSTER fits results")
   cat("\n")
 
+  # Extract the best fits that we are going to qc
   best_fits = lapply(mfits,
                      function(x){
                        if (x %>% is.null %>% all)
@@ -209,8 +210,10 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
                        x$best
                      })
 
+  # Perform qc
   qc =  lapply(best_fits, qc_deconvolution_mobster,  type = qc_type)
 
+  # Make a table for each used karyotype/ group/ whatever
   qc_table = lapply(qc %>% names,
                     function(x)
                     {
@@ -227,6 +230,7 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
   )
   qc_table = Reduce(bind_rows, qc_table)
 
+  # Report a YES/ NO kind of message
   for(l in seq(qc_table$QC))
   {
     if(qc_table$QC[l] == "PASS")
@@ -240,17 +244,19 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
   cli::cli_h1("Preparing plots and tables for MOBSTER fits.")
   cat('\n')
 
-  mfits_plot = lapply(karyotypes, function(y) qc_mobster_plot(qc_clones[[y]]))
+  # MOBSTER plots, sourrounded by a coloured box by QC
+  mfits_plot = lapply(karyotypes, function(y) qc_mobster_plot(qc[[y]]))
 
+  # If any, a CNA plot
   cna_plot = ggplot() + geom_blank()
   timeable = c("CNA", names(qc_clones))
 
   if(!is.null(cna)) cna_plot = CNAqc::plot_icon_CNA(cna_obj)
 
+  # Assembly as strip plot
   mfits_plot =  append(list(cna_plot), mfits_plot)
   mfits_plot = ggpubr::ggarrange(plotlist = mfits_plot,
                                  nrow = 1, ncol = length(mfits_plot), labels = timeable)
-
 
   # Table of assignments
   atab =  Reduce(bind_rows,
