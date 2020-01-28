@@ -69,104 +69,61 @@ pipeline_chromosome_timing = function(mutations,
     cli::cli_process_done()
   }
 
-  # Timeable ones, processed one by one with MOBSTER
-  # VAF required in 0/1
-  mfits = lapply(
-    timeable,
-    function(k)
-    {
-      cat("\n")
-      cli::cli_process_start("MOBSTER clustering of mutations with karyotype {.field {k}}")
-      cat("\n")
-
-      kmuts = mutations %>%
-        filter(karyotype == k, VAF > 0, VAF < 1)
-
-      if(nrow(kmuts) < min_muts) {
-        cli::cli_alert_warning("Less than {.value {min_muts}} mutations, skipping.")
-        cli::cli_process_failed()
-
-        return(NULL)
-      }
-
-      mfit = mobster::mobster_fit(kmuts, ...)
-
-      cat("\n")
-      cli::cli_process_done()
-
-      return(mfit)
-    }
+  # Deconvolution function
+  mfits = deconvolution_mobster_karyotypes(
+    mutations = mutations,
+    karyotypes = timeable,
+    min_muts = min_muts,
+    ...
   )
-  names(mfits) = timeable
 
-  # QC with the trained classifier evoverse::qc_timing_model
+  # QC with the trained classifier evoverse::qc_timing_model (type = 'T')
   cat("\n")
   cli::cli_rule("QC MOBSTER fits results")
 
-  qc_timing_model = evoverse::qc_timing_model
+  qc_clocks =  lapply(mfits, function(d) qc_deconvolution_mobster(d$best, type = 'T'))
 
-  qc_clocks = lapply(
-    lapply(timeable, function(x) mfits[[x]]$best),
-    qc_mobster_timing,
-    input = input,
-    model = qc_timing_model
-    )
-  names(qc_clocks) = timeable
+  qc_clocks_table = lapply(qc_clocks,
+                           function(x)
+                             bind_cols(
+                               mobster::to_string(x),
+                               data.frame(QC = x$QC, QC_prob = x$QC_prob, QC_type = x$QC_type)
+                               )
+                           )
+  qc_clocks_table = Reduce(bind_rows, qc_clocks_table)
 
-  qc_clocks = Reduce(bind_rows, qc_clocks)
-  qc_clocks$karyotype = timeable
-
-  for(l in seq(qc_clocks$QC))
+  for(l in seq(qc_clocks_table$QC))
   {
-    if(qc_clocks$QC[l] == "PASS")
-      cli::cli_alert_success("Karyotype {.field {qc_clocks$karyotype[l]}} QC PASS.")
+    if(qc_clocks_table$QC[l] == "PASS")
+      cli::cli_alert_success("Karyotype {.field {qc_clocks_table$karyotype[l]}} QC PASS. p = {.value {qc_clocks_table$QC_prob[l]}}")
     else
-      cli::cli_alert_danger("Karyotype {.field {red(qc_clocks$karyotype[l])}} QC FAIL.")
+      cli::cli_alert_danger("Karyotype {.field {red(qc_clocks_table$karyotype[l])}} QC FAIL. p = {.value {qc_clocks_table$QC_prob[l]}}")
   }
-
-  # Results: class and probability
-  class_of = pio:::nmfy(qc_clocks$karyotype, qc_clocks$QC)
-
-  p_of = pio:::nmfy(qc_clocks$karyotype, qc_clocks$QC_prob)
-  p_of = round(p_of, 3)
 
   # Produce plots
   cli::cli_process_start("Preparing plots and tables for MOBSTER fits.")
 
-  mfits_plot = lapply(names(mfits),
-                      function(y) {
-                        if(all(is.null(mfits[[y]]))) return(ggplot() + geom_blank())
+  mfits_plot = lapply(qc_clocks, function(y) qc_mobster_plot(y))
 
-                        qc = ifelse(class_of[y] == "FAIL",
-                               "indianred3",
-                               'forestgreen')
+  cna_plot = ggplot() + geom_blank()
+  timeable = c("WG", timeable)
 
-                        mobster::plot.dbpmm(mfits[[y]]$best) +
-                          labs(title = bquote("AUTO QC "~ .(class_of[y]) ~ p["PASS"] ~'='~ .(p_of[y]))) +
-                          theme(
-                            title = element_text(color = qc),
-                            panel.border = element_rect(colour = qc, fill = NA, size = 5)
-                            )
+  if(!is.null(cna)) cna_plot = CNAqc::plot_icon_CNA(cna_obj)
 
-                        })
-
-  if(!is.null(cna)) {
-    mfits_plot =  append(CNAqc::plot_icon_CNA(cna_obj), list(mfits_plot))
-    timeable = c("WG", timeable)
-  }
-
+  mfits_plot =  append(cna_plot, list(mfits_plot))
   mfits_plot = ggpubr::ggarrange(plotlist = mfits_plot,
                                  nrow = 1, ncol = length(mfits_plot), labels = timeable)
 
+
   # Table of assignments
-  atab =  lapply(mfits,
-                 function(x) {
-                   if(all(is.null(x))) return(NULL)
+  atab =  Reduce(bind_rows,
+                 lapply(mfits,
+                        function(x) {
+                          if (all(is.null(x)))
+                            return(NULL)
 
-                   mobster::Clusters(x$best)
-                 })
-
-  atab = Reduce(bind_rows, atab)
+                          mobster::Clusters(x$best)
+                        }))
 
   cli::cli_process_done()
 
@@ -180,42 +137,3 @@ pipeline_chromosome_timing = function(mutations,
     )
 }
 
-qc_mobster_timing = function(x, input, model)
-{
-  m = x
-
-  scores = data.frame(
-    tailTRUE = m$fit.tail,
-    reduced.entropy = m$scores$reduced.entropy,
-    entropy = m$scores$entropy,
-    stringsAsFactors = FALSE
-  )
-
-  # Fail
-  if(m$Kbeta == 1)
-  {
-    input = bind_cols(mobster:::to_string(m), scores)
-    input$QC <- 'FAIL'
-    input$QC_prob <- 0
-
-    return(input)
-  }
-
-
-
-  input = bind_cols(mobster:::to_string(m), scores)  %>%
-    mutate(ratioM = abs((Mean_C1 / Mean_C2) - 2),
-           ratioV = max(Variance_C1, Variance_C2) / min(Variance_C1, Variance_C2),
-           ratioN = (max(N_C1, N_C2) +1) / (min(N_C2, N_C1) + 1),
-           minpi = min(pi_C1, pi_C2))
-
-  fulldatasetprob <- model %>% predict(input, type = "response")
-  predicted.classes.fulldataset <- ifelse(fulldatasetprob > 0.5, "PASS", "FAIL")
-
-  input$QC <- predicted.classes.fulldataset
-  input$QC_prob <- fulldatasetprob
-
-
-
-  return(input)
-}

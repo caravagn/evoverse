@@ -66,9 +66,9 @@ write_tsv(L, "Parameters_fits.tsv")
 
 ##############################################################################################################################
 # Locally -- multinomial classifier
-
-# library(ggforce)
-# library(ggfortify)
+#
+#
+# LOGISTIC 3 classes
 
 parameters_models =  read_tsv("Parameters_fits.tsv")
 parameters_models$sample = gsub('\\./', '', parameters_models$sample)
@@ -85,6 +85,7 @@ annotated_fits =  read_tsv("training_set.tsv") %>%
       )
   ) %>%
   rename(Training_Set_QC = QC)
+
 
 # Covariates to predict
 parameters_models =
@@ -185,6 +186,14 @@ sum(test_partition$Training_Set_QC == test_partition$prediction)/nrow(test_parti
 # summarize accuracy
 
 
+
+
+##############################################################################################################################
+# Locally -- Binomial classifier
+#
+#
+# LOGISTIC 2 classes
+
 # Logistic classifier p vs NONp
 parameters_models =  read_tsv("Parameters_fits.tsv")
 parameters_models$sample = gsub('\\./', '', parameters_models$sample)
@@ -202,6 +211,8 @@ annotated_fits =  read_tsv("training_set.tsv") %>%
   ) %>%
   rename(Training_Set_QC = QC)
 
+annotated_fits$Training_Set_QC[annotated_fits$Training_Set_QC == 'r'] = 'p'
+
 # Covariates to predict
 parameters_models =
   parameters_models %>%
@@ -209,6 +220,7 @@ parameters_models =
     starts_with("Mean_C"),
     starts_with("Variance_C"),
     N,
+    tail,
     starts_with("N_C"),
     starts_with("pi_"),
     Shape_Tail,
@@ -225,39 +237,69 @@ parameters_models =
     karyotype
   )  %>%
   full_join(annotated_fits) %>%
-  filter(!is.na(Training_Set_QC))
-
-
-parameters_models %>%
-  ggplot(aes(x = sse_total, y = sse_0_0.1, color = Training_Set_QC)) +
-  geom_jitter() +
-  facet_wrap(~Training_Set_QC)
-
-parameters_models %>%
-  ggplot(aes(x = sse_0.1_0.2, y = sse_0_0.1, color = Training_Set_QC)) +
-  geom_jitter() +
-  facet_wrap(~Training_Set_QC)
+  filter(!is.na(Training_Set_QC), !is.na(sse_total))
 
 
 
-load('~/a.RData')
-M
+# dat = dat[complete.cases(dat %>% select(-Variance_C3)),]
 
-genes_list = mobster::cancer_genes_dnds$Martincorena_drivers
+dat <- parameters_models %>%
+  # select(
+  #   # karyotype,
+  #   sse_total, sse_0_0.1, sse_0.1_0.2,
+  #   Variance_C1, Variance_C2,
+  #   # Mean_C1, Mean_C2,
+  #   reduced.entropy, entropy, tail,
+  #   Training_Set_QC) %>%
+  select(starts_with('sse'), starts_with("Variance_C"), -Variance_C3,
+         reduced.entropy, tail, Training_Set_QC, entropy) %>%
+  mutate(Training_Set_QC = ifelse(Training_Set_QC == "p", 1, 0))
 
-mobster:::extract_dnds_input(x=M, genes_list = genes_list) %>% pull(gene)
+# dat$Variance_C2[is.na(dat$Variance_C2)] = Inf
 
-data('fit_example')
-x = fit_example$best
+do_train = function(dat)
+{
+  dat = dat[complete.cases(dat), ]
+  print(dat)
 
+  training.samples <- dat$Training_Set_QC %>%
+    caret::createDataPartition(p = 0.7, list = FALSE)
 
-x_domain = seq(0, 1, 0.001)
-domain = mobster::Clusters_denovo(x, data.frame(VAF = x_domain))
+  train.data  <- dat[training.samples, ]
+  test.data <- dat[-training.samples, ]
 
-densities = mobster:::template_density(
-  x,
-  x.axis = seq(1e-3, 1-1e-3, by = 1e-3), # Restricted for numerical errors
-  binwidth = 1e-3,
-  reduce = TRUE) %>%
-  spread(cluster, y)
+  model <- glm( Training_Set_QC ~., data = train.data, family = binomial)
+
+  # Summarize the model
+  summary(model)
+
+  # Make predictions
+  probabilities <- model %>% predict(test.data, type = "response")
+  predicted.classes <- ifelse(probabilities > 0.5, 1, 0)
+
+  # Model accuracy
+  ma = mean(predicted.classes == test.data$Training_Set_QC)
+  print(ma)
+
+  model
+}
+
+trained_monoclonal = dat %>% select(-ends_with('C2')) %>% do_train
+trained_biclonal = dat %>% do_train
+
+qc_deconvolution_classifier = list(
+  trained_monoclonal = trained_monoclonal,
+  trained_biclonal = trained_biclonal,
+  input = dat
+)
+
+saveRDS(object = qc_deconvolution_classifier, file = "logsitic_model_deconvolution.RData")
+
+qc_deconvolution_monoclonal = trained_monoclonal
+usethis::use_data(qc_deconvolution_monoclonal, overwrite = T)
+
+qc_deconvolution_polyclonal = trained_biclonal
+usethis::use_data(qc_deconvolution_polyclonal)
+
+saveRDS(object = qc_deconvolution_classifier, file = "logsitic_model_deconvolution.RData")
 
