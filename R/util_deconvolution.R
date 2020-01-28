@@ -199,9 +199,8 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj)
   cat("\n")
 
   best_fits = lapply(mfits,
-                     {
-                       function(x)
-                         if (x %>% is.null %>% all)
+                     function(x){
+                       if (x %>% is.null %>% all)
                            return(NULL)
                        x$best
                      })
