@@ -12,14 +12,14 @@ deconvolution_mobster_karyotypes = function(mutations,
     k = 'wg'
 
     cat("\n")
-    cli::cli_h1("MOBSTER clusterin ~ All mutations (fake karyotype label {.field {k}})")
+    cli::cli_h1("MOBSTER clustering ~ All mutations (fake karyotype label {.field {k}})")
     cat("\n")
 
     kmuts = mutations %>% filter(VAF > 0, VAF < 1)
 
     if (nrow(kmuts) < min_muts) {
       cli::cli_alert_warning("Less than {.value {min_muts}} mutations, skipping.")
-      cli::cli_process_failed()
+      # cli::cli_process_failed()
 
       return(NULL)
     }
@@ -39,14 +39,14 @@ deconvolution_mobster_karyotypes = function(mutations,
                  function(k)
                  {
                    cat("\n")
-                   cli::cli_h1("MOBSTER clusterin ~ Mutations with karyotype {.field {k}}")
+                   cli::cli_h1("MOBSTER clustering ~ Mutations with karyotype {.field {k}}")
 
                    kmuts = mutations %>%
                      filter(karyotype == k, VAF > 0, VAF < 1)
 
                    if (nrow(kmuts) < min_muts) {
                      cli::cli_alert_warning("Less than {.value {min_muts}} mutations, skipping.")
-                     cli::cli_process_failed()
+                     # cli::cli_process_failed()
 
                      return(NULL)
                    }
@@ -71,7 +71,11 @@ deconvolution_mobster_CCF = function(cna_obj,
   if (all(is.null(CCF_karyotypes)))
     stop("CCF_karyotypes should not be null")
 
-  cli::cli_process_start("Performing deconvolution with CCF from karyotypes {.field {CCF_karyotypes}}")
+  # cli::cli_process_start("Performing deconvolution with CCF from karyotypes {.field {CCF_karyotypes}}")
+
+  cat("\n")
+  cli::cli_h1("MOBSTER clustering ~ CCF for mutations with karyotype {.field {CCF_karyotypes}}")
+  cat("\n")
 
   if (!("CCF" %in% colnames(cna_obj$snvs)))
   {
@@ -93,7 +97,7 @@ deconvolution_mobster_CCF = function(cna_obj,
 
   if (nrow(mutations) < min_muts) {
     cli::cli_alert_warning("Less than {.value {min_muts}} mutations, skipping.")
-    cli::cli_process_failed()
+    # cli::cli_process_failed()
 
     return(list(fits = NULL, cna_obj = cna_obj))
   }
