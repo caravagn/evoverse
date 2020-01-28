@@ -71,7 +71,7 @@ pipeline_chromosome_timing = function(mutations,
   }
 
   # Deconvolution function
-  mfits = deconvolution_mobster_karyotypes(
+  mfits = evoverse:::deconvolution_mobster_karyotypes(
     mutations = mutations,
     karyotypes = timeable,
     min_muts = min_muts,
@@ -79,7 +79,7 @@ pipeline_chromosome_timing = function(mutations,
   )
 
   # Assemble tables, plots and perform QC
-  results = wrap_up_pipeline_mobster(mfits, qc_type = "T", cna_obj, karyotypes = timeable)
+  results = evoverse:::wrap_up_pipeline_mobster(mfits, qc_type = "T", cna_obj, karyotypes = timeable)
   results$mobster = mfits
   results$input = list(mutations = mutations, cna = cna, purity = purity)
 

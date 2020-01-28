@@ -211,7 +211,7 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
                      })
 
   # Perform qc
-  qc =  lapply(best_fits, qc_deconvolution_mobster,  type = qc_type)
+  qc =  lapply(best_fits, evoverse:::qc_deconvolution_mobster,  type = qc_type)
 
   # Make a table for each used karyotype/ group/ whatever
   qc_table = lapply(qc %>% names,
@@ -245,7 +245,7 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
   cat('\n')
 
   # MOBSTER plots, sourrounded by a coloured box by QC
-  mfits_plot = lapply(karyotypes, function(y) qc_mobster_plot(qc[[y]]))
+  mfits_plot = lapply(karyotypes, function(y) evoverse:::qc_mobster_plot(qc[[y]]))
 
   # If any, a CNA plot
   cna_plot = ggplot() + geom_blank()
