@@ -162,7 +162,7 @@ pipeline_subclonal_deconvolution = function(mutations,
     ncol = 1
     )
 
-  caption = paste0("", Sys.time(), '. evoverse pipeline for subclonal deconvolution. QC: ', results$)
+  caption = paste0("", Sys.time(), '. evoverse pipeline for subclonal deconvolution. QC: ', results$qc$QC_type[1])
 
   figure = ggpubr::annotate_figure(
     figure,
@@ -187,7 +187,7 @@ pipeline_subclonal_deconvolution = function(mutations,
     names(bmix_fits),
     function(x)
     {
-      if(all(is.null(x))) return(NULL)
+      if(all(is.null(bmix_fits[[x]]))) return(NULL)
       x = BMix::to_string(bmix_fits[[x]])
       colnames(x) = paste0("BMix_", colnames(x))
       x
