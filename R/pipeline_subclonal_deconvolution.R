@@ -90,7 +90,15 @@ pipeline_subclonal_deconvolution = function(mutations,
   }
 
   # Assemble tables, plots and perform QC
-  results = wrap_up_pipeline_mobster(mfits, qc_type = "D", cna_obj, karyotypes = karyotypes)
+  results = wrap_up_pipeline_mobster(mfits,
+                                     qc_type = "D",
+                                     cna_obj,
+                                     karyotypes =
+                                       ifelse(
+                                         !all(is.null(cna_obj)),
+                                         c(karyotypes, "CCF"),
+                                         karyotypes)
+                                     )
   results$mobster = mfits
   results$input = list(mutations = mutations, cna = cna, purity = purity)
 
@@ -130,7 +138,7 @@ pipeline_subclonal_deconvolution = function(mutations,
                         BMix::plot_clusters(x, x$input)
                       })
 
-  bmix_panel = ggarrange(plotlist = bmix_panel,
+  bmix_panel = ggarrange(plotlist = append(list(ggplot() + geom_blank()), bmix_panel),
                          nrow = 1,
                          ncol = length(bmix_panel),
                          labels = names(results$mobster))

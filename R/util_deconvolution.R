@@ -258,15 +258,43 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
   mfits_plot = ggpubr::ggarrange(plotlist = mfits_plot,
                                  nrow = 1, ncol = length(mfits_plot), labels = timeable)
 
-  # Table of assignments
+  # Table of assignments -- all karyotypes
   atab =  Reduce(bind_rows,
-                 lapply(mfits,
+                 lapply(best_fits[names(best_fits) != "CCF"],
                         function(x) {
                           if (all(is.null(x)))
                             return(NULL)
 
-                          mobster::Clusters(x$best)
+                          mobster::Clusters(x)
                         }))
+
+  # If there is CCF data out, take genome coordinates, merge the CCF value and cluster
+  if("CCF" %in% names(best_fits))
+  {
+    CCF_output = mobster::Clusters(best_fits$CCF) %>%
+      dplyr::select(chr, from, to, ref, alt, CCF, cluster) %>%
+      dplyr::rename(CCF_cluster = cluster)
+
+    atab = atab %>%
+      dplyr::full_join(CCF_output, by = c('chr', 'from', 'to', 'ref', 'alt'))
+
+    # bckg_color = RColorBrewer::brewer.pal(
+    #   n = length(atab$CCF_cluster %>% unique), name = 'Set1') %>%
+    #   alpha(.8)
+    #
+    # atab %>%
+    #   ggplot(
+    #     aes(x = CCF, fill = CCF_cluster)
+    #   ) +
+    #   geom_histogram(binwidth = 0.01, size = .1) +
+    #   scale_fill_manual(values = bckg_color) +
+    #   scale_color_brewer(palette = "Dark2") +
+    #   # scale_col
+    #   mobster:::my_ggplot_theme() +
+    #   facet_wrap(~cluster, ncol = 1)
+    #   #acet_grid(cluster ~ CCF_cluster)
+
+  }
 
   return(
     list(
