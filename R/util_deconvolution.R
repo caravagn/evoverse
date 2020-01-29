@@ -119,15 +119,17 @@ deconvolution_mobster_CCF = function(cna_obj,
     mutations = Reduce(bind_rows,
                        lapply(cna_obj$CCF_estimates, function(x)
                          x$mutations))
+
+    # We remove things that make no sense..
+    if(any(mutations$CCF/2 > 1))
+    {
+      cli::boxx(paste0("n = ", sum(mutations$CCF/2 > 1),  " mutations with CCF/2 > will be removed.")) %>% cat
+      cat('\n')
+    }
   }
   else
     cli::cli_alert_warning("Using CCF annotation already available in the data")
 
-  if(any(mutations$CCF/2 > 1)) {
-    cli::boxx(paste0("n = ", sum(mutations$CCF/2 > 1),  " mutations with CCF/2 > will be removed.")) %>% cat
-    cat('\n')
-
-  }
 
   mutations = mutations %>%
     mutate(VAF_raw = VAF,
