@@ -1,3 +1,39 @@
+deconvolution_prepare_input = function(mutations, cna, purity, N_max)
+{
+  # x must be a dataset for MOBSTER
+  if(!is.data.frame(mutations) & !is.matrix(mutations))
+    stop("mutations: Must use a dataset for MOBSTER!")
+
+  if(!is.null(cna) & !is.data.frame(cna) & !is.matrix(cna))
+    stop("cna: Must use a dataset for MOBSTER!")
+
+  if(!is.null(purity) & (purity > 1 | purity <= 0))
+    stop("Purity must be in 0/1.")
+
+  # Downsample data
+  if(mutations %>% nrow > N_max) {
+
+    cat('\n')
+    cli::boxx(paste0("n = ", mutations %>% nrow,  " mutations. n > ", N_max, " , downsampling input.")) %>% cat
+    cat('\n')
+
+    mutations = mutations %>% dplyr::sample_n(N_max)
+  }
+
+  # Apply CNA mapping and retain only mappable mutations
+  cna_obj = NULL
+  if(!is.null(cna))
+  {
+    cli::cli_h1("Found CNA calls, retaining mutations to CNAs.")
+    cat("\n")
+
+    cna_obj = CNAqc::init(mutations, cna, purity)
+    mutations = cna_obj$snvs
+  }
+
+  return(list(mutations = mutations, cna = cna, purity = purity, cna_obj = cna_obj))
+}
+
 deconvolution_mobster_karyotypes = function(mutations,
                                             karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                             min_muts = 50,
@@ -25,9 +61,6 @@ deconvolution_mobster_karyotypes = function(mutations,
     }
 
     mfit = mobster::mobster_fit(kmuts, ...)
-
-    cat("\n")
-    cli::cli_process_done()
 
     return(list(`wg` = mfit))
   }
@@ -199,114 +232,170 @@ qc_mobster_plot = function(x)
 
 wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes, add_CCF = FALSE)
 {
-  cat("\n")
-  cli::cli_h2("QC MOBSTER fits results")
-  cat("\n")
 
 
-  # Extract the best fits that we are going to qc
-  best_fits = lapply(mfits,
-                     function(x){
-                       if (x %>% is.null %>% all)
-                           return(NULL)
-                       x$best
-                     })
-
-  # Perform qc
-  qc =  lapply(best_fits, evoverse:::qc_deconvolution_mobster,  type = qc_type)
-
-  # Make a table for each used karyotype/ group/ whatever
-  qc_table = lapply(qc %>% names,
-                    function(x)
-                    {
-                      if(qc[[x]] %>% is.null %>% all) return(NULL)
-
-                      k = x
-                      x = qc[[x]]
-
-                      bind_cols(
-                        mobster::to_string(x),
-                        data.frame(QC = x$QC, QC_prob = x$QC_prob, QC_type = x$QC_type, karyotype = k, stringsAsFactors = F)
-                      )
-                    }
-  )
-  qc_table = Reduce(bind_rows, qc_table)
 
 
-  # Report a YES/ NO kind of message
-  for(l in seq(qc_table$QC))
-  {
-    if(qc_table$QC[l] == "PASS")
-      cli::cli_alert_success("Mutations in {.field {qc_table$karyotype[l]}} QC PASS. p = {.value {qc_table$QC_prob[l]}}")
-    else
-      cli::cli_alert_danger("Mutations in {.field {red(qc_table$karyotype[l])}} QC FAIL. p = {.value {qc_table$QC_prob[l]}}")
-  }
+}
 
-  # Produce plots
-  cat('\n')
-  cli::cli_h1("Preparing plots and tables for MOBSTER fits.")
-  cat('\n')
+
+# Assemble the plot
+deconvolution_plot_assembly = function(mobster_fits, cna_obj, bmix_fits, figure_caption, figure_title)
+{
+  groups = names(mobster_fits)
+  empty_panel = ggplot() + geom_blank()
 
   # MOBSTER plots, sourrounded by a coloured box by QC
-  mfits_plot = lapply(karyotypes[karyotypes != 'CCF'], function(y) evoverse:::qc_mobster_plot(qc[[y]]))
-  if(add_CCF) mfits_plot = append(mfits_plot, list(evoverse:::qc_mobster_plot(qc[['CCF']])))
+  mob_fits_plot = lapply(groups, function(y) evoverse:::qc_mobster_plot(mobster_fits[[y]]))
+
+  # CNA plot
+  cna_plot = empty_panel
+  if(!is.null(cna_obj)) cna_plot = CNAqc::plot_segments(cna_obj, circular = TRUE)
+
+  # Top panel: CNA + MOBSTER
+  mob_fits_plot =  append(list(cna_plot), mob_fits_plot)
+  figure = ggpubr::ggarrange(
+    plotlist = mob_fits_plot,
+    nrow = 1,
+    ncol = length(groups) + 1,
+    labels = c("CNA", groups)
+    )
+
+  # If there is a second panel, we put it below
+  if(!all(is.null(bmix_fits)))
+  {
+    # BMIx: a panel like the one above, same dimension
+    bmix_panel = lapply(
+      groups,
+      function(x)
+      {
+        if (all(is.null(bmix_fits[[x]]))) return(empty_panel)
+        BMix::plot_clusters(bmix_fits[[x]], bmix_fits[[x]]$input %>% dplyr::select(NV, DP))
+      })
+
+    bmix_panel = ggarrange(plotlist = append(list(empty_panel), bmix_panel),
+                           nrow = 1,
+                           ncol = length(groups) + 1,
+                           labels = c("", groups))
+
+    # Assemble a one-page final figure with both MOBSTER and BMix panels
+    figure =  ggpubr::ggarrange(
+      figure,
+      bmix_panel,
+      nrow = 2,
+      ncol = 1
+    )
+  }
+
+  # Set the figure title and captions
+  figure = ggpubr::annotate_figure(
+    figure,
+    top = ggpubr::text_grob(bquote(bold("Dataset. ") ~ figure_title), hjust = 0, x = 0, size = 15),
+    bottom = ggpubr::text_grob(bquote(figure_caption), hjust = 0, x = 0, size = 8)
+  )
+
+  return(figure)
+}
 
 
-  # If any, a CNA plot
-  cna_plot = ggplot() + geom_blank()
-  timeable = c("CNA", names(qc))
+# Extract a table of mutations assignments: MOBSTER + BMix fits
+deconvolution_table_assignments = function(mobster_fits, bmix_fits)
+{
+  groups = names(mobster_fits)
 
-  if(!is.null(cna_obj)) cna_plot = CNAqc::plot_icon_CNA(cna_obj)
+  # First, gather all VAF-based clusters
+  summary_table = Reduce(bind_rows,
+                         lapply(groups[groups != 'CCF'],
+                                function(x)
+                                {
+                                  # If there is no fit -> empty table
+                                  if (all(is.null(mobster_fits[[x]])))
+                                    return(NULL)
 
-  # Assembly as strip plot
-  mfits_plot =  append(list(cna_plot), mfits_plot)
-  mfits_plot = ggpubr::ggarrange(plotlist = mfits_plot,
-                                 nrow = 1, ncol = length(mfits_plot), labels = timeable)
+                                  # Otherwise take the VAF clustering for this karyotype
+                                  mobster_tab = mobster::Clusters(mobster_fits[[x]]) %>%
+                                    dplyr::mutate(karyotype = x)
 
-  # Table of assignments -- all karyotypes
-  atab =  Reduce(bind_rows,
-                 lapply(best_fits[names(best_fits) != "CCF"],
-                        function(x) {
-                          if (all(is.null(x)))
-                            return(NULL)
+                                  if(all(is.null(bmix_fits[[x]]))) return(mobster_tab)
 
-                          mobster::Clusters(x)
-                        }))
+                                  bmix_tab = BMix::Clusters(bmix_fits[[x]], bmix_fits[[x]]$input) %>%
+                                    dplyr::select(chr, from, to, ref, alt, karyotype, cluster)
+
+                                  mobster_tab %>%
+                                    dplyr::full_join(bmix_tab,
+                                                     by = c('chr', 'from', 'to', 'ref', 'alt', 'karyotype')) %>%
+                                    dplyr::rename(cluster = cluster.x, BMix_cluster = cluster.y) %>%
+                                    dplyr::select(-ends_with('.y'))
+                                }))
 
   # If there is CCF data out, take genome coordinates, merge the CCF value and cluster
-  if("CCF" %in% names(best_fits))
+  if ("CCF" %in% groups)
   {
-    CCF_output = mobster::Clusters(best_fits$CCF) %>%
+    mCCF_output = mobster::Clusters(mobster_fits$CCF) %>%
       dplyr::select(chr, from, to, ref, alt, CCF, cluster) %>%
       dplyr::rename(CCF_cluster = cluster)
 
-    atab = atab %>%
-      dplyr::full_join(CCF_output, by = c('chr', 'from', 'to', 'ref', 'alt'))
+    summary_table = summary_table %>%
+      dplyr::full_join(mCCF_output, by = c('chr', 'from', 'to', 'ref', 'alt'))
 
-    # bckg_color = RColorBrewer::brewer.pal(
-    #   n = length(atab$CCF_cluster %>% unique), name = 'Set1') %>%
-    #   alpha(.8)
-    #
-    # atab %>%
-    #   ggplot(
-    #     aes(x = CCF, fill = CCF_cluster)
-    #   ) +
-    #   geom_histogram(binwidth = 0.01, size = .1) +
-    #   scale_fill_manual(values = bckg_color) +
-    #   scale_color_brewer(palette = "Dark2") +
-    #   # scale_col
-    #   mobster:::my_ggplot_theme() +
-    #   facet_wrap(~cluster, ncol = 1)
-    #   #acet_grid(cluster ~ CCF_cluster)
+    bCCF_output = BMix::Clusters(bmix_fits$CCF, bmix_fits$CCF$input) %>%
+      dplyr::select(chr, from, to, ref, alt, cluster) %>%
+      dplyr::rename(CCF_BMix_cluster = cluster)
 
+    summary_table = summary_table %>%
+      dplyr::full_join(bCCF_output, by = c('chr', 'from', 'to', 'ref', 'alt'))
   }
 
-  return(
-    list(
-      figure =  mfits_plot,
-      assignments = atab,
-      qc = qc_table
-    ))
-
+  return(summary_table)
 }
+
+# Extract a table of summary stats: MOBSTER + BMix fits
+deconvolution_table_summary = function(mobster_fits, bmix_fits)
+{
+  groups = names(mobster_fits)
+
+  summary_table = lapply(
+    groups,
+    function(k)
+    {
+      # No Mobster, no table
+      if(mobster_fits[[k]] %>% is.null %>% all) return(NULL)
+
+      x = mobster_fits[[k]]
+
+      # Mobster summary, plus QC results
+      m_tab = bind_cols(
+        mobster::to_string(x),
+        data.frame(QC = x$QC, QC_prob = x$QC_prob, QC_type = x$QC_type, karyotype = k, stringsAsFactors = F)
+      )
+
+      if(all(is.null(bmix_fits[[k]]))) return(m_tab)
+
+      # BMix summary
+      b_tab = BMix::to_string(bmix_fits[[k]])
+      colnames(b_tab) = paste0('BMix_', colnames(b_tab))
+
+      return(cbind(m_tab, b_tab) %>% as_tibble())
+      })
+
+  return(Reduce(bind_rows, summary_table))
+}
+
+
+# bckg_color = RColorBrewer::brewer.pal(
+#   n = length(atab$CCF_cluster %>% unique), name = 'Set1') %>%
+#   alpha(.8)
+#
+# atab %>%
+#   ggplot(
+#     aes(x = CCF, fill = CCF_cluster)
+#   ) +
+#   geom_histogram(binwidth = 0.01, size = .1) +
+#   scale_fill_manual(values = bckg_color) +
+#   scale_color_brewer(palette = "Dark2") +
+#   # scale_col
+#   mobster:::my_ggplot_theme() +
+#   facet_wrap(~cluster, ncol = 1)
+#   #acet_grid(cluster ~ CCF_cluster)
+
 

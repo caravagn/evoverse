@@ -47,30 +47,18 @@ pipeline_chromosome_timing = function(mutations,
   pio::pioHdr("Evoverse", italic('Copy Number timing pipeline'))
   cat('\n')
 
-  # x must be a dataset for MOBSTER
-  if(!is.data.frame(mutations) & !is.matrix(mutations))
-    stop("mutations: Must use a dataset for MOBSTER!")
+  #
+  # 1) Check input data, subset by CNA data if available
+  #
+  prepared_input = deconvolution_prepare_input(mutations, cna, purity, N_max)
+  mutations = prepared_input$mutations
+  cna = prepared_input$cna
+  cna_obj = prepared_input$cna_obj
+  purity = prepared_input$purity
 
-  if(!is.null(cna) & !is.data.frame(cna) & !is.matrix(cna))
-    stop("cna: Must use a dataset for MOBSTER!")
-
-  if(!is.null(purity) & (purity > 1 | purity <= 0))
-    stop("Purity must be in 0/1.")
-
-  # Add further extra checks on timeable, it cannot be anything...
-
-  # Apply CNA mapping and retain only mappable mutations
-  cna_obj = NULL
-  if(!is.null(cna))
-  {
-    cli::cli_h1("Using CNA data to subset mutations.")
-    cat("\n")
-
-    cna_obj = CNAqc::init(mutations, cna, purity)
-    mutations = cna_obj$snvs
-  }
-
-  # Deconvolution function
+  #
+  # 2) MOBSTER analysis of karyotypes
+  #
   mfits = evoverse:::deconvolution_mobster_karyotypes(
     mutations = mutations,
     karyotypes = timeable,
@@ -78,11 +66,65 @@ pipeline_chromosome_timing = function(mutations,
     ...
   )
 
-  # Assemble tables, plots and perform QC
-  results = evoverse:::wrap_up_pipeline_mobster(mfits, qc_type = "T", cna_obj, karyotypes = timeable)
-  results$mobster = mfits
-  results$input = list(mutations = mutations, cna = cna, purity = purity)
+  # Extract the best fits that we are going to qc
+  mobster_best_fits = lapply(mobster_fits,
+                             function(x){
+                               if (x %>% is.null %>% all)
+                                 return(NULL)
+                               x$best
+                             })
 
+  # QC
+  mobster_best_fits =  lapply(mobster_best_fits, evoverse:::qc_deconvolution_mobster, type = 'T')
+
+  # Report a message from QC
+  for(x in karyotypes)
+  {
+    if (mobster_best_fits[[x]] %>% is.null %>% all)
+      cli::cli_alert_warning("{.field {x}}: not analysed.")
+    else
+    {
+      if(mobster_best_fits[[x]]$QC == "PASS")
+        cli::cli_alert_success("{.field {x}}: QC PASS. p = {.value {mobster_best_fits[[x]]$QC_prob}}")
+      else
+        cli::cli_alert_danger("{.field {red(x)}}: QC FAIL. p = {.value {mobster_best_fits[[x]]$QC_prob}}")
+    }
+  }
+
+  #
+  # 4) Results assembly
+  #
+  cat("\n")
+  cli::cli_h2("Pipeline results assembly")
+  cat("\n")
+
+  results = list()
+
+  # Fits
+  results$mobster = mobster_fits
+
+  # Input
+  results$input = list(
+    mutations = mutations,
+    cna = cna,
+    purity = purity,
+    cnaqc = cna_obj)
+
+  # Plot and tables
+  results$table$summary = deconvolution_table_summary(mobster_best_fits, bmix_fits = NULL)
+
+  # Clustering assignments
+  results$table$clustering_assignments = deconvolution_table_assignments(mobster_best_fits, bmix_fits = NULL)
+
+  results$figure = deconvolution_plot_assembly(
+    mobster_best_fits,
+    cna_obj,
+    bmix_best_fits = NULL,
+    figure_caption = paste0("", Sys.time(), '. evoverse pipeline for chromosome timing. QC: ', results$table$summary$QC_type[1]),
+    figure_title = description)
+
+  # Data id
+  results$description = description
 
   return(results)
 }
