@@ -1,10 +1,3 @@
-#
-# cna = CNAqc::example_dataset_CNAqc$cna
-# mutations = CNAqc::example_dataset_CNAqc$snvs
-# purity = CNAqc::example_dataset_CNAqc$purity
-
-# x = chromosome_timing_pipeline(mutations, cna = cna, purity = purity, auto_setup = 'FAST')
-
 #' Pipeline to time aneuploidy with MOBSTER.
 #'
 #' @description
@@ -41,10 +34,12 @@ pipeline_chromosome_timing = function(mutations,
                                       purity = NULL,
                                       timeable = c('2:0', '2:1', '2:2'),
                                       min_muts = 50,
+                                      description = "Chromosomal timing dataset (MOBSTER)",
+                                      N_max = 15000,
                                       ...
                                       )
 {
-  pio::pioHdr("Evoverse", italic('Copy Number timing pipeline'))
+  pio::pioHdr("Evoverse", italic('Chromosomal timing pipeline'))
   cat('\n')
 
   #
@@ -74,6 +69,10 @@ pipeline_chromosome_timing = function(mutations,
                                x$best
                              })
 
+  cat("\n")
+  cli::cli_h2("MOBSTER QC")
+  cat("\n")
+
   # QC
   mobster_best_fits =  lapply(mobster_best_fits, evoverse:::qc_deconvolution_mobster, type = 'T')
 
@@ -95,7 +94,7 @@ pipeline_chromosome_timing = function(mutations,
   # 4) Results assembly
   #
   cat("\n")
-  cli::cli_h2("Pipeline results assembly")
+  cli::cli_process_start("Pipeline results assembly")
   cat("\n")
 
   results = list()
@@ -125,6 +124,9 @@ pipeline_chromosome_timing = function(mutations,
 
   # Data id
   results$description = description
+
+  cli::cli_process_done()
+
 
   return(results)
 }

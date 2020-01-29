@@ -13,7 +13,6 @@ deconvolution_prepare_input = function(mutations, cna, purity, N_max)
   # Downsample data
   if(mutations %>% nrow > N_max) {
 
-    cat('\n')
     cli::boxx(paste0("n = ", mutations %>% nrow,  " mutations. n > ", N_max, " , downsampling input.")) %>% cat
     cat('\n')
 
@@ -24,7 +23,7 @@ deconvolution_prepare_input = function(mutations, cna, purity, N_max)
   cna_obj = NULL
   if(!is.null(cna))
   {
-    cli::cli_h1("Found CNA calls, retaining mutations to CNAs.")
+    cli::cli_h1("Found CNA calls, retaining mutations mapping to available segments")
     cat("\n")
 
     cna_obj = CNAqc::init(mutations, cna, purity)
@@ -48,7 +47,7 @@ deconvolution_mobster_karyotypes = function(mutations,
     k = 'wg'
 
     cat("\n")
-    cli::cli_h1("MOBSTER clustering ~ All mutations (fake karyotype label {.field {k}})")
+    cli::cli_h1("MOBSTER clustering all mutations (no subsetting by karyotype)")
     cat("\n")
 
     kmuts = mutations %>% filter(VAF > 0, VAF < 1)
@@ -72,7 +71,8 @@ deconvolution_mobster_karyotypes = function(mutations,
                  function(k)
                  {
                    cat("\n")
-                   cli::cli_h1("MOBSTER clustering ~ Mutations with karyotype {.field {k}}")
+                   cli::cli_h1("MOBSTER clustering mutations with karyotype {.field {k}}")
+                   cat("\n")
 
                    kmuts = mutations %>%
                      filter(karyotype == k, VAF > 0, VAF < 1)
@@ -107,7 +107,7 @@ deconvolution_mobster_CCF = function(cna_obj,
   # cli::cli_process_start("Performing deconvolution with CCF from karyotypes {.field {CCF_karyotypes}}")
 
   cat("\n")
-  cli::cli_h1("MOBSTER clustering ~ CCF for mutations with karyotype {.field {CCF_karyotypes}}")
+  cli::cli_h1("MOBSTER clustering CCF for mutations with karyotype(s) {.field {CCF_karyotypes}}")
   cat("\n")
 
   if (!("CCF" %in% colnames(cna_obj$snvs)))
@@ -122,6 +122,12 @@ deconvolution_mobster_CCF = function(cna_obj,
   }
   else
     cli::cli_alert_warning("Using CCF annotation already available in the data")
+
+  if(any(mutations$CCF/2 > 1)) {
+    cli::boxx(paste0("n = ", sum(mutations$CCF/2 > 1),  " mutations with CCF/2 > will be removed.")) %>% cat
+    cat('\n')
+
+  }
 
   mutations = mutations %>%
     mutate(VAF_raw = VAF,
@@ -230,14 +236,6 @@ qc_mobster_plot = function(x)
           ))
 }
 
-wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes, add_CCF = FALSE)
-{
-
-
-
-
-}
-
 
 # Assemble the plot
 deconvolution_plot_assembly = function(mobster_fits, cna_obj, bmix_fits, figure_caption, figure_title)
@@ -290,8 +288,8 @@ deconvolution_plot_assembly = function(mobster_fits, cna_obj, bmix_fits, figure_
   # Set the figure title and captions
   figure = ggpubr::annotate_figure(
     figure,
-    top = ggpubr::text_grob(bquote(bold("Dataset. ") ~ figure_title), hjust = 0, x = 0, size = 15),
-    bottom = ggpubr::text_grob(bquote(figure_caption), hjust = 0, x = 0, size = 8)
+    top = ggpubr::text_grob(bquote(bold("Dataset. ") ~ .(figure_title)), hjust = 0, x = 0, size = 15),
+    bottom = ggpubr::text_grob(bquote(.(figure_caption)), hjust = 0, x = 0, size = 8)
   )
 
   return(figure)

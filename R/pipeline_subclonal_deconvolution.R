@@ -1,12 +1,3 @@
-#
-# cna = CNAqc::example_dataset_CNAqc$cna
-# mutations = CNAqc::example_dataset_CNAqc$snvs
-# purity = CNAqc::example_dataset_CNAqc$purity
-
-# target_k = c("1:0", '1:1', '2:1', '2:2')
-# target_k = target_k[cna_obj$ploidy]
-# x = chromosome_timing_pipeline(mutations, cna = cna, purity = purity, auto_setup = 'FAST')
-
 #' Pipeline to perform subclonal deconvolution with MOBSTER.
 #'
 #' @description
@@ -37,7 +28,7 @@
 #' purity = CNAqc::example_dataset_CNAqc$purity
 #'
 #' # We use auto_setup = 'FAST' to speed up the analysis
-#' x = pipeline_subclonal_deconvolution(mutations, cna = cna, purity = purity,  N_max = 1500, auto_setup = 'FAST')
+#' x = pipeline_subclonal_deconvolution(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
 #' print(x)
 pipeline_subclonal_deconvolution = function(mutations,
                                       cna = NULL,
@@ -45,7 +36,7 @@ pipeline_subclonal_deconvolution = function(mutations,
                                       karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                       CCF_karyotypes = karyotypes,
                                       min_muts = 50,
-                                      description = "MOBSTER deconvolution",
+                                      description = "Subclonal deconvolution dataset (MOBSTER + BMix)",
                                       N_max = 15000,
                                       ...
 )
@@ -77,11 +68,15 @@ pipeline_subclonal_deconvolution = function(mutations,
   {
     if(is.null(cna_obj)) stop("You asked for CCF analysis but did not provide CNA data (cna = NULL), cannot compute.")
 
-    CCF_fit = deconvolution_mobster_CCF(cna_obj, CCF_karyotypes = CCF_karyotypes, min_muts = min_muts)
+    CCF_fit = deconvolution_mobster_CCF(cna_obj, CCF_karyotypes = CCF_karyotypes, min_muts = min_muts, ...)
     cna_obj = CCF_fit$cna_obj
 
     mobster_fits = append(mobster_fits, list(`CCF` = CCF_fit$fits))
   }
+
+  cat("\n")
+  cli::cli_h2("MOBSTER QC")
+  cat("\n")
 
   # Extract the best fits that we are going to qc
   mobster_best_fits = lapply(mobster_fits,
@@ -115,6 +110,11 @@ pipeline_subclonal_deconvolution = function(mutations,
   {
     if(all(is.null(mobster_best_fits[[k]]))) return(NULL)
 
+    cat("\n")
+    cli::cli_h1("BMix clustering non-tail mutations with karyotype {.field {k}}")
+    cat("\n")
+
+
     non_tail = mobster::Clusters(mobster_best_fits[[k]]) %>%
       dplyr::filter(cluster != "Tail") %>%
       data.frame
@@ -138,7 +138,7 @@ pipeline_subclonal_deconvolution = function(mutations,
   # 4) Results assembly
   #
   cat("\n")
-  cli::cli_h2("Pipeline results assembly")
+  cli::cli_process_start("Pipeline results assembly")
   cat("\n")
 
   results = list()
@@ -170,6 +170,8 @@ pipeline_subclonal_deconvolution = function(mutations,
 
   # Data id
   results$description = description
+
+  cli::cli_process_done()
 
   return(results)
 }
