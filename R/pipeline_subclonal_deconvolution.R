@@ -168,6 +168,7 @@ pipeline_subclonal_deconvolution = function(mutations,
     figure,
     top = ggpubr::text_grob(bquote(bold("Dataset. ") ~ description), hjust = 0, x = 0),
     bottom = ggpubr::text_grob(bquote(caption, hjust = 0, x = 0, size = 8))
+    )
 
   results$figure = figure
   results$description = description
