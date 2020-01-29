@@ -121,7 +121,7 @@ deconvolution_mobster_CCF = function(cna_obj,
                          x$mutations))
 
     # We remove things that make no sense..
-    if(any(mutations$CCF/2 > 1))
+    if(any(mutations$CCF/2 > 1, na.rm = T))
     {
       cli::boxx(paste0("n = ", sum(mutations$CCF/2 > 1),  " mutations with CCF/2 > will be removed.")) %>% cat
       cat('\n')
