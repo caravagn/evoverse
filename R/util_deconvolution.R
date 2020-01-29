@@ -108,6 +108,7 @@ deconvolution_mobster_CCF = function(cna_obj,
   ))
 }
 
+# Perform QC of a MOBSTER fit
 qc_deconvolution_mobster = function(x, type)
 {
   qc_model = NULL
@@ -172,7 +173,7 @@ qc_deconvolution_mobster = function(x, type)
     stop("QC available: (T) Timing, (D) Deconvolution.")
 
   # Make predictions
-  x$QC_prob <- qc_model %>% predict(input, type = "response")
+  x$QC_prob <- qc_model %>% predict(input, type = "response") %>% round(digits = 3)
   x$QC <- ifelse(x$QC_prob > 0.5, "PASS", "FAIL")
 
   return(x)
@@ -186,7 +187,7 @@ qc_mobster_plot = function(x)
   qc = ifelse(x$QC == "FAIL", "indianred3", 'forestgreen')
 
   mobster::plot.dbpmm(x) +
-    labs(title = bquote("AUTO QC " ~ .(x$QC) ~ p["PASS"] ~
+    labs(title = bquote("QC " ~ .(x$QC) ~ p["PASS"] ~
                           '=' ~ .(x$QC_prob))) +
     theme(title = element_text(color = qc),
           panel.border = element_rect(
@@ -196,11 +197,12 @@ qc_mobster_plot = function(x)
           ))
 }
 
-wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
+wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes, add_CCF = FALSE)
 {
   cat("\n")
   cli::cli_h2("QC MOBSTER fits results")
   cat("\n")
+
 
   # Extract the best fits that we are going to qc
   best_fits = lapply(mfits,
@@ -230,6 +232,7 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
   )
   qc_table = Reduce(bind_rows, qc_table)
 
+
   # Report a YES/ NO kind of message
   for(l in seq(qc_table$QC))
   {
@@ -245,7 +248,9 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
   cat('\n')
 
   # MOBSTER plots, sourrounded by a coloured box by QC
-  mfits_plot = lapply(karyotypes, function(y) evoverse:::qc_mobster_plot(qc[[y]]))
+  mfits_plot = lapply(karyotypes[karyotypes != 'CCF'], function(y) evoverse:::qc_mobster_plot(qc[[y]]))
+  if(add_CCF) mfits_plot = append(mfits_plot, list(evoverse:::qc_mobster_plot(qc[['CCF']])))
+
 
   # If any, a CNA plot
   cna_plot = ggplot() + geom_blank()

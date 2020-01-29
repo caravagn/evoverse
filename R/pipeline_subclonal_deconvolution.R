@@ -52,6 +52,10 @@ pipeline_subclonal_deconvolution = function(mutations,
   pio::pioHdr("Evoverse", italic('Subclonal deconvolution pipeline'))
   cat('\n')
 
+  #
+  # 1) Check input data, subset by CNA data if available
+  #
+
   # x must be a dataset for MOBSTER
   if(!is.data.frame(mutations) & !is.matrix(mutations))
     stop("mutations: Must use a dataset for MOBSTER!")
@@ -73,7 +77,9 @@ pipeline_subclonal_deconvolution = function(mutations,
     mutations = cna_obj$snvs
   }
 
-  # For NULL karyotypes, this analyses all the genome
+  #
+  # 2) MOBSTER analysis of karyotypes and CCF if required
+  #
   mfits = deconvolution_mobster_karyotypes(
       mutations = mutations,
       karyotypes = karyotypes,
@@ -83,26 +89,29 @@ pipeline_subclonal_deconvolution = function(mutations,
 
   if(!is.null(CCF_karyotypes) | !is.na(CCF_karyotypes))
   {
+    if(is.null(cna_obj)) stop("You asked for CCF analysis but did not provide CNA data (cna = NULL), cannot compute.")
+
     CCF_fit = deconvolution_mobster_CCF(cna_obj, CCF_karyotypes = CCF_karyotypes, min_muts = min_muts)
     cna_obj = CCF_fit$cna_obj
 
     mfits = append(mfits, list(`CCF` = CCF_fit$fits))
   }
 
-  # Assemble tables, plots and perform QC
-  results = wrap_up_pipeline_mobster(mfits,
+  #
+  # 3) Wrap MOBSTER results for all this fits, apply QC
+  #
+  results =  wrap_up_pipeline_mobster(mfits,
                                      qc_type = "D",
                                      cna_obj,
-                                     karyotypes =
-                                       ifelse(
-                                         !all(is.null(cna_obj)),
-                                         c(karyotypes, "CCF"),
-                                         karyotypes)
+                                     karyotypes = karyotypes,
+                                     add_CCF = ("CCF" %in% names(mfits))
                                      )
   results$mobster = mfits
-  results$input = list(mutations = mutations, cna = cna, purity = purity)
+  results$input = list(mutations = mutations, cna = cna, purity = purity, cnaqc_obj = cna_obj)
 
-  # Now run BMix on each biopsy -- Binomial model
+  #
+  # 4) BMix -- Binomial model -- on each karyotype non-tail mutations
+  #
   runner = function(k)
   {
     if(all(is.null(results$mobster[[k]]))) return(NULL)
@@ -140,10 +149,12 @@ pipeline_subclonal_deconvolution = function(mutations,
 
   bmix_panel = ggarrange(plotlist = append(list(ggplot() + geom_blank()), bmix_panel),
                          nrow = 1,
-                         ncol = length(bmix_panel),
+                         ncol = length(bmix_panel) + 1,
                          labels = names(results$mobster))
 
-  # Combine both plots
+  #
+  # 5) Assemble a one-page final figure with both MOBSTER and BMix panels
+  #
   figure =  ggpubr::ggarrange(
     results$figure,
     bmix_panel,
@@ -151,10 +162,39 @@ pipeline_subclonal_deconvolution = function(mutations,
     ncol = 1
     )
 
-  figure = ggpubr::annotate_figure(figure, top = description)
+  caption = paste0("", Sys.time(), '. evoverse pipeline for subclonal deconvolution. QC: ', results$)
+
+  figure = ggpubr::annotate_figure(
+    figure,
+    top = ggpubr::text_grob(bquote(bold("Dataset. ") ~ description), hjust = 0, x = 0),
+    bottom = ggpubr::text_grob(bquote(caption, hjust = 0, x = 0, size = 8))
 
   results$figure = figure
   results$description = description
+
+  #
+  # 6) Generate tables
+  #
+
+  # QC table for mobster
+  results$tables$qc_mobster = results$qc
+  results$qc = NULL
+
+  # Clustering assignments table contain both MOBSTER and BMix results for the same sample
+  results$tables$mobster_assignments = results$assignments
+
+  bmix_assignments = lapply(
+    names(bmix_fits),
+    function(x)
+    {
+      if(all(is.null(x))) return(NULL)
+      x = BMix::to_string(bmix_fits[[x]])
+      colnames(x) = paste0("BMix_", colnames(x))
+      x
+    })
+
+
+  results$assignments = results$qc = NULL
 
   return(results)
 }
