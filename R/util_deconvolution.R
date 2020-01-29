@@ -276,3 +276,4 @@ wrap_up_pipeline_mobster = function(mfits, qc_type, cna_obj, karyotypes)
     ))
 
 }
+

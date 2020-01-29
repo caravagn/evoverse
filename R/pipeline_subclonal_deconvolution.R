@@ -44,6 +44,7 @@ pipeline_subclonal_deconvolution = function(mutations,
                                       karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                       CCF_karyotypes = karyotypes,
                                       min_muts = 50,
+                                      description = "MOBSTER deconvolution",
                                       ...
 )
 {
@@ -82,7 +83,7 @@ pipeline_subclonal_deconvolution = function(mutations,
 
   if(!is.null(CCF_karyotypes) | !is.na(CCF_karyotypes))
   {
-    CCF_fit = deconvolution_mobster_CCF(cna_obj, CCF_karyotypes = CCF_karyotypes, min_muts = min_muts, ...)
+    CCF_fit = deconvolution_mobster_CCF(cna_obj, CCF_karyotypes = CCF_karyotypes, min_muts = min_muts)
     cna_obj = CCF_fit$cna_obj
 
     mfits = append(mfits, list(`CCF` = CCF_fit$fits))
@@ -93,6 +94,59 @@ pipeline_subclonal_deconvolution = function(mutations,
   results$mobster = mfits
   results$input = list(mutations = mutations, cna = cna, purity = purity)
 
+  # Now run BMix on each biopsy -- Binomial model
+  runner = function(k)
+  {
+    if(all(is.null(results$mobster[[k]]))) return(NULL)
+
+    non_tail = mobster::Clusters(results$mobster[[k]]$best) %>%
+      dplyr::filter(cluster != "Tail") %>%
+      dplyr::select(NV, DP) %>%
+      data.frame
+
+    Kbeta = min(results$mobster[[k]]$best$Kbeta * 2, 4)
+
+    fit_readcounts = BMix::bmixfit(
+      non_tail,
+      K.BetaBinomials = 0,
+      K.Binomials = 1:Kbeta,
+      samples = 3)
+
+    fit_readcounts$input = non_tail
+    fit_readcounts
+  }
+
+  bmix_fits = lapply(names(results$mobster), runner)
+  names(bmix_fits) = names(results$mobster)
+
+  results$bmix = bmix_fits
+
+  # Set a panel like the one above, same dimension
+  bmix_panel = lapply(bmix_fits,
+                      function(x)
+                      {
+                        if (all(is.null(x)))
+                          return(ggplot() + geom_blank())
+                        BMix::plot_clusters(x, x$input)
+                      })
+
+  bmix_panel = ggarrange(plotlist = bmix_panel,
+                         nrow = 1,
+                         ncol = length(bmix_panel),
+                         labels = names(results$mobster))
+
+  # Combine both plots
+  figure =  ggpubr::ggarrange(
+    results$figure,
+    bmix_panel,
+    nrow = 2,
+    ncol = 1
+    )
+
+  figure = ggpubr::annotate_figure(figure, top = description)
+
+  results$figure = figure
+  results$description = description
 
   return(results)
 }

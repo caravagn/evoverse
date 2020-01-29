@@ -4,15 +4,10 @@
 \alias{pipeline_subclonal_deconvolution}
 \title{Pipeline to perform subclonal deconvolution with MOBSTER.}
 \usage{
-pipeline_subclonal_deconvolution(
-  mutations,
-  cna = NULL,
-  purity = NULL,
+pipeline_subclonal_deconvolution(mutations, cna = NULL, purity = NULL,
   karyotypes = c("1:0", "1:1", "2:0", "2:1", "2:2"),
-  CCF_karyotypes = karyotypes,
-  min_muts = 50,
-  ...
-)
+  CCF_karyotypes = karyotypes, min_muts = 50,
+  description = "MOBSTER deconvolution", ...)
 }
 \arguments{
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
@@ -27,9 +22,6 @@ pipeline_subclonal_deconvolution(
 
 \item{timeable}{Karyotypes that can be timed, expressed as "Major:minor" notation. Default
 are the following states \code{timeable = c('2:0', '2:1', '2:2')}.}
-}
-\value{
-
 }
 \description{
 For a list of input mutations, CNA and purity data from a tumour sample,

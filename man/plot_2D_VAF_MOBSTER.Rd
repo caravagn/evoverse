@@ -4,16 +4,19 @@
 \alias{plot_2D_VAF_MOBSTER}
 \title{Plot a 2-dimensional VAF scatterplot, augmented with `MOBSTER` cluster.}
 \usage{
-plot_2D_VAF_MOBSTER(x, s1 = x$samples[1], s2 = x$samples[2], N = 10000, ...)
+plot_2D_VAF_MOBSTER(x, s1 = x$samples[1], s2 = x$samples[2],
+  N = 10000, ...)
 }
 \arguments{
 \item{x}{An `evoverse` object.}
 
-\item{s1}{The second sample name, by default `x$samples[1]` the second sample in the data.}
+\item{s1}{The first sample name, by default `x$samples[1]` the first sample in the data.}
 
 \item{N}{Maximum number of points to plot, the overall percentage is reported.}
 
 \item{...}{Extra parameters, not used.}
+
+\item{s1}{The second sample name, by default `x$samples[1]` the second sample in the data.}
 }
 \value{
 A `ggplot` object plot.
