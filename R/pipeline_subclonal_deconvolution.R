@@ -114,7 +114,6 @@ pipeline_subclonal_deconvolution = function(mutations,
     cli::cli_h1("BMix clustering non-tail mutations with karyotype {.field {k}}")
     cat("\n")
 
-
     non_tail = mobster::Clusters(mobster_best_fits[[k]]) %>%
       dplyr::filter(cluster != "Tail") %>%
       data.frame
@@ -122,7 +121,7 @@ pipeline_subclonal_deconvolution = function(mutations,
     # For CCF adjustments, special case. Note VAF column is CCF/2 here by construction
     if(k == "CCF")
     {
-      non_tail = mobster::Clusters(results$mobster[[k]]$best) %>%
+      non_tail = mobster::Clusters(mobster_best_fits[[k]]) %>%
         dplyr::filter(cluster != "Tail") %>%
         dplyr::mutate(
           NV = floor((VAF * DP) / (1 - VAF)),
