@@ -119,27 +119,37 @@ deconvolution_mobster_CCF = function(cna_obj,
     mutations = Reduce(bind_rows,
                        lapply(cna_obj$CCF_estimates, function(x)
                          x$mutations))
-
-    # We remove things that make no sense..
-    if(any(mutations$CCF/2 > 1, na.rm = T))
-    {
-      cli::boxx(paste0("n = ", sum(mutations$CCF/2 > 1),  " mutations with CCF/2 > will be removed.")) %>% cat
-      cat('\n')
-    }
   }
   else
-    cli::cli_alert_warning("Using CCF annotation already available in the data")
+    cli::cli_alert_warning("Using CCF annotation already available in the data, removing NAs.")
 
-
-  mutations = mutations %>%
-    mutate(VAF_raw = VAF,
-           VAF = CCF / 2) %>%
-    filter(VAF > 0, VAF < 1)
+  # We remove things that make no sense.. NA for CCF
+  mutations = mutations %>% dplyr::filter(!is.na(CCF))
 
   if (nrow(mutations) < min_muts) {
-    cli::cli_alert_warning("Less than {.value {min_muts}} mutations, skipping.")
-    # cli::cli_process_failed()
+    cli::cli_alert_warning("Less than {.value {min_muts}} mutations, fit is NULL ....")
+    return(list(fits = NULL, cna_obj = cna_obj))
+  }
 
+  # Scale CCF
+  if(any((mutations$CCF/2) > 1, na.rm = T))
+  {
+    cli::boxx(
+      paste0(
+        "n = ", sum(mutations$CCF/2 > 1),
+        " mutations with CCF/2 > 1 will be removed (50% adjusted VAF).")) %>%
+      cat
+    cat('\n')
+  }
+
+  mutations = mutations %>%
+    dplyr::mutate(
+      VAF_raw = VAF,
+      VAF = CCF / 2) %>%
+    dplyr::filter(VAF > 0, VAF < 1)
+
+  if (nrow(mutations) < min_muts) {
+    cli::cli_alert_warning("Less than {.value {min_muts}} mutations, fit is NULL ....")
     return(list(fits = NULL, cna_obj = cna_obj))
   }
 

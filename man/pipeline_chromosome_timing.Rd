@@ -5,7 +5,9 @@
 \title{Pipeline to time aneuploidy with MOBSTER.}
 \usage{
 pipeline_chromosome_timing(mutations, cna = NULL, purity = NULL,
-  timeable = c("2:0", "2:1", "2:2"), min_muts = 50, ...)
+  timeable = c("2:0", "2:1", "2:2"), min_muts = 50,
+  description = "Chromosomal timing dataset (MOBSTER)", N_max = 15000,
+  ...)
 }
 \arguments{
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
@@ -36,6 +38,6 @@ cna = CNAqc::example_dataset_CNAqc$cna
 mutations = CNAqc::example_dataset_CNAqc$snvs
 purity = CNAqc::example_dataset_CNAqc$purity
 
-x = pipeline_chromosome_timing(mutations, cna = cna, purity = purity, auto_setup = 'FAST')
+x = pipeline_chromosome_timing(mutations, cna = cna, purity = purity, auto_setup = 'FAST', N_max = 500)
 print(x)
 }

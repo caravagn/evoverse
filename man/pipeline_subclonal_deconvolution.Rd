@@ -7,7 +7,8 @@
 pipeline_subclonal_deconvolution(mutations, cna = NULL, purity = NULL,
   karyotypes = c("1:0", "1:1", "2:0", "2:1", "2:2"),
   CCF_karyotypes = karyotypes, min_muts = 50,
-  description = "MOBSTER deconvolution", ...)
+  description = "Subclonal deconvolution dataset (MOBSTER + BMix)",
+  N_max = 15000, ...)
 }
 \arguments{
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
@@ -38,6 +39,7 @@ cna = CNAqc::example_dataset_CNAqc$cna
 mutations = CNAqc::example_dataset_CNAqc$snvs
 purity = CNAqc::example_dataset_CNAqc$purity
 
-x = pipeline_subclonal_deconvolution(mutations, cna = cna, purity = purity, auto_setup = 'FAST')
+# We use auto_setup = 'FAST' to speed up the analysis
+x = pipeline_subclonal_deconvolution(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
 print(x)
 }

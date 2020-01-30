@@ -114,22 +114,35 @@ pipeline_subclonal_deconvolution = function(mutations,
     cli::cli_h1("BMix clustering non-tail mutations with karyotype {.field {k}}")
     cat("\n")
 
+    # Get non_tail mutations
     non_tail = mobster::Clusters(mobster_best_fits[[k]]) %>%
       dplyr::filter(cluster != "Tail") %>%
       data.frame
 
+    # p1 = ggplot(non_tail, aes(CCF)) + geom_histogram(binwidth = 0.01)
+
     # For CCF adjustments, special case. Note VAF column is CCF/2 here by construction
     if(k == "CCF")
     {
+      # CCF have been computed before, and adjusted VAF values (CCF/2) have been
+      # used to cluster with MOBSTER. Now we hold fixed the sequencing depth DP,
+      # and derive from NV/DP=VAF that NV=VAF*DP, and adjust NV and NR constrained to NV+NR=DP
+      # (no coverage change, trials).
       non_tail = mobster::Clusters(mobster_best_fits[[k]]) %>%
         dplyr::filter(cluster != "Tail") %>%
         dplyr::mutate(
-          NV = floor((VAF * DP) / (1 - VAF)),
+          NV = floor(VAF * DP),
+          NR = DP - NV,
           NV = ifelse(NV < 0, 0, NV),
-          NV = ifelse(NV > DP, DP, NV)
+          NV = ifelse(NV > DP, DP, NV),
+          NR = ifelse(NR < 0, 0, NR),
+          NR = ifelse(NR > DP, DP, NR),
+          VAF = NV/(NV+NR)
         ) %>%
-        dplyr::select(NV, DP) %>%
         data.frame
+
+      # p2 = ggplot(non_tail, aes(VAF)) + geom_histogram(binwidth = 0.01)
+      # ggarrange(p1,p1,nrow = 2, ncol=1)
     }
 
     Kbeta = min(mobster_best_fits[[k]]$best$Kbeta * 2, 4)
