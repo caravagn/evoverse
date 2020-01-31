@@ -99,6 +99,7 @@ deconvolution_mobster_karyotypes = function(mutations,
 deconvolution_mobster_CCF = function(cna_obj,
                                      CCF_karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                      min_muts = 50,
+                                     min_VAF = 0.05,
                                      ...)
 {
   if (all(is.null(CCF_karyotypes)) | length(CCF_karyotypes) == 0) stop("CCF_karyotypes are null or empty")
@@ -106,6 +107,8 @@ deconvolution_mobster_CCF = function(cna_obj,
   cat("\n")
   cli::cli_h1("MOBSTER clustering CCF for mutations with karyotype(s) {.field {CCF_karyotypes}}")
   cat("\n")
+
+  # print(summary(mutations))
 
   if (!("CCF" %in% colnames(cna_obj$snvs)))
   {
@@ -137,7 +140,7 @@ deconvolution_mobster_CCF = function(cna_obj,
     cli::boxx(
       paste0(
         "n = ", sum(mutations$CCF/2 > 1),
-        " mutations with CCF/2 > 1 will be removed (50% adjusted VAF).")) %>%
+        " mutation(s) with CCF/2 > 1 will be removed (50% adjusted VAF).")) %>%
       cat
     cat('\n')
   }
@@ -145,18 +148,24 @@ deconvolution_mobster_CCF = function(cna_obj,
   # Then we do something else to reflect the fact that the VAF
   # and CCF values are related, and if any filter is applied to VAF data,
   # then the same filter should be applied to CCF
-  M = mutations %>%
+  M_VAF = mutations %>%
     dplyr::group_by(karyotype) %>%
     dplyr::summarise(m = min(VAF, na.rm = T)) %>%
     tidyr::separate(karyotype, into = c("A", "B"), sep =':') %>%
     dplyr::mutate(
-      min_CCF = CNAqc:::ccf_adjustment_fun(m, as.numeric(A), as.numeric(B), cna_obj$purity, mut.allele = 1)
-    ) %>%
+      min_CCF = CNAqc:::ccf_adjustment_fun(min_VAF, as.numeric(A), as.numeric(B), cna_obj$purity, mut.allele = 1),
+      min_VAF = min_VAF
+    )
+
+  M = M_VAF %>%
     dplyr::summarise(M = max(min_CCF, na.rm = T)) %>%
     dplyr::pull()
+  M = M/2
+
+  print(M_VAF)
 
   cat('\n')
-  cli::boxx("Adjusted VAF (=CCF/2) minimum value {.value {M/2}} from VAF profiling") %>% cat
+  cli::boxx(paste0("Minimum adjusted VAF (=CCF/2) value ", round(M, 4), ", from VAF/CCF profiling")) %>% cat
   cat('\n')
 
   # CCF values divided by 2 to get adjusted VAF

@@ -33,6 +33,7 @@
 pipeline_subclonal_deconvolution = function(mutations,
                                       cna = NULL,
                                       purity = NULL,
+                                      min_VAF = 0.05,
                                       karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                       CCF_karyotypes = karyotypes,
                                       min_muts = 50,
@@ -48,7 +49,7 @@ pipeline_subclonal_deconvolution = function(mutations,
   #
   # 1) Check input data, subset by CNA data if available
   #
-  prepared_input = deconvolution_prepare_input(mutations, cna, purity, N_max)
+  prepared_input = deconvolution_prepare_input(mutations %>% dplyr::filter(VAF > min_VAF), cna, purity, N_max)
   mutations = prepared_input$mutations
   cna = prepared_input$cna
   cna_obj = prepared_input$cna_obj
@@ -68,10 +69,7 @@ pipeline_subclonal_deconvolution = function(mutations,
   {
     if(is.null(cna_obj)) stop("To perform CCF analysis you have to provide CNA data but 'cna = NULL', will not compute.")
 
-
-
-
-    CCF_fit = deconvolution_mobster_CCF(cna_obj, CCF_karyotypes = CCF_karyotypes, min_muts = min_muts, ...)
+    CCF_fit = deconvolution_mobster_CCF(cna_obj, CCF_karyotypes = CCF_karyotypes, min_muts = min_muts, min_VAF = min_VAF, ...)
     cna_obj = CCF_fit$cna_obj
 
     mobster_fits = append(mobster_fits, list(`CCF` = CCF_fit$fits))
