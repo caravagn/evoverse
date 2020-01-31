@@ -173,7 +173,7 @@ deconvolution_mobster_CCF = function(cna_obj,
     dplyr::mutate(
       VAF_raw = VAF,
       VAF = CCF / 2) %>%
-    dplyr::filter(VAF > M/2, VAF < 1)
+    dplyr::filter(VAF > M, VAF < 1)
 
   if (nrow(mutations) < min_muts)
   {
