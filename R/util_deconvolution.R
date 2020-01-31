@@ -102,7 +102,10 @@ deconvolution_mobster_CCF = function(cna_obj,
                                      min_VAF = 0.05,
                                      ...)
 {
-  if (all(is.null(CCF_karyotypes)) | length(CCF_karyotypes) == 0) stop("CCF_karyotypes are null or empty")
+  if (all(is.null(CCF_karyotypes)) | length(CCF_karyotypes) == 0) {
+    warning("CCF_karyotypes are null or empty")
+    return(NULL)
+  }
 
   cat("\n")
   cli::cli_h1("MOBSTER clustering CCF for mutations with karyotype(s) {.field {CCF_karyotypes}}")
@@ -114,9 +117,9 @@ deconvolution_mobster_CCF = function(cna_obj,
   {
     available_karyo = cna_obj$n_karyotype[CCF_karyotypes]
     available_karyo = available_karyo[!is.na(available_karyo)]
-    CCF_karyotypes = available_karyo
+    CCF_karyotypes = intersect(CCF_karyotypes, available_karyo)
 
-    cna_obj = CNAqc::compute_CCF(cna_obj, karyotypes = names(available_karyo))
+    cna_obj = CNAqc::compute_CCF(cna_obj, karyotypes = names(CCF_karyotypes))
     mutations = Reduce(bind_rows,
                        lapply(cna_obj$CCF_estimates, function(x)
                          x$mutations))
