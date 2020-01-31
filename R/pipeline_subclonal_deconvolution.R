@@ -55,6 +55,8 @@ pipeline_subclonal_deconvolution = function(mutations,
   cna_obj = prepared_input$cna_obj
   purity = prepared_input$purity
 
+  print(summary(mutations))
+
   #
   # 2) MOBSTER analysis of karyotypes
   #

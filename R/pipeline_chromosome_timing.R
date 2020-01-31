@@ -34,6 +34,7 @@ pipeline_chromosome_timing = function(mutations,
                                       purity = NULL,
                                       timeable = c('2:0', '2:1', '2:2'),
                                       min_muts = 50,
+                                      min_VAF = 0.05,
                                       description = "Chromosomal timing dataset (MOBSTER)",
                                       N_max = 15000,
                                       ...
@@ -45,11 +46,13 @@ pipeline_chromosome_timing = function(mutations,
   #
   # 1) Check input data, subset by CNA data if available
   #
-  prepared_input = deconvolution_prepare_input(mutations, cna, purity, N_max)
+  prepared_input = deconvolution_prepare_input(mutations %>% dplyr::filter(VAF > min_VAF), cna, purity, N_max)
   mutations = prepared_input$mutations
   cna = prepared_input$cna
   cna_obj = prepared_input$cna_obj
   purity = prepared_input$purity
+
+  print(summary(mutations))
 
   #
   # 2) MOBSTER analysis of karyotypes
