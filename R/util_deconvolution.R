@@ -159,14 +159,6 @@ deconvolution_mobster_CCF = function(cna_obj,
   cli::boxx("Adjusted VAF (=CCF/2) minimum value {.value {M/2}} from VAF profiling") %>% cat
   cat('\n')
 
-  # When each raw karyotype has a certain minimal VAF
-  min_VAFs = lapply(
-    mobster_fits,
-    function(x){
-      if (x %>% is.null %>% all) return(NULL)
-      x$best
-    })
-
   # CCF values divided by 2 to get adjusted VAF
   mutations = mutations %>%
     dplyr::mutate(
