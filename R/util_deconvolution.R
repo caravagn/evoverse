@@ -128,7 +128,7 @@ deconvolution_mobster_CCF = function(cna_obj,
     CCF_karyotypes = intersect(CCF_karyotypes, names(available_karyo))
     cat("Final CCF karyotypes from:", CCF_karyotypes, '\n')
 
-    cna_obj = CNAqc::compute_CCF(cna_obj, karyotypes = names(CCF_karyotypes))
+    cna_obj = CNAqc::compute_CCF(cna_obj, karyotypes = CCF_karyotypes)
     mutations = Reduce(bind_rows,
                        lapply(cna_obj$CCF_estimates, function(x)
                          x$mutations))
