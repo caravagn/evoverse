@@ -37,7 +37,6 @@ pipeline_subclonal_deconvolution = function(mutations,
                                       karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                       CCF_karyotypes = karyotypes,
                                       min_muts = 50,
-                                      min_VAF = 0.05,
                                       description = "Subclonal deconvolution dataset (MOBSTER + BMix)",
                                       N_max = 15000,
                                       ...
