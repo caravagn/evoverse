@@ -115,9 +115,18 @@ deconvolution_mobster_CCF = function(cna_obj,
 
   if (!("CCF" %in% colnames(cna_obj$snvs)))
   {
+    cli::cli_process_start("Preparing CCF data ")
+
+    cat("Required CCF karyotypes from:", CCF_karyotypes, '\n')
+
     available_karyo = cna_obj$n_karyotype[CCF_karyotypes]
     available_karyo = available_karyo[!is.na(available_karyo)]
-    CCF_karyotypes = intersect(CCF_karyotypes, available_karyo)
+
+    cat("Availables ones ..\n")
+    print(available_karyo)
+
+    CCF_karyotypes = intersect(CCF_karyotypes, names(available_karyo))
+    cat("Final CCF karyotypes from:", CCF_karyotypes, '\n')
 
     cna_obj = CNAqc::compute_CCF(cna_obj, karyotypes = names(CCF_karyotypes))
     mutations = Reduce(bind_rows,
