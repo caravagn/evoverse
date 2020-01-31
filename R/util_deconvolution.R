@@ -101,10 +101,7 @@ deconvolution_mobster_CCF = function(cna_obj,
                                      min_muts = 50,
                                      ...)
 {
-  if (all(is.null(CCF_karyotypes)))
-    stop("CCF_karyotypes should not be null")
-
-  # cli::cli_process_start("Performing deconvolution with CCF from karyotypes {.field {CCF_karyotypes}}")
+  if (all(is.null(CCF_karyotypes)) | length(CCF_karyotypes) == 0) stop("CCF_karyotypes are null or empty")
 
   cat("\n")
   cli::cli_h1("MOBSTER clustering CCF for mutations with karyotype(s) {.field {CCF_karyotypes}}")
@@ -114,6 +111,7 @@ deconvolution_mobster_CCF = function(cna_obj,
   {
     available_karyo = cna_obj$n_karyotype[CCF_karyotypes]
     available_karyo = available_karyo[!is.na(available_karyo)]
+    CCF_karyotypes = available_karyo
 
     cna_obj = CNAqc::compute_CCF(cna_obj, karyotypes = names(available_karyo))
     mutations = Reduce(bind_rows,
@@ -124,14 +122,16 @@ deconvolution_mobster_CCF = function(cna_obj,
     cli::cli_alert_warning("Using CCF annotation already available in the data, removing NAs.")
 
   # We remove things that make no sense.. NA for CCF
-  mutations = mutations %>% dplyr::filter(!is.na(CCF))
+  mutations = mutations %>%
+    dplyr::filter(!is.na(CCF))
 
-  if (nrow(mutations) < min_muts) {
+  if (nrow(mutations) < min_muts)
+  {
     cli::cli_alert_warning("Less than {.value {min_muts}} mutations, fit is NULL ....")
     return(list(fits = NULL, cna_obj = cna_obj))
   }
 
-  # Scale CCF
+  # Scale CCF - first remove anything which exceeds 2
   if(any((mutations$CCF/2) > 1, na.rm = T))
   {
     cli::boxx(
@@ -142,13 +142,40 @@ deconvolution_mobster_CCF = function(cna_obj,
     cat('\n')
   }
 
+  # Then we do something else to reflect the fact that the VAF
+  # and CCF values are related, and if any filter is applied to VAF data,
+  # then the same filter should be applied to CCF
+  M = mutations %>%
+    dplyr::group_by(karyotype) %>%
+    dplyr::summarise(m = min(VAF, na.rm = T)) %>%
+    tidyr::separate(karyotype, into = c("A", "B"), sep =':') %>%
+    dplyr::mutate(
+      min_CCF = CNAqc:::ccf_adjustment_fun(m, as.numeric(A), as.numeric(B), cna_obj$purity, mut.allele = 1)
+    ) %>%
+    dplyr::summarise(M = max(min_CCF, na.rm = T)) %>%
+    dplyr::pull()
+
+  cat('\n')
+  cli::boxx("Adjusted VAF (=CCF/2) minimum value {.value {M/2}} from VAF profiling") %>% cat
+  cat('\n')
+
+  # When each raw karyotype has a certain minimal VAF
+  min_VAFs = lapply(
+    mobster_fits,
+    function(x){
+      if (x %>% is.null %>% all) return(NULL)
+      x$best
+    })
+
+  # CCF values divided by 2 to get adjusted VAF
   mutations = mutations %>%
     dplyr::mutate(
       VAF_raw = VAF,
       VAF = CCF / 2) %>%
-    dplyr::filter(VAF > 0, VAF < 1)
+    dplyr::filter(VAF > M/2, VAF < 1)
 
-  if (nrow(mutations) < min_muts) {
+  if (nrow(mutations) < min_muts)
+  {
     cli::cli_alert_warning("Less than {.value {min_muts}} mutations, fit is NULL ....")
     return(list(fits = NULL, cna_obj = cna_obj))
   }

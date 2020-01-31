@@ -55,7 +55,7 @@ pipeline_subclonal_deconvolution = function(mutations,
   purity = prepared_input$purity
 
   #
-  # 2) MOBSTER analysis of karyotypes and CCF, if required
+  # 2) MOBSTER analysis of karyotypes
   #
   mobster_fits = deconvolution_mobster_karyotypes(
       mutations = mutations,
@@ -66,7 +66,10 @@ pipeline_subclonal_deconvolution = function(mutations,
 
   if(!is.null(CCF_karyotypes) | !is.na(CCF_karyotypes))
   {
-    if(is.null(cna_obj)) stop("You asked for CCF analysis but did not provide CNA data (cna = NULL), cannot compute.")
+    if(is.null(cna_obj)) stop("To perform CCF analysis you have to provide CNA data but 'cna = NULL', will not compute.")
+
+
+
 
     CCF_fit = deconvolution_mobster_CCF(cna_obj, CCF_karyotypes = CCF_karyotypes, min_muts = min_muts, ...)
     cna_obj = CCF_fit$cna_obj
