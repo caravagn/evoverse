@@ -18,7 +18,7 @@ deconvolution_prepare_input = function(mutations, cna, purity, N_max, min_VAF)
   # VAF above cutoff
   if(any(mutations$VAF < min_VAF, na.rm = T))
   {
-    cli::cli_alert_info("Removing {.value {sum(mutations$VAF < min_VAF na.rm = T)}} mutations with VAF < {.value {min_VAF}}.")
+    cli::cli_alert_info("Removing {.value {sum(mutations$VAF < min_VAF, na.rm = T)}} mutations with VAF < {.value {min_VAF}}.")
     mutations = mutations %>% dplyr::filter(VAF > min_VAF)
   }
 
