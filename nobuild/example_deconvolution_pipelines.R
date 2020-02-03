@@ -1,4 +1,4 @@
-load("~/Documents/Davros/Hartwig_analysis/fits/160704_HMFregCPCT_FR12244557_FR12244595_CPCT02110002/HW_input_data.RData")
+load("~/Documents/Davros/Hartwig_analysis/fits/190913_HMFregCPCT_FR16672425_FR13923148_CPCT02020940/HW_input_data.RData")
 hw_data
 
 load("~/Downloads//HW_input_data.RData")
@@ -22,7 +22,7 @@ ct_deconvolution = evoverse::pipeline_chromosome_timing(
   cna = hw_data$cna,
   purity = hw_data$purity,
   N_max = 3000,
-  description = "160704_HMFregCPCT_FR12244557_FR12244595_CPCT02110002",
+  description = "My amazing dataset!",
   auto_setup = 'FAST'
 )
 

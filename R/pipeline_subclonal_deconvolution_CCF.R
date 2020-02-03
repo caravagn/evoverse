@@ -81,13 +81,13 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
 
   # Report a message from QC
   if (mobster_best_fits[["CCF"]] %>% is.null %>% all)
-      cli::cli_alert_warning("{.field {x}}: not analysed.")
+      cli::cli_alert_warning("CCF not analysed.")
   else
   {
     if(mobster_best_fits[["CCF"]]$QC == "PASS")
-      cli::cli_alert_success("{.field {x}}: QC PASS. p = {.value {mobster_best_fits[[x]]$QC_prob}}")
+      cli::cli_alert_success("{.field {'CCF'}}: QC PASS. p = {.value {mobster_best_fits[[x]]$QC_prob}}")
     else
-      cli::cli_alert_danger("{.field {red(x)}}: QC FAIL. p = {.value {mobster_best_fits[[x]]$QC_prob}}")
+      cli::cli_alert_danger("{.field {red('CCF')}}: QC FAIL. p = {.value {mobster_best_fits[[x]]$QC_prob}}")
   }
 
   #
