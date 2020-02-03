@@ -4,8 +4,13 @@
 \alias{dataset}
 \title{Create an \code{evoverse} dataset.}
 \usage{
-dataset(mutations, segments, samples, purity,
-  description = "My evoverse dataset")
+dataset(
+  mutations,
+  segments,
+  samples,
+  purity,
+  description = "My evoverse dataset"
+)
 }
 \arguments{
 \item{mutations}{Dataframe of mutations in all samples, or list of dataframes of

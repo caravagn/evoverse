@@ -109,6 +109,8 @@ pipeline_subclonal_deconvolution_VAF = function(mutations,
   cat("\n")
 
   results = list()
+  results$type = "VAF pipeline"
+  class(results) = "evopipe_deconv"
 
   # Fits
   results$mobster = mobster_fits
@@ -128,15 +130,17 @@ pipeline_subclonal_deconvolution_VAF = function(mutations,
   results$table$clustering_assignments = deconvolution_table_assignments(mobster_best_fits, bmix_best_fits)
 
   # Plot
-  results$figure = deconvolution_plot_assembly(
-    mobster_best_fits,
-    CNAqc_input,
-    bmix_best_fits,
-    figure_caption = paste0("", Sys.time(), '. evoverse pipeline for subclonal deconvolution. QC: ', results$table$summary$QC_type[1]),
-    figure_title = description)
+  # results$figure = deconvolution_plot_assembly(
+  #   mobster_best_fits,
+  #   CNAqc_input,
+  #   bmix_best_fits,
+  #   figure_caption = paste0("", Sys.time(), '. evoverse pipeline for subclonal deconvolution. QC: ', results$table$summary$QC_type[1]),
+  #   figure_title = description)
+
 
   # Data id
   results$description = description
+  results$log = paste0("", Sys.time(), '. evoverse pipeline for subclonal deconvolution from VAF data. QC: ', results$table$summary$QC_type[1])
 
   cli::cli_process_done()
 

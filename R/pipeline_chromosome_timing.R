@@ -44,40 +44,36 @@ pipeline_chromosome_timing = function(mutations,
   cat('\n')
 
   #
-  # 1) Check input data, subset by CNA data if available
+  # 1) Load input data -- this is a common function to all deconvolution-based pipelines
   #
-  prepared_input = deconvolution_prepare_input(mutations, cna, purity, N_max, min_VAF = min_VAF)
-  mutations = prepared_input$mutations
-  cna = prepared_input$cna
-  cna_obj = prepared_input$cna_obj
-  purity = prepared_input$purity
-
-  print(summary(mutations))
+  CNAqc_input = deconvolution_prepare_input(mutations, cna, purity, N_max, min_VAF = min_VAF)
 
   #
   # 2) MOBSTER analysis of karyotypes
   #
-  mobster_fits = evoverse:::deconvolution_mobster_karyotypes(
-    mutations = mutations,
+  mobster_fits = deconvolution_mobster_karyotypes_VAF(
+    mutations = CNAqc_input$snvs,
     karyotypes = timeable,
     min_muts = min_muts,
     ...
   )
 
   # Extract the best fits that we are going to qc
-  mobster_best_fits = lapply(mobster_fits,
-                             function(x){
-                               if (x %>% is.null %>% all)
-                                 return(NULL)
-                               x$best
-                             })
-
   cat("\n")
   cli::cli_h2("MOBSTER QC")
   cat("\n")
 
+  mobster_best_fits = lapply(
+    mobster_fits,
+    function(x) {
+      if (x %>% is.null %>% all) return(NULL)
+      x$best
+    })
+
   # QC
-  mobster_best_fits =  lapply(mobster_best_fits, evoverse:::qc_deconvolution_mobster, type = 'T')
+  mobster_best_fits =  lapply(mobster_best_fits,
+                              evoverse:::qc_deconvolution_mobster,
+                              type = 'T')
 
   # Report a message from QC
   for(x in timeable)
@@ -101,6 +97,8 @@ pipeline_chromosome_timing = function(mutations,
   cat("\n")
 
   results = list()
+  results$type = "Timing pipeline"
+  class(results) = "evopipe_deconv"
 
   # Fits
   results$mobster = mobster_fits
@@ -110,7 +108,7 @@ pipeline_chromosome_timing = function(mutations,
     mutations = mutations,
     cna = cna,
     purity = purity,
-    cnaqc = cna_obj)
+    cnaqc = CNAqc_input)
 
   # Plot and tables
   results$table$summary = deconvolution_table_summary(mobster_best_fits, bmix_fits = NULL)
@@ -118,15 +116,16 @@ pipeline_chromosome_timing = function(mutations,
   # Clustering assignments
   results$table$clustering_assignments = deconvolution_table_assignments(mobster_best_fits, bmix_fits = NULL)
 
-  results$figure = deconvolution_plot_assembly(
-    mobster_fits = mobster_best_fits,
-    cna_obj,
-    bmix_fits = NULL,
-    figure_caption = paste0("", Sys.time(), '. evoverse pipeline for chromosome timing. QC: ', results$table$summary$QC_type[1]),
-    figure_title = description)
+  # results$figure = deconvolution_plot_assembly(
+  #   mobster_fits = mobster_best_fits,
+  #   cna_obj,
+  #   bmix_fits = NULL,
+  #   figure_caption = paste0("", Sys.time(), '. evoverse pipeline for chromosome timing. QC: ', results$table$summary$QC_type[1]),
+  #   figure_title = description)
 
   # Data id
   results$description = description
+  results$log = paste0("", Sys.time(), '. evoverse pipeline for chromosome timing. QC: ', results$table$summary$QC_type[1])
 
   cli::cli_process_done()
 
