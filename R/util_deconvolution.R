@@ -1,4 +1,9 @@
-deconvolution_prepare_input = function(mutations, cna, purity, N_max)
+######################################################
+### INPUT FUNCTIONS
+######################################################
+
+# Transforms input data into a CNAqc object, if required it downsamples the data.
+deconvolution_prepare_input = function(mutations, cna, purity, N_max, min_VAF)
 {
   # x must be a dataset for MOBSTER
   if(!is.data.frame(mutations) & !is.matrix(mutations))
@@ -10,6 +15,13 @@ deconvolution_prepare_input = function(mutations, cna, purity, N_max)
   if(!is.null(purity) & (purity > 1 | purity <= 0))
     stop("Purity must be in 0/1.")
 
+  # VAF above cutoff
+  if(any(mutations$VAF < min_VAF, na.rm = T))
+  {
+    cli::cli_alert_info("Removing {.value {sum(mutations$VAF < min_VAF na.rm = T)}} mutations with VAF < {.value {min_VAF}}.")
+    mutations = mutations %>% dplyr::filter(VAF > min_VAF)
+  }
+
   # Downsample data
   if(mutations %>% nrow > N_max) {
 
@@ -20,20 +32,15 @@ deconvolution_prepare_input = function(mutations, cna, purity, N_max)
   }
 
   # Apply CNA mapping and retain only mappable mutations
-  cna_obj = NULL
-  if(!is.null(cna))
-  {
-    cli::cli_h1("Found CNA calls, retaining mutations mapping to available segments")
-    cat("\n")
-
-    cna_obj = CNAqc::init(mutations, cna, purity)
-    mutations = cna_obj$snvs
-  }
-
-  return(list(mutations = mutations, cna = cna, purity = purity, cna_obj = cna_obj))
+  return(CNAqc::init(mutations, cna, purity))
 }
 
-deconvolution_mobster_karyotypes = function(mutations,
+######################################################
+### DECONVOLUTION WITH MOBSTER/ BMIX OF VAF VALUES
+######################################################
+
+# Fit every subset of mutations (defined by karyotypes) with MOBSTER. Skip those with < min_muts.
+deconvolution_mobster_karyotypes_VAF = function(mutations,
                                             karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                             min_muts = 50,
                                             ...)
@@ -74,20 +81,15 @@ deconvolution_mobster_karyotypes = function(mutations,
                    cli::cli_h1("MOBSTER clustering mutations with karyotype {.field {k}}")
                    cat("\n")
 
-                   kmuts = mutations %>%
-                     filter(karyotype == k, VAF > 0, VAF < 1)
+                   kmuts = mutations %>% filter(karyotype == k, VAF > 0, VAF < 1)
 
                    if (nrow(kmuts) < min_muts) {
-                     cli::cli_alert_warning("Less than {.value {min_muts}} mutations, skipping.")
-                     # cli::cli_process_failed()
+                     cli::cli_alert_warning("Less than {.value {min_muts}} mutations, will no fit.")
 
                      return(NULL)
                    }
 
                    mfit = mobster::mobster_fit(kmuts, ...)
-
-                   # cat("\n")
-                   # cli::cli_process_done()
 
                    return(mfit)
                  })
@@ -95,6 +97,56 @@ deconvolution_mobster_karyotypes = function(mutations,
 
   mfits
 }
+
+deconvolution_nonread_counts_bmix_VAF = function(x,
+                                                 karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
+                                                 min_muts = 50)
+{
+  runner = function(x, k)
+  {
+    if(all(is.null(x[[k]]))) {
+      cli::cli_alert_warning("Requested to fit read counts from {.field {k}}, but the required MOBSTER fit is null.")
+      # Some error message?
+      return(NULL)
+    }
+
+    cat("\n")
+    cli::cli_h1("BMix clustering non-tail mutations with karyotype {.field {k}}")
+    cat("\n")
+
+    # Get non_tail mutations
+    non_tail = mobster::Clusters(x[[k]]) %>%
+      dplyr::filter(cluster != "Tail") %>%
+      data.frame
+
+    # Not enough non-tail mutations
+    if(nrow(non_tail) < min_muts) {
+      cli::cli_alert_warning("Requested to fit read counts from {.field {k}}, but therere are less than {.value {min_muts}} available non-tail mutations.")
+
+      return(NULL)
+    }
+
+    # Fit: use 2 times the clusters detected at max
+
+    Kbeta = min(x[[k]]$Kbeta * 2, 4)
+
+    fit_readcounts = BMix::bmixfit(
+      non_tail %>% dplyr::select(NV, DP),
+      K.BetaBinomials = 0,
+      K.Binomials = 1:Kbeta,
+      samples = 3)
+
+    fit_readcounts$input = non_tail
+    fit_readcounts
+  }
+
+  lapply(karyotypes, runner, x = x)
+}
+
+
+######################################################
+### DECONVOLUTION WITH MOBSTER/ BMIX OF CCF VALUES
+######################################################
 
 deconvolution_mobster_CCF = function(cna_obj,
                                      CCF_karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
@@ -112,29 +164,20 @@ deconvolution_mobster_CCF = function(cna_obj,
   cat("\n")
 
   # print(summary(mutations))
+  available_karyo = cna_obj$n_karyotype[CCF_karyotypes]
+  available_karyo = available_karyo[!is.na(available_karyo)]
 
-  if (!("CCF" %in% colnames(cna_obj$snvs)))
+  if(!all(CCF_karyotypes %in% names(available_karyo)))
   {
-    cli::cli_process_start("Preparing CCF data ")
-
-    cat("Required CCF karyotypes from:", CCF_karyotypes, '\n')
-
-    available_karyo = cna_obj$n_karyotype[CCF_karyotypes]
-    available_karyo = available_karyo[!is.na(available_karyo)]
-
-    cat("Availables ones ..\n")
-    print(available_karyo)
-
     CCF_karyotypes = intersect(CCF_karyotypes, names(available_karyo))
-    cat("Final CCF karyotypes from:", CCF_karyotypes, '\n')
 
-    cna_obj = CNAqc::compute_CCF(cna_obj, karyotypes = CCF_karyotypes)
-    mutations = Reduce(bind_rows,
-                       lapply(cna_obj$CCF_estimates, function(x)
-                         x$mutations))
+    cli::cli_alert_info("Some karyotypes are not avilable, using {.field {CCF_karyotypes}}")
   }
-  else
-    cli::cli_alert_warning("Using CCF annotation already available in the data, removing NAs.")
+
+  cna_obj = CNAqc::compute_CCF(cna_obj, karyotypes = CCF_karyotypes)
+  mutations = Reduce(bind_rows,
+                     lapply(cna_obj$CCF_estimates, function(x)
+                       x$mutations))
 
   # We remove things that make no sense.. NA for CCF
   mutations = mutations %>%
@@ -142,7 +185,7 @@ deconvolution_mobster_CCF = function(cna_obj,
 
   if (nrow(mutations) < min_muts)
   {
-    cli::cli_alert_warning("Less than {.value {min_muts}} mutations, fit is NULL ....")
+    cli::cli_alert_warning("Less than {.value {min_muts}} mutations, will not fit CCF data.")
     return(list(fits = NULL, cna_obj = cna_obj))
   }
 
@@ -174,8 +217,6 @@ deconvolution_mobster_CCF = function(cna_obj,
     dplyr::pull()
   M = M/2
 
-  print(M_VAF)
-
   cat('\n')
   cli::boxx(paste0("Minimum adjusted VAF (=CCF/2) value ", round(M, 4), ", from VAF/CCF profiling")) %>% cat
   cat('\n')
@@ -189,7 +230,7 @@ deconvolution_mobster_CCF = function(cna_obj,
 
   if (nrow(mutations) < min_muts)
   {
-    cli::cli_alert_warning("Less than {.value {min_muts}} mutations, fit is NULL ....")
+    cli::cli_alert_warning("Less than {.value {min_muts}} mutations, will not fit CCF data.")
     return(list(fits = NULL, cna_obj = cna_obj))
   }
 
@@ -199,7 +240,59 @@ deconvolution_mobster_CCF = function(cna_obj,
   ))
 }
 
-# Perform QC of a MOBSTER fit
+deconvolution_nonread_counts_bmix_CCF = function(x, min_muts)
+{
+  if(all(is.null(x[["CCF"]]))) return(NULL)
+
+  x = x[["CCF"]]
+
+  cat("\n")
+  cli::cli_h1("BMix clustering non-tail mutations from CCF data")
+  cat("\n")
+
+  # Get non_tail mutations
+  non_tail = mobster::Clusters(x) %>%
+      dplyr::filter(cluster != "Tail") %>%
+      data.frame
+
+  # Not enough non-tail mutations
+  if(nrow(non_tail) < min_muts) {
+    cli::cli_alert_warning("Requested to fit read counts from {.field {k}}, but therere are less than {.value {min_muts}} available non-tail mutations.")
+
+    return(list(`CCF` = NULL))
+  }
+
+  # CCF have been computed before, and adjusted VAF values (CCF/2) have been
+  # used to cluster with MOBSTER. Now we hold fixed the sequencing depth DP,
+  # and derive from NV/DP=VAF that NV=VAF*DP, and adjust NV and NR constrained to NV+NR=DP
+  # (no coverage change, trials).
+  non_tail = mobster::Clusters(x) %>%
+    dplyr::filter(cluster != "Tail") %>%
+    dplyr::mutate(
+      NV = floor(VAF * DP),
+      NR = DP - NV,
+      NV = ifelse(NV < 0, 0, NV),
+      NV = ifelse(NV > DP, DP, NV),
+      NR = ifelse(NR < 0, 0, NR),
+      NR = ifelse(NR > DP, DP, NR),
+      VAF = NV / (NV + NR)
+    ) %>%
+    data.frame
+
+  Kbeta = min(x$Kbeta * 2, 4)
+
+  fit_readcounts = BMix::bmixfit(
+    non_tail %>% dplyr::select(NV, DP),
+    K.BetaBinomials = 0,
+    K.Binomials = 1:Kbeta,
+    samples = 3)
+
+  fit_readcounts$input = non_tail
+    fit_readcounts
+}
+
+
+# Perform QC of a MOBSTER fit, either based on the Timing or Deconvolution classfiers
 qc_deconvolution_mobster = function(x, type)
 {
   qc_model = NULL
@@ -269,6 +362,8 @@ qc_deconvolution_mobster = function(x, type)
 
   return(x)
 }
+
+
 
 qc_mobster_plot = function(x)
 {
@@ -355,20 +450,22 @@ deconvolution_table_assignments = function(mobster_fits, bmix_fits)
 
   # First, gather all VAF-based clusters
   summary_table = Reduce(bind_rows,
-                         lapply(groups[groups != 'CCF'],
+                         lapply(groups,
                                 function(x)
                                 {
+                                  mfit = mobster_fits[[x]]
+                                  bfit = bmix_fits[[x]]
+
                                   # If there is no fit -> empty table
-                                  if (all(is.null(mobster_fits[[x]])))
+                                  if (all(is.null(mfit)))
                                     return(NULL)
 
                                   # Otherwise take the VAF clustering for this karyotype
-                                  mobster_tab = mobster::Clusters(mobster_fits[[x]]) %>%
-                                    dplyr::mutate(karyotype = x)
+                                  mobster_tab = mobster::Clusters(mfit) %>% dplyr::mutate(karyotype = x)
 
-                                  if(all(is.null(bmix_fits[[x]]))) return(mobster_tab)
+                                  if(all(is.null(bfit))) return(mobster_tab)
 
-                                  bmix_tab = BMix::Clusters(bmix_fits[[x]], bmix_fits[[x]]$input) %>%
+                                  bmix_tab = BMix::Clusters(bfit, bfit$input) %>%
                                     dplyr::select(chr, from, to, ref, alt, karyotype, cluster)
 
                                   mobster_tab %>%
@@ -378,23 +475,23 @@ deconvolution_table_assignments = function(mobster_fits, bmix_fits)
                                     dplyr::select(-ends_with('.y'))
                                 }))
 
-  # If there is CCF data out, take genome coordinates, merge the CCF value and cluster
-  if ("CCF" %in% groups)
-  {
-    mCCF_output = mobster::Clusters(mobster_fits$CCF) %>%
-      dplyr::select(chr, from, to, ref, alt, CCF, cluster) %>%
-      dplyr::rename(CCF_cluster = cluster)
-
-    summary_table = summary_table %>%
-      dplyr::full_join(mCCF_output, by = c('chr', 'from', 'to', 'ref', 'alt'))
-
-    bCCF_output = BMix::Clusters(bmix_fits$CCF, bmix_fits$CCF$input) %>%
-      dplyr::select(chr, from, to, ref, alt, cluster) %>%
-      dplyr::rename(CCF_BMix_cluster = cluster)
-
-    summary_table = summary_table %>%
-      dplyr::full_join(bCCF_output, by = c('chr', 'from', 'to', 'ref', 'alt'))
-  }
+  # # If there is CCF data out, take genome coordinates, merge the CCF value and cluster
+  # if ("CCF" %in% groups)
+  # {
+  #   mCCF_output = mobster::Clusters(mobster_fits$CCF) %>%
+  #     dplyr::select(chr, from, to, ref, alt, CCF, cluster) %>%
+  #     dplyr::rename(CCF_cluster = cluster)
+  #
+  #   summary_table = summary_table %>%
+  #     dplyr::full_join(mCCF_output, by = c('chr', 'from', 'to', 'ref', 'alt'))
+  #
+  #   bCCF_output = BMix::Clusters(bmix_fits$CCF, bmix_fits$CCF$input) %>%
+  #     dplyr::select(chr, from, to, ref, alt, cluster) %>%
+  #     dplyr::rename(CCF_BMix_cluster = cluster)
+  #
+  #   summary_table = summary_table %>%
+  #     dplyr::full_join(bCCF_output, by = c('chr', 'from', 'to', 'ref', 'alt'))
+  # }
 
   return(summary_table)
 }
