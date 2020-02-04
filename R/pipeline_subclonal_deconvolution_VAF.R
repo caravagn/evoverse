@@ -54,52 +54,22 @@ pipeline_subclonal_deconvolution_VAF = function(mutations,
   # 2) MOBSTER analysis of karyotypes
   #
   mobster_fits = deconvolution_mobster_karyotypes_VAF(
-      mutations = CNAqc_input$snvs,
-      karyotypes = karyotypes,
-      min_muts = min_muts,
-      ...
+    mutations = CNAqc_input$snvs,
+    karyotypes = karyotypes,
+    min_muts = min_muts,
+    QC_type = "D",
+    ...
     )
-
-  # Extract the best fits that we are going to qc
-  cat("\n")
-  cli::cli_h2("MOBSTER QC")
-  cat("\n")
-
-  mobster_best_fits = lapply(
-    mobster_fits,
-    function(x) {
-      if (x %>% is.null %>% all) return(NULL)
-      x$best
-      })
-
-  # QC
-  mobster_best_fits =  lapply(mobster_best_fits,
-                              evoverse:::qc_deconvolution_mobster,
-                              type = 'D')
-
-  # Report a message from QC
-  for(x in karyotypes)
-  {
-    if (mobster_best_fits[[x]] %>% is.null %>% all)
-      cli::cli_alert_warning("{.field {x}}: not analysed.")
-    else
-    {
-      if(mobster_best_fits[[x]]$QC == "PASS")
-        cli::cli_alert_success("{.field {x}}: QC PASS. p = {.value {mobster_best_fits[[x]]$QC_prob}}")
-      else
-        cli::cli_alert_danger("{.field {red(x)}}: QC FAIL. p = {.value {mobster_best_fits[[x]]$QC_prob}}")
-    }
-  }
 
   #
   # 3) BMix -- Binomial model -- on each karyotype non-tail mutations
   #
   bmix_best_fits = deconvolution_nonread_counts_bmix_VAF(
-    x = mobster_best_fits,
+    x = mobster_fits,
     karyotypes = karyotypes,
     min_muts =  min_muts
     )
-  names(bmix_best_fits) = names(mobster_best_fits)
+  names(bmix_best_fits) = names(mobster_fits)
 
   #
   # 4) Results assembly
@@ -124,18 +94,10 @@ pipeline_subclonal_deconvolution_VAF = function(mutations,
     cnaqc = CNAqc_input)
 
   # Plot and tables
-  results$table$summary = deconvolution_table_summary(mobster_best_fits, bmix_best_fits)
+  results$table$summary = deconvolution_table_summary(mobster_fits, bmix_best_fits)
 
   # Clustering assignments
-  results$table$clustering_assignments = deconvolution_table_assignments(mobster_best_fits, bmix_best_fits)
-
-  # Plot
-  # results$figure = deconvolution_plot_assembly(
-  #   mobster_best_fits,
-  #   CNAqc_input,
-  #   bmix_best_fits,
-  #   figure_caption = paste0("", Sys.time(), '. evoverse pipeline for subclonal deconvolution. QC: ', results$table$summary$QC_type[1]),
-  #   figure_title = description)
+  results$table$clustering_assignments = deconvolution_table_assignments(mobster_fits, bmix_best_fits)
 
 
   # Data id

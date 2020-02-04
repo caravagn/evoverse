@@ -56,45 +56,19 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
   CCF_fit = deconvolution_mobster_CCF(CNAqc_input,
                                       CCF_karyotypes = CCF_karyotypes,
                                       min_muts = min_muts,
-                                      min_VAF = min_VAF, ...)
+                                      min_VAF = min_VAF,
+                                      QC_type = "D",
+                                      ...)
 
   # Update the object that now has also CCF data
   CNAqc_input = CCF_fit$cna_obj
   mobster_fits = list(`CCF` = CCF_fit$fits)
 
-  # Extract the best fits that we are going to qc
-  cat("\n")
-  cli::cli_h2("MOBSTER QC")
-  cat("\n")
-
-  mobster_best_fits = lapply(
-    mobster_fits,
-    function(x) {
-      if (x %>% is.null %>% all) return(NULL)
-      x$best
-    })
-
-  # QC
-  mobster_best_fits =  lapply(mobster_best_fits,
-                              evoverse:::qc_deconvolution_mobster,
-                              type = 'D')
-
-  # Report a message from QC
-  if (mobster_best_fits[["CCF"]] %>% is.null %>% all)
-      cli::cli_alert_warning("CCF not analysed.")
-  else
-  {
-    if(mobster_best_fits[["CCF"]]$QC == "PASS")
-      cli::cli_alert_success("{.field {'CCF'}}: QC PASS. p = {.value {mobster_best_fits[['CCF']]$QC_prob}}")
-    else
-      cli::cli_alert_danger("{.field {red('CCF')}}: QC FAIL. p = {.value {mobster_best_fits[['CCF']]$QC_prob}}")
-  }
-
   #
   # 3) BMix -- Binomial model -- with special adjustment for CCF
   #
   bmix_best_fits = deconvolution_nonread_counts_bmix_CCF(
-    x = mobster_best_fits,
+    x = mobster_fits,
     min_muts =  min_muts
   )
   bmix_best_fits = list(`CCF` = bmix_best_fits)
@@ -123,10 +97,10 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
     cnaqc = CNAqc_input)
 
   # Plot and tables
-  results$table$summary = deconvolution_table_summary(mobster_best_fits, bmix_best_fits)
+  results$table$summary = deconvolution_table_summary(mobster_fits, bmix_best_fits)
 
   # Clustering assignments
-  results$table$clustering_assignments = deconvolution_table_assignments(mobster_best_fits, bmix_best_fits)
+  results$table$clustering_assignments = deconvolution_table_assignments(mobster_fits, bmix_best_fits)
 
   # Plot
   # results$figure = deconvolution_plot_assembly(

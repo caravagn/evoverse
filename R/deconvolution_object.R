@@ -44,13 +44,7 @@ plot.evopipe_deconv = function(x)
 {
   stopifnot(inherits(x, 'evopipe_deconv'))
 
-  mobster_fits = lapply(
-    x$mobster,
-    function(x) {
-      if (x %>% is.null %>% all) return(NULL)
-      x$best
-    })
-
+  mobster_fits = x$mobster
   bmix_fits = x$bmix
   cna_obj = x$input$cnaqc
 

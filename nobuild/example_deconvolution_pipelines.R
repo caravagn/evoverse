@@ -1,4 +1,4 @@
-load("~/Documents/Davros/Hartwig_analysis/fits/190913_HMFregCPCT_FR16672425_FR13923148_CPCT02020940/HW_input_data.RData")
+load("~/Documents/Davros/Hartwig_analysis/fits/180731_HMFregCPCT_FR17020297_FR16982250_CPCT02060256//HW_input_data.RData")
 hw_data
 
 load("~/Downloads//HW_input_data.RData")
