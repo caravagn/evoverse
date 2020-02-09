@@ -36,45 +36,64 @@ deconvolution_prepare_input = function(mutations, cna, purity, N_max, min_VAF)
 }
 
 ######################################################
+### DECONVOLUTION WITH MOBSTER WOTH AUTO QC AND AUTO-RERUN
+######################################################
+
+# # Fit every subset of mutations (defined by karyotypes) with MOBSTER. Skip those with < min_muts.
+smartrun_mobster_qc = function(x, QC_type, model_description = "My model", ...)
+{
+  # First, attempt a mobster fit with the required parameters
+  mfit = mobster::mobster_fit(x, description = model_description, ...)$best
+
+  # Then, QC the model fit
+  mfit = evoverse:::qc_deconvolution_mobster(mfit, type = QC_type)
+
+  cat("\n")
+  if(mfit$QC == "PASS") cli::cli_alert_success("{.field {green(model_description)}}: QC PASS. p = {.value {mfit$QC_prob}}")
+  else cli::cli_alert_danger("{.field {red(model_description)}}: QC FAIL. p = {.value {mfit$QC_prob}}")
+  cat("\n")
+
+  if(is.null(QC_type) |  mfit$QC == "PASS") return(mfit)
+
+  cat("\n")
+  cat(
+    cli::boxx(
+      paste0("Auto-QC (type '", QC_type, "') failed, attempting another single run with default parameters"),
+      padding = 1,
+      float = 'center',
+      background_col = "brown")
+  )
+  cat("\n")
+
+  # Second attempt
+  mfit = mobster::mobster_fit(x, description = model_description, parallel = FALSE)
+
+  # Then, QC the model fit
+  mfit = evoverse:::qc_deconvolution_mobster(mfit$best, type = QC_type)
+
+  cat("\n")
+  if(mfit$QC == "PASS") cli::cli_alert_success("{.field {green(model_description)}}: QC PASS. p = {.value {mfit$QC_prob}}")
+  else cli::cli_alert_danger("{.field {red(model_description)}}: QC FAIL. p = {.value {mfit$QC_prob}}")
+  cat("\n")
+
+  return(mfit)
+}
+
+######################################################
 ### DECONVOLUTION WITH MOBSTER/ BMIX OF VAF VALUES
 ######################################################
+
 
 # Fit every subset of mutations (defined by karyotypes) with MOBSTER. Skip those with < min_muts.
 deconvolution_mobster_karyotypes_VAF = function(mutations,
                                             karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                             min_muts = 50,
+                                            QC_type = NULL,
                                             ...)
 {
-  timeable = karyotypes
-
-
-  # Special case -- if karyotypes is null all data are used
-  if (all(is.null(timeable)))
-  {
-    k = 'wg'
-
-    cat("\n")
-    cli::cli_h1("MOBSTER clustering all mutations (no subsetting by karyotype)")
-    cat("\n")
-
-    kmuts = mutations %>% filter(VAF > 0, VAF < 1)
-
-    if (nrow(kmuts) < min_muts) {
-      cli::cli_alert_warning("Less than {.value {min_muts}} mutations, skipping.")
-      # cli::cli_process_failed()
-
-      return(NULL)
-    }
-
-    mfit = mobster::mobster_fit(kmuts, ...)
-
-    return(list(`wg` = mfit))
-  }
-
-
   # Timeable ones, processed one by one with MOBSTER
   # VAF required in 0/1
-  mfits = lapply(timeable,
+  mfits = lapply(karyotypes,
                  function(k)
                  {
                    cat("\n")
@@ -89,11 +108,11 @@ deconvolution_mobster_karyotypes_VAF = function(mutations,
                      return(NULL)
                    }
 
-                   mfit = mobster::mobster_fit(kmuts, ...)
+                   mfit = smartrun_mobster_qc(kmuts, QC_type, model_description = paste0("Raw VAF in ", k),  ...)
 
                    return(mfit)
                  })
-  names(mfits) = timeable
+  names(mfits) = karyotypes
 
   mfits
 }
@@ -152,6 +171,7 @@ deconvolution_mobster_CCF = function(cna_obj,
                                      CCF_karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                      min_muts = 50,
                                      min_VAF = 0.05,
+                                     QC_type = NULL,
                                      ...)
 {
   if (all(is.null(CCF_karyotypes)) | length(CCF_karyotypes) == 0) {
@@ -235,7 +255,7 @@ deconvolution_mobster_CCF = function(cna_obj,
   }
 
   return(list(
-    fits = mobster::mobster_fit(mutations, ...),
+    fits = smartrun_mobster_qc(mutations, QC_type, model_description = "CCF values", ...),
     cna_obj = cna_obj
   ))
 }

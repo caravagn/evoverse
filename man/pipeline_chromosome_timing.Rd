@@ -6,8 +6,8 @@
 \usage{
 pipeline_chromosome_timing(
   mutations,
-  cna = NULL,
-  purity = NULL,
+  cna,
+  purity,
   timeable = c("2:0", "2:1", "2:2"),
   min_muts = 50,
   min_VAF = 0.05,
