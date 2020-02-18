@@ -1,40 +1,79 @@
-#' Title
+#' Determine clonal mutations and sample purity from mutation data.
 #'
-#' @param x
-#' @param cutoff_lv
-#' @param N_min
-#' @param ...
+#' @description
 #'
-#' @return
+#' This function implements a pipeline that uses MOBSTER to determine
+#' a pool of clonal mutations for a tumour biopsy, and the purity of
+#' the associated bulk sample.
+#'
+#' This function does not work with Copy Number data, and uses only
+#' the oberved raw VAF from a set of available somatic mutations. To use
+#' also CNA data, please refer to \code{\link{}}
+#'
+#' The pipeline implements two heuristics to improve the quality of the
+#' output results:
+#'
+#' \itemise{
+#' \item determine a dynanmic cutoff of the latent variables for
+#' MOBSTER hard clustering assignments, so to ensure that a minimum number
+#' of mutations is assigned to the clonal cluster. This means that the
+#' pipeline starts with an initial value for the cutoffs, which gets
+#' decreased until the minimum number of mutations is reached. If the
+#' mutational burden was insufficient, the best possible result is still returned.
+#'
+#' \item determine if most of the mutations available in one cluster are
+#' mapped to a subset of chromosome locations (i.e., they are clustered). This
+#' suggests which clusters might be originated from Copy Number events (e.g. LOH)
+#' that are not available in the input data. In practice, it checks if more than
+#' 60% of the mutations in one cluster map to less than 20% of the chromosomes
+#' that have been used for this analysis (all the genome).
+#' }
+#'
+#' @param x A dataframe of somatic mutations that can be processed with
+#' MOBSTER, and that has the column \code{"chr"}.
+#' @param cutoff_lv A desired starting cutoff to compute clustering
+#' assignments with the latent variables probabilities above this threshold.
+#' This value gets decreased progressively if not enouth mutations are
+#' assignable to the cluster.
+#' @param N_min Minimum number of mutations that we wish to have in a cluster
+#' to consider it for this analysis.
+#' @param ... Parameters for the model fit that are forwarded to \code{\link{mobster_fit}}
+#' from package [MOBSTER](https://caravagn.github.io/mobster/)
+#'
+#' @return A list of named objects. These contain the best fit to the data,
+#' a summary table with the results of the heuristics and the best choice
+#' for the clonal cluster, high-confidence clonal mutations and tumour purity.
+#'
 #' @export
 #'
 #' @examples
-#'
 #' Take one dataset with genomic locations
 #' data('PD4120a_breast_sample', package = 'mobster')
 #'
-#' # Tune the pipeline (fast)
-x = pipeline_clonal_mutations(
-  PD4120a_breast_sample$best$data,
-  cutoff_lv = .7,
-  auto_setup = 'FAST', # These go to MOBSTER mobster_fit
-  K = 3)
-
-print(x)
-
-pipeline_clonal_mutations = function(x, cutoff_lv = .7, N_min = 20, ...)
+#' # Tune the pipeline (auto_setup = 'FAST')
+#' x = pipeline_clonal_mutations_purity(
+#'  PD4120a_breast_sample$best$data,
+#'  cutoff_lv = .7,
+#'  auto_setup = 'FAST' # These go to MOBSTER mobster_fit
+#'  )
+#'
+#' print(x)
+pipeline_clonal_mutations_purity = function(x, cutoff_lv = .7, N_min = 20, ...)
 {
+  pio::pioHdr("Evoverse", italic(paste0('~ Pipeline to determine clonal mutations and sample purity, from mutation data')))
+  cat('\n')
+
   # Required input
-  required_columns = c('chr', 'from', 'to')
+  required_columns = c('chr', 'VAF')
   stopifnot(required_columns %in% colnames(x))
 
   # This is the default analysis, it
   used_chromsomes = CNAqc::chr_coordinates_GRCh38$chr %>% unique
 
   #  MOBSTER fit of the input data
-  cli::cli_h1("Determining clonal mutations from VAF data (all karyotypes)")
+  cli::cli_h1("Determining clonal mutations from VAF of all karyotypes")
   cat('\n')
-  cli::cli_alert_info("Working without CNA data: MOBSTER will use a whole-genome reference")
+  cli::cli_alert_info("Without CNA data, evoverse will use the whole-genome reference")
   cat('\n')
 
   mobster_fit_tumour = mobster::mobster_fit(x, ...)
@@ -55,14 +94,14 @@ pipeline_clonal_mutations = function(x, cutoff_lv = .7, N_min = 20, ...)
     chromosomes = used_chromsomes)
 
   cat('\n')
-  cli::cli_alert_warning("Mutations spread across chromsomes (whole-genome)")
+  cli::cli_alert_warning("Clustered groups of mutations (spread across all chromsomes)")
 
   print(
     LOCATION_clusters_table %>% dplyr::select(cluster, prob, p_20p, CLUSTERED)
   )
 
   # 3) estimate tumour purity. Without mapping mutations to CNA, we assume everything is diploid
-  cli::cli_alert_warning("Without mapping mutations to CNA, a 'diploid' adjustment is assumed: purity = 2 * clonal_VAF")
+  cli::cli_alert_warning("For puirty, without CNA data a 'diploid' adjustment is assumed: purity = 2 * clonal_VAF")
   PURITY_clusters_table = heuristic_mobster_purity_estimation_nocna(best)
 
   # Select the best clonal cluster
@@ -75,7 +114,7 @@ pipeline_clonal_mutations = function(x, cutoff_lv = .7, N_min = 20, ...)
     dplyr::full_join(PURITY_clusters_table, by = 'cluster')
 
   # Cluster means (to scan in order and determie priority by location)
-  cluster_Binomial_means = x$Clusters %>% dplyr::filter(type == 'Mean') %>% dplyr::select(-init.value)
+  cluster_Binomial_means = best$Clusters %>% dplyr::filter(type == 'Mean') %>% dplyr::select(-init.value)
 
   candidates = fit$table %>%
     dplyr::full_join(cluster_Binomial_means, by = 'cluster') %>%
@@ -94,12 +133,16 @@ pipeline_clonal_mutations = function(x, cutoff_lv = .7, N_min = 20, ...)
 
   fit$clonal_cluster = candidates$cluster[1]
   fit$purity =  candidates$purity[1]
-  fit$n_clonal = table(x$data$cluster)[fit$clonal_cluster]
+
+  fit$clonal_mutations = mobster::Clusters(best, cutoff_assignment = cutoff_lv[fit$clonal_cluster]) %>%
+    dplyr::filter(cluster == !!fit$clonal_cluster)
+  fit$n_clonal = nrow(fit$clonal_mutations)
 
   cli::cli_alert_success("Clonal cluster: {.field {fit$clonal_cluster}} with n = {.value {fit$n_clonal}} mutations.")
 
   if(fit$purity > 1)
     cli::cli_alert_danger("Tumor purity: {.value {fit$purity}} (>1), will be coerced to 1.")
+  else  cli::cli_alert_success("Tumor purity estimated to be {.value {fit$purity}} from clonal mutations.")
 
   if(fit$clonal_cluster == "Tail")
     cli::cli_alert_danger("Clonal cluster as 'Tail', does not make sense.")
