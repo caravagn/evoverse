@@ -57,9 +57,9 @@ pipeline_qc_copynumbercalls = function(
   )
 
   color_peaks_qc = 'forestgreen'
-  if(adjustment > 0.03) color_peaks_qc = 'darkyellow'
-  if(adjustment > 0.05) color_peaks_qc = 'orange'
-  if(adjustment > 0.10) color_peaks_qc = 'red'
+  if(adjustment > 0.03) color_peaks_qc = 'darkgoldenrod2'
+  if(adjustment > 0.05) color_peaks_qc = 'chocolate3'
+  if(adjustment > 0.10) color_peaks_qc = 'brown3'
 
   peaks = CNAqc::plot_peaks_analysis(x)
   peaks = ggpubr::annotate_figure(peaks,
