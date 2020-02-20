@@ -3,7 +3,7 @@
 # purity = CNAqc::example_dataset_CNAqc$purity
 # reference = CNAqc::example_dataset_CNAqc$reference
 #
-# w = evoverse:::pipeline_qc_copynumbercalls(mutations, cna, purity, smooth = F, collate = F)
+# w = evoverse:::pipeline_qc_copynumbercalls(mutations, cna, purity, smooth = F, collate = T)
 
 #' Title
 #'

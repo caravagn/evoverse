@@ -237,8 +237,10 @@ report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collat
   require(myprettyreport)
   require(magick)
 
-  tool <-
-    image_read("https://caravagn.github.io/CNAqc/reference/figures/logo.png")
+  # tool <-
+  #   image_read("https://caravagn.github.io/CNAqc/reference/figures/logo.png")
+  tool = NA
+
   sample_logo = tool
   # frink <- image_read("https://jeroen.github.io/images/frink.png")
   # sample_logo = c(tool, frink)
