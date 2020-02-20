@@ -4,20 +4,13 @@
 \alias{pipeline_qc_copynumbercalls}
 \title{Title}
 \usage{
-pipeline_qc_copynumbercalls(
-  mutations,
-  cna,
-  purity,
-  reference = "GRCh38",
-  sample = "My Sample",
-  matching_epsilon_peaks = 0.025
-)
+pipeline_qc_copynumbercalls(mutations, cna, purity, reference = "GRCh38",
+  sample = "PAT00001", output = paste0(sample,
+  "_evoverse_qcreport.pdf"), matching_epsilon_peaks = 0.025,
+  smooth = FALSE, cex = 0.7, collate = FALSE)
 }
 \arguments{
-\item{matching_epsilon_peaks}{}
-}
-\value{
-
+\item{collate}{}
 }
 \description{
 Title
