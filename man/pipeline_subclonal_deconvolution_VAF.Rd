@@ -5,10 +5,11 @@
 \title{Pipeline to perform subclonal deconvolution with MOBSTER.}
 \usage{
 pipeline_subclonal_deconvolution_VAF(mutations, cna = NULL,
-  purity = NULL, min_VAF = 0.05, karyotypes = c("1:0", "1:1", "2:0",
-  "2:1", "2:2"), min_muts = 50,
-  description = "VAF Subclonal deconvolution dataset (MOBSTER + BMix)",
-  N_max = 15000, ...)
+  purity = NULL, sample = "XXX_YYY_ZZZ", output = paste0(sample,
+  "_evoverse_vaf_deconvolution.pdf"), min_VAF = 0.05,
+  karyotypes = c("1:0", "1:1", "2:0", "2:1", "2:2"), min_muts = 50,
+  N_max = 15000, matching_epsilon_peaks = 0.025, cex = 0.7,
+  collate = FALSE, ...)
 }
 \arguments{
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
@@ -19,10 +20,9 @@ pipeline_subclonal_deconvolution_VAF(mutations, cna = NULL,
 
 \item{min_muts}{Skip analysing karyotypes with less than \code{min_muts} mutations.}
 
-\item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
+\item{cex}{}
 
-\item{timeable}{Karyotypes that can be timed, expressed as "Major:minor" notation. Default
-are the following states \code{timeable = c('2:0', '2:1', '2:2')}.}
+\item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
 }
 \description{
 For a list of input mutations, CNA and purity data from a tumour sample,

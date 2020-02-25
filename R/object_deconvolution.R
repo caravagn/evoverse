@@ -25,10 +25,13 @@ print.evopipe_deconv = function(x)
 
   cat("\n")
 
+  cli::cli_alert_info("This tumour is {.field {x$table$architecture}}.")
+  cat("\n")
+
   df = x$table$summary
   df = df[, names(df) %in% c('karyotype', 'N', 'K_beta', 'tail', 'Shape_Tail', 'QC', 'QC_prob', 'BMix_K')]
 
-  print(df)
+  print(x$table$QC_table)
 }
 
 
@@ -51,9 +54,8 @@ plot.evopipe_deconv = function(x)
   qc_table = x$table$summary
 
   # 2 x 1 CNAqc plot
-
   groups = names(mobster_fits)
-  empty_panel = ggplot() + geom_blank()
+  empty_panel = CNAqc:::eplot()
 
   # MOBSTER plots, sourrounded by a coloured box by QC
   mob_fits_plot = lapply(
@@ -61,7 +63,7 @@ plot.evopipe_deconv = function(x)
     function(y)
     {
       if (all(is.null(mobster_fits[[y]])))
-        return(ggplot() + geom_blank())
+        return(CNAqc:::eplot())
 
       qc_entries = qc_table %>% dplyr::filter(karyotype == !!y)
 
@@ -77,7 +79,6 @@ plot.evopipe_deconv = function(x)
                 size = 5
               ))
   })
-
 
 
   # CNA plot

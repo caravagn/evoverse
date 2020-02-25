@@ -37,6 +37,8 @@ pipeline_qc_copynumbercalls = function(
   pio::pioHdr("Evoverse", italic(paste0('~ Pipeline to determine thq quality of somatic mutation and CNA data')))
   cat('\n')
 
+  options(CNAqc_cex = cex)
+
   # Creating input CNAqc
   cli::cli_h1("Creating input object (smoothing {.field {smooth}}) for sample {.field {sample}}")
   cat("\n")
@@ -69,7 +71,7 @@ pipeline_qc_copynumbercalls = function(
   cat("\n")
 
   x = CNAqc::detect_arm_overfragmentation(x)
-  x =  CNAqc::detect_wg_overfragmentation(x)
+  # x =  CNAqc::detect_wg_overfragmentation(x)
 
   # Final QC
   QC_table = evoverse:::get_pqc_cna_QC_table(x)
@@ -107,7 +109,7 @@ pipeline_qc_copynumbercalls = function(
 
 get_pqc_cna_QC_table = function(x)
 {
-  all_karyptypes = x$peaks_analysis$plots %>% names
+  all_karyptypes = x$peaks_analysis$fits %>% names
 
   peaks_QC = x$peaks_analysis$matches %>%
     dplyr::select(karyotype, QC) %>%

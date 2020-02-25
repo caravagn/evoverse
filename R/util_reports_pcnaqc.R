@@ -1,86 +1,4 @@
-button = function(color, radio, size, font = 'plain')
-{
-  ggplot(data = data.frame(
-    x = 0,
-    y = 0,
-    label = radio,
-    stringsAsFactors = FALSE
-  ),
-  aes(x = x , y = y, label = label)) +
-    theme_void() +
-    theme(plot.background = element_rect(fill = color)) +
-    geom_text(fontface = font, hjust = 0)
-}
-
-# devtools::install_github("tarkomatas/myprettyreport")
-
-# Raw data panel
-get_raw_data_panel = function(x)
-{
-  USE_KARYOTYPES = c("1:0", '1:1', '2:0', '2:1', '2:2')
-
-  # Raw mutation data
-  raw_muts = x$snvs %>% dplyr::mutate(karyotype = ifelse(karyotype %in% USE_KARYOTYPES, karyotype, "other"))
-  ccf_data = Reduce(dplyr::bind_rows,
-                    lapply(x$CCF_estimates, function(x)
-                      x$mutations)) %>%
-    dplyr::mutate(karyotype = ifelse(karyotype %in% USE_KARYOTYPES, karyotype, "other"))
-
-  karyo_colors = CNAqc:::get_karyotypes_colors(c(USE_KARYOTYPES, 'other'))
-
-  cvgp = ggplot(data = raw_muts, aes(DP, fill = karyotype)) +
-    geom_histogram(bins = 100) +
-    scale_x_log10() +
-    CNAqc:::my_ggplot_theme() +
-    labs(title = "Sequencing depth (coverage)",
-         caption = paste0("Median coverage ", median(x$snvs$DP), 'x')) +
-    geom_vline(
-      xintercept = median(raw_muts$DP),
-      color = 'orange',
-      linetype = 'dashed',
-      size = .3
-    ) +
-    scale_fill_manual(values = karyo_colors)
-
-  vafp = ggplot(data = raw_muts, aes(VAF, fill = karyotype)) +
-    geom_histogram(binwidth = 0.01) +
-    xlim(0, 1) +
-    CNAqc:::my_ggplot_theme() +
-    labs(title = "Raw VAF",
-         caption = paste0("VAF < 0.05 (5%) = ", sum(x$snvs$VAF < 0.05))) +
-    scale_fill_manual(values = karyo_colors)
-
-  ccfp = ggplot(data = ccf_data,
-                aes(CCF, fill = karyotype)) +
-    geom_histogram(binwidth = 0.01) +
-    xlim(0, max(ccf_data$CCF, na.rm = T) %>% ceiling) +
-    CNAqc:::my_ggplot_theme() +
-    labs(title = "CCF values",
-         caption = paste0("CCF < 0.05 (5%) = ", sum(ccf_data$CCF < 0.05, na.rm = T))) +
-    scale_fill_manual(values = karyo_colors)
-
-  return(list(cvgp, vafp, ccfp))
-}
-
-# Annotate title on top of a plot
-annot_t = function(x, t) {
-  ggpubr::annotate_figure(x,
-                          top = ggpubr::text_grob(
-                            t,
-                            hjust = 0,
-                            x = 0,
-                            face = 'plain'
-                          ))
-
-}
-
-# Add margins to a plot
-fun_marg = function(x, fact, w = 1, h = 1) {
-  x + theme(plot.margin = unit(c(1 * h, 1 * w, 1 * h, 1 * w) * fact, "cm"))
-}
-
-
-page_one = function(x) {
+page1_pcnaqc = function(x) {
   N = ifelse(x$n_snvs > 3000, 3000, x$n_snvs)
 
   # Segments
@@ -100,11 +18,46 @@ page_one = function(x) {
     rel_heights = c(.35, .8)
   )
 
-  Bpl  = evoverse:::get_raw_data_panel(x)
+  # Raw data panels
+  USE_KARYOTYPES = c("1:0", '1:1', '2:0', '2:1', '2:2')
 
-  B = Bpl[[1]]
-  C = Bpl[[2]]
-  D = Bpl[[3]]
+  # Raw mutation data
+  raw_muts = x$snvs %>% dplyr::mutate(karyotype = ifelse(karyotype %in% USE_KARYOTYPES, karyotype, "other"))
+  ccf_data = Reduce(dplyr::bind_rows,
+                    lapply(x$CCF_estimates, function(x)
+                      x$mutations)) %>%
+    dplyr::mutate(karyotype = ifelse(karyotype %in% USE_KARYOTYPES, karyotype, "other"))
+
+  B = ggplot(data = raw_muts, aes(DP, fill = karyotype)) +
+    geom_histogram(bins = 100) +
+    scale_x_log10() +
+    CNAqc:::my_ggplot_theme() +
+    labs(title = "Sequencing depth (coverage)",
+         caption = paste0("Median coverage ", median(x$snvs$DP), 'x')) +
+    geom_vline(
+      xintercept = median(raw_muts$DP),
+      color = 'orange',
+      linetype = 'dashed',
+      size = .3
+    ) +
+    scale_fill_manual(values = evoverse:::my_ggplot_karyotype_colors())
+
+  C = ggplot(data = raw_muts, aes(VAF, fill = karyotype)) +
+    geom_histogram(binwidth = 0.01) +
+    xlim(0, 1) +
+    CNAqc:::my_ggplot_theme() +
+    labs(title = "Raw VAF",
+         caption = paste0("VAF < 0.05 (5%) = ", sum(x$snvs$VAF < 0.05))) +
+    scale_fill_manual(values = evoverse:::my_ggplot_karyotype_colors())
+
+  D = ggplot(data = ccf_data,
+                aes(CCF, fill = karyotype)) +
+    geom_histogram(binwidth = 0.01) +
+    xlim(0, max(ccf_data$CCF, na.rm = T) %>% ceiling) +
+    CNAqc:::my_ggplot_theme() +
+    labs(title = "CCF values",
+         caption = paste0("CCF < 0.05 (5%) = ", sum(ccf_data$CCF < 0.05, na.rm = T))) +
+    scale_fill_manual(values = evoverse:::my_ggplot_karyotype_colors())
 
   W = ggpubr::ggarrange(C,
                         B,
@@ -146,8 +99,7 @@ page_one = function(x) {
   )
 }
 
-
-page_two = function(x)
+page2_pcnaqc = function(x)
 {
   sc = getOption('CNAqc_cex', default = 1)
 
@@ -203,10 +155,10 @@ page_two = function(x)
 
 }
 
-page_three = function(x)
+page3_pcnaqc = function(x)
 {
   CNAqc::plot_CCF(x) %>%
-    annot_t(t = paste0(
+    evoverse:::img_annot_t(t = paste0(
       "QC PASS (per karyotype) if we can assign >90% of mutation burden\n"
     ))
 }
@@ -216,7 +168,6 @@ report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collat
 {
   # Set global cex value for all CNAqc plots
   options(CNAqc_cex = cex)
-  require(CNAqc)
   require(patchwork)
 
   # QC
@@ -225,41 +176,26 @@ report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collat
   qc_col = brewer.pal('Spectral', n = 5)[l_PASS]
 
   # Page one -- segments | vaf | qc
-  first_page = evoverse:::page_one(x) %>% evoverse:::fun_marg(fact = 1, w = 1, h = )
-
   # Page two -- Peak analysis and fragmentation
-  second_page = evoverse:::page_two(x) %>% evoverse:::fun_marg(fact = 1, w = 1, h = 2)
-
-  # Page two -- Peak analysis and fragmentation
-  third_page = evoverse:::page_three(x) %>% evoverse:::fun_marg(fact = 1, w = 1, h = 2)
+  # Page three -- Peak analysis and fragmentation
+  first_page = evoverse:::page1_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h = )
+  second_page = evoverse:::page2_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h = 2)
+  third_page = evoverse:::page3_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h = 2)
 
   # Report assembly
   require(myprettyreport)
-  require(magick)
+  # require(magick)
 
   # tool <-
-  #   image_read("https://caravagn.github.io/CNAqc/reference/figures/logo.png")
+  #   magick::image_read("https://caravagn.github.io/CNAqc/reference/figures/logo.png")
   tool = NA
 
   sample_logo = tool
-  # frink <- image_read("https://jeroen.github.io/images/frink.png")
-  # sample_logo = c(tool, frink)
 
+  # Frontline
   cp_e_params = function() {
     B = brewer.pal('Spectral', n = 5)
 
-
-    # for(i in seq_along(B))
-    # {
-    #   grid::grid.rect(gp = grid::gpar(fill = B[i]),
-    #                   vp = grid::viewport(layout.pos.row = 2,
-    #                                       layout.pos.col = 2),
-    #                   x = i,
-    #                   y = 2,
-    #                   width = 0.2, height = 0.2)
-    # }
-#
-# #
     grid::grid.rect(
       gp = grid::gpar(fill = alpha(qc_col, .3)),
       vp = grid::viewport(layout.pos.row = 2,
@@ -278,7 +214,7 @@ report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collat
   p3_tit = 'Cancer Cell Fractions estimation and QC.'
 
   # Special report - 1 page wide collated
-  if(collate == FALSE)
+  if(collate == TRUE)
   {
     message("Saving single-page collated PDF report")
 
@@ -344,26 +280,10 @@ report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collat
         logo_size = .35,
         theme = "flashy",
         need_footer = TRUE,
-        footer_text = "Copyright © Giulio Caravagna | 2020 | evoverse (caravagn.github.io/evoverse)",
+        footer_text = "evoverse GitHub Pages: caravagn.github.io/evoverse | @gcaravagna | 2020",
         footer_color = "#3d3c3c"
       ) %>%
       end_report()
   }
 
 }
-
-
-# report_multipage_cnaqc_pipeline(x)
-#
-# library(pdftools)
-#
-# pdf_combine(c("report_output.pdf", "report_output.pdf"), output = "joined.pdf")
-# pdf_compress('joined.pdf', output = "joined3.pdf")
-#
-#
-#
-# plotflow:::mergePDF(
-#   in.file = paste(c("report_output.pdf", "report_output.pdf"), collapse=" "),
-#   file="joined3.pdf"
-# )
-#
