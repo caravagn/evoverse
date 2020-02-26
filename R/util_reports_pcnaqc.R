@@ -23,10 +23,29 @@ page1_pcnaqc = function(x) {
 
   # Raw mutation data
   raw_muts = x$snvs %>% dplyr::mutate(karyotype = ifelse(karyotype %in% USE_KARYOTYPES, karyotype, "other"))
-  ccf_data = Reduce(dplyr::bind_rows,
-                    lapply(x$CCF_estimates, function(x)
-                      x$mutations)) %>%
-    dplyr::mutate(karyotype = ifelse(karyotype %in% USE_KARYOTYPES, karyotype, "other"))
+
+  # CCF data, if available
+  D = NULL
+  if (all(is.null(x$CCF_estimates)))
+  {
+    D = CNAqc:::eplot()
+  }
+  else
+  {
+    ccf_data = Reduce(dplyr::bind_rows,
+                      lapply(x$CCF_estimates, function(x)
+                        x$mutations)) %>%
+      dplyr::mutate(karyotype = ifelse(karyotype %in% USE_KARYOTYPES, karyotype, "other"))
+
+    D = ggplot(data = ccf_data,
+               aes(CCF, fill = karyotype)) +
+      geom_histogram(binwidth = 0.01) +
+      xlim(0, max(ccf_data$CCF, na.rm = T) %>% ceiling) +
+      CNAqc:::my_ggplot_theme() +
+      labs(title = "CCF values",
+           caption = paste0("CCF < 0.05 (5%) = ", sum(ccf_data$CCF < 0.05, na.rm = T))) +
+      scale_fill_manual(values = evoverse:::my_ggplot_karyotype_colors())
+  }
 
   B = ggplot(data = raw_muts, aes(DP, fill = karyotype)) +
     geom_histogram(bins = 100) +
@@ -48,15 +67,6 @@ page1_pcnaqc = function(x) {
     CNAqc:::my_ggplot_theme() +
     labs(title = "Raw VAF",
          caption = paste0("VAF < 0.05 (5%) = ", sum(x$snvs$VAF < 0.05))) +
-    scale_fill_manual(values = evoverse:::my_ggplot_karyotype_colors())
-
-  D = ggplot(data = ccf_data,
-                aes(CCF, fill = karyotype)) +
-    geom_histogram(binwidth = 0.01) +
-    xlim(0, max(ccf_data$CCF, na.rm = T) %>% ceiling) +
-    CNAqc:::my_ggplot_theme() +
-    labs(title = "CCF values",
-         caption = paste0("CCF < 0.05 (5%) = ", sum(ccf_data$CCF < 0.05, na.rm = T))) +
     scale_fill_manual(values = evoverse:::my_ggplot_karyotype_colors())
 
   W = ggpubr::ggarrange(C,
@@ -124,12 +134,19 @@ page2_pcnaqc = function(x)
     filter(n > !!N, length > D) %>%
     pull(segment_id)
 
-  if(length(segment_ids) == 0) B = CNAqc:::eplot()
+  if (length(segment_ids) == 0)
+    B = CNAqc:::eplot()
   else
   {
     B = CNAqc::inspect_segment(x, n = N, l = D) +
       labs(
-        title = paste0("Segments with >", N, " mutations (1% of total) and >", D, ' bases (10% of median length)\n'),
+        title = paste0(
+          "Segments with >",
+          N,
+          " mutations (1% of total) and >",
+          D,
+          ' bases (10% of median length)\n'
+        ),
         subtitle = NULL
       )
   }
@@ -164,7 +181,12 @@ page3_pcnaqc = function(x)
 }
 
 # Report multi-page style for the Data QC pipeline
-report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collate = F)
+report_multipage_cnaqc_pipeline = function(x,
+                                           f,
+                                           cex = .7,
+                                           sample,
+                                           score,
+                                           collate = F)
 {
   # Set global cex value for all CNAqc plots
   options(CNAqc_cex = cex)
@@ -178,7 +200,7 @@ report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collat
   # Page one -- segments | vaf | qc
   # Page two -- Peak analysis and fragmentation
   # Page three -- Peak analysis and fragmentation
-  first_page = evoverse:::page1_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h = )
+  first_page = evoverse:::page1_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h =)
   second_page = evoverse:::page2_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h = 2)
   third_page = evoverse:::page3_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h = 2)
 
@@ -203,10 +225,13 @@ report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collat
       width = 0.8,
       height = 0.2
     )
-#
-    grid::grid.text(paste0("PASS rate ", score), gp=grid::gpar(col=qc_col),
-                    vp = grid::viewport(layout.pos.row = 2,
-                                        layout.pos.col = 1))
+    #
+    grid::grid.text(
+      paste0("PASS rate ", score),
+      gp = grid::gpar(col = qc_col),
+      vp = grid::viewport(layout.pos.row = 2,
+                          layout.pos.col = 1)
+    )
   }
 
   p1_tit = 'Data quality check (QC) from matched Copy Number and mutation data.'
@@ -214,7 +239,7 @@ report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collat
   p3_tit = 'Cancer Cell Fractions estimation and QC.'
 
   # Special report - 1 page wide collated
-  if(collate == TRUE)
+  if (collate == TRUE)
   {
     message("Saving single-page collated PDF report")
 
@@ -224,7 +249,12 @@ report_multipage_cnaqc_pipeline = function(x, f, cex = .7, sample, score, collat
       third_page %>% evoverse:::annot_t(p3_tit),
       ncol = 3
     ) %>%
-      ggsave(filename = f, height = 250, width = 2.1 * 297, units = 'mm')
+      ggsave(
+        filename = f,
+        height = 250,
+        width = 2.1 * 297,
+        units = 'mm'
+      )
   }
   else
   {
