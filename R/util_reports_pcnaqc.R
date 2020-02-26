@@ -18,63 +18,15 @@ page1_pcnaqc = function(x) {
     rel_heights = c(.35, .8)
   )
 
-  # Raw data panels
-  USE_KARYOTYPES = c("1:0", '1:1', '2:0', '2:1', '2:2')
 
-  # Raw mutation data
-  raw_muts = x$snvs %>% dplyr::mutate(karyotype = ifelse(karyotype %in% USE_KARYOTYPES, karyotype, "other"))
-
-  # CCF data, if available
-  D = NULL
-  if (all(is.null(x$CCF_estimates)))
-  {
-    D = CNAqc:::eplot()
-  }
-  else
-  {
-    ccf_data = Reduce(dplyr::bind_rows,
-                      lapply(x$CCF_estimates, function(x)
-                        x$mutations)) %>%
-      dplyr::mutate(karyotype = ifelse(karyotype %in% USE_KARYOTYPES, karyotype, "other"))
-
-    D = ggplot(data = ccf_data,
-               aes(CCF, fill = karyotype)) +
-      geom_histogram(binwidth = 0.01) +
-      xlim(0, max(ccf_data$CCF, na.rm = T) %>% ceiling) +
-      CNAqc:::my_ggplot_theme() +
-      labs(title = "CCF values",
-           caption = paste0("CCF < 0.05 (5%) = ", sum(ccf_data$CCF < 0.05, na.rm = T))) +
-      scale_fill_manual(values = evoverse:::my_ggplot_karyotype_colors())
-  }
-
-  B = ggplot(data = raw_muts, aes(DP, fill = karyotype)) +
-    geom_histogram(bins = 100) +
-    scale_x_log10() +
-    CNAqc:::my_ggplot_theme() +
-    labs(title = "Sequencing depth (coverage)",
-         caption = paste0("Median coverage ", median(x$snvs$DP), 'x')) +
-    geom_vline(
-      xintercept = median(raw_muts$DP),
-      color = 'orange',
-      linetype = 'dashed',
-      size = .3
-    ) +
-    scale_fill_manual(values = evoverse:::my_ggplot_karyotype_colors())
-
-  C = ggplot(data = raw_muts, aes(VAF, fill = karyotype)) +
-    geom_histogram(binwidth = 0.01) +
-    xlim(0, 1) +
-    CNAqc:::my_ggplot_theme() +
-    labs(title = "Raw VAF",
-         caption = paste0("VAF < 0.05 (5%) = ", sum(x$snvs$VAF < 0.05))) +
-    scale_fill_manual(values = evoverse:::my_ggplot_karyotype_colors())
-
-  W = ggpubr::ggarrange(C,
-                        B,
-                        D,
-                        ncol = 3,
-                        common.legend = T,
-                        legend = 'bottom')
+  # Histograms plots
+  W = ggpubr::ggarrange(
+    CNAqc::plot_data_histogram(x, which = "VAF"),
+    CNAqc::plot_data_histogram(x, which = "DP"),
+    CNAqc::plot_data_histogram(x, which = "CCF"),
+    ncol = 3,
+    common.legend = T,
+    legend = 'bottom')
 
   # Genome distribution and QC
   E = ggpubr::ggarrange(
