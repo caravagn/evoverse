@@ -1,166 +1,115 @@
-#' Plot a dataset (complex figure).
+#' Plot an \code{evoverse} dataset.
 #'
-#' @description Create a complex figure via \code{ggpubr} assembling several plots. The figure
-#' reports 1) the adjusted VAF (full spectrum), 2) the zoomed version of the adjusted
-#' VAF for values below 0.20 (low-frequency spectrum), 3) the depth against the VAF
-#' of each mutation and 4) the depth distribution.
+#' @description
 #'
+#' This function can return different types of lists of plots for an \code{evoverse} dataset;
+#' the control on which type of plot is generated is given by the ellipsis parameters.
 #'
-#' @param x A dataset of class \code{"mbst_data"}.
-#' @param scales Scales for ggplot facets, default is \code{'fixed'} but \code{'free'} can also help.
-#' @param cex Cex of the plots.
-#' @param ...
+#' In particular, this function returns:
 #'
-#' @return A ggpubr figure object.
+#' \itemize{
+#' \item 2D VAF plots (sample versus sample), if there are more than one sample in this dataset.
+#' \item or a single histogram plot when there one sample in the dataset.
+#' }
+#'
+#' The plotting style depends on the ellipsis parameters:
+#'
+#' \itemize{
+#' \item without parameters, the mutations are left black. These plots are generated
+#' by ether function \link{plot_2D_VAF}, or \link{plot_1D_VAF};
+#' \item with \code{clusters = "MOBSTER"}, the mutations are coloured according to the
+#' \code{MOBSTER} clusters. These plots in 2D are generated
+#' by function \link{plot_2D_VAF_MOBSTER}, and in 1D by the
+#' \code{MOBSTER} S3 \code{plot} function (see MOBSTER's documentation);
+#' \item with \code{clusters = "VIBER"}, the mutations are plot according to the
+#' \code{VIBER} S3 \code{plot} function (see VIBER's documentation);
+#' }
+#'
+#' @param x An  \code{evoverse} object.
+#' @param ... Only one extra parameter is supported: \code{clusters}, which can be
+#' set to \code{"MOBSTER"} or \code{"VIBER"}.
+#'
+#' @return A list of \code{ggplot} figures.
+#'
+#' @seealso Plotting functions used by this S3 function are \link{\code{plot_2D_VAF}},
+#' \link{\code{plot_2D_VAF_MOBSTER}} and \link{\code{plot_1D_VAF}}.
+#'
 #' @export
 #'
 #' @examples
-#' TODO
-plot.mbst_data = function(x, scales = 'fixed', cex = 1, ...)
+#' data('example_evoverse')
+#'
+#' # Plot the data
+#' plot(example_evoverse)
+#'
+#' # Plot the data augmented with MOBSTER clusters
+#' plot(example_evoverse, clusters = "MOBSTER")
+plot.mbst_data = function(x, ...)
 {
-  stopifnot(inherits(x, "mbst_data"))
+  check_is_mobster_mvdata(x)
 
-  # 4 plots
-  pl_Full = plot_VAF(x,
-                     scales = scales,
-                     cex = cex,
-                     range = c(0, Inf))
+  params = as.list(substitute(list(...)))[-1L]
+  which_cluster = params['clusters']
 
-  pl_LowFreq = plot_VAF(x,
-                        scales = scales,
-                        cex = cex,
-                        range = c(0, 0.2))
+  # =-=-=-=-=-=-=-=-=-=-=-=-
+  # Plots without clusters
+  # =-=-=-=-=-=-=-=-=-=-=-=-
+  if(which_cluster != 'MOBSTER' & which_cluster != 'VIBER')
+  {
+    message("Plotting plain data - use clusters = {'MOBSTER', 'VIBER'} to plot clusters")
 
-  pl_DP = plot_DP(x,
-                  scales = scales,
-                  cex = cex,
-                  range = c(0, Inf))
+    # 2D case, without clusters
+    if (length(x$samples) > 1)
+    {
+      pairs = combn(x$samples, 2)
 
-  pl_DP_V = plot_DP_VAF(x, scales = scales)
+      figures = apply(pairs, 2, function(w)
+      {
+        plot_2D_VAF(x, w[1], w[2], ...)
+      })
+    }
+    else
+    {
+      figures = plot_1D_VAF(x, x$samples[1])
+    }
+  }
 
-  # 1 figure
-  figure = ggpubr::ggarrange(pl_Full,
-                             pl_LowFreq,
-                             pl_DP_V,
-                             pl_DP,
-                             ncol = 1,
-                             nrow = 4)
+  # =-=-=-=-=-=-=-=-=-=-=-=-
+  # Plots with MOBSTER cluster
+  # =-=-=-=-=-=-=-=-=-=-=-=-
+  if(which_cluster == 'MOBSTER')
+  {
+    message("Plotting data augmented with MOBSTER clusters")
 
-  figure = ggpubr::annotate_figure(figure, top = x$description)
+    # 2D case, without clusters
+    if (length(x$samples) > 1)
+    {
+      pairs = combn(x$samples, 2)
 
-  return(figure)
+      figures = apply(pairs, 2, function(w)
+      {
+        plot_2D_VAF_MOBSTER(x, w[1], w[2], ...)
+      })
+    }
+    else
+    {
+      figures = plot(x$fit_MOBSTER[[1]]$best)
+    }
 
+  }
+
+  # =-=-=-=-=-=-=-=-=-=-=-=-
+  # Plots with VIBER cluster
+  # =-=-=-=-=-=-=-=-=-=-=-=-
+  if(which_cluster == 'VIBER')
+  {
+    message("Plotting VIBER clusters- using plot function from the VIBER package.")
+
+    figures = plot(x$fit_VIBER)
+  }
+
+
+  return(figures)
 }
 
-# =-=-=-=-=-=-=-=-
-# Aux methods
-# =-=-=-=-=-=-=-=-
-plot_VAF = function(x,
-                    scales = 'fixed',
-                    cex = 1,
-                    range = c(0, Inf))
-{
-  stopifnot(inherits(x, "mbst_data"))
-
-  vaf = VAF(x) %>%
-    filter(value > range[1], value < range[2])
-
-  max.VAF = max(vaf$value)
-  if (max.VAF < 1 & range[2] > 1)
-    max.VAF = 1
-
-  ggplot(vaf, aes(value, fill = sample)) +
-    facet_wrap( ~ sample, nrow = 1, scales = scales) +
-    theme_light(base_size = 8) +
-    guides(fill = FALSE) +
-    theme(
-      legend.position = "bottom",
-      legend.text = element_text(size = 8),
-      legend.key.size = unit(.3, "cm")
-    ) +
-    geom_vline(aes(xintercept = 0.5), colour = 'black', size = .3) +
-    geom_vline(
-      aes(xintercept = 0.25),
-      colour = 'darkblue',
-      linetype = "longdash",
-      size = .5
-    ) +
-    geom_vline(
-      aes(xintercept = 0.33),
-      colour = 'steelblue',
-      linetype = "longdash",
-      size = .5
-    ) +
-    geom_vline(
-      aes(xintercept = 0.66),
-      colour = 'blue',
-      linetype = "longdash",
-      size = .3
-    ) +
-    geom_vline(
-      aes(xintercept = 1),
-      colour = 'black',
-      linetype = "longdash",
-      size = .2
-    ) +
-    geom_histogram(binwidth = 0.01, alpha = .8) +
-    # geom_density() +
-    xlim(0, max.VAF) +
-    labs(
-      title = bquote(bold("Adjusted VAF")),
-      subtitle = paste0('Plot range: ', range[1], '-', range[2]),
-      x = 'Adjusted VAF',
-      y = 'Counts'
-    )
-}
-
-plot_DP = function(x,
-                   scales = 'fixed',
-                   cex = 1,
-                   range = c(0, Inf))
-{
-  stopifnot(inherits(x, "mbst_data"))
-
-  dp = DP(x) %>% filter(value > range[1], value < range[2])
-
-  ggplot(dp, aes(value, fill = sample)) +
-    geom_histogram(binwidth = 5, alpha = .8) +
-    facet_wrap( ~ sample, nrow = 1, scales = scales) +
-    theme_light(base_size = 8) +
-    guides(fill = FALSE) +
-    theme(
-      legend.position = "bottom",
-      legend.text = element_text(size = 8),
-      legend.key.size = unit(.3, "cm")
-    ) +
-    labs(
-      title = bquote(bold("Depth (DP)")),
-      subtitle = paste0('Plot range: ', range[1], '-', range[2]),
-      x = 'DP',
-      y = 'Counts'
-    )
-
-}
-
-plot_DP_VAF = function(x, scales = 'fixed', cex = 1)
-{
-  VAF_val = VAF(x) %>% filter(value > 0)
-  DP_val = DP(x) %>% filter(value > 0)
-
-  ggplot(bind_rows(DP_val, VAF_val) %>% spread(variable, value),
-         aes(x = DP, y = VAF, color = sample)) +
-    geom_point(alpha = 1, size = .4) +
-    facet_wrap(~ sample, nrow = 1,  scales = 'free') +
-    guides(fill = FALSE, color = FALSE) +
-    labs(title = bquote(bold("Depth (DP) versus Adjusted VAF")),
-         x = 'Depth (DP)',
-         y = 'Adjusted VAF') +
-    theme_light(base_size = 8) +
-    theme(
-      legend.position = "bottom",
-      legend.text = element_text(size = 8),
-      legend.key.size = unit(.3, "cm")
-    ) +
-    scale_x_log10() +
-    stat_density2d(alpha = .3)
-}
+#

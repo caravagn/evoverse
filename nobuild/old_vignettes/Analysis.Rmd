@@ -1,0 +1,78 @@
+---
+title: "Cancer Evolution Analysis"
+author: "Giulio Caravagna"
+date: "September 2019"
+institute: "Institute for Cancer Research"
+email: "giulio.caravagna@icr.ac.uk"
+output: rmarkdown::github_document
+vignette: >
+  %\VignetteIndexEntry{Cancer Evolution Analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette shows the analysis with MOBSTER and VIBER of the data stored inside a dataset of the mvMOBSTER package (S3 object class `mbs_data`).
+
+We work with the `x` generated in the introductory vignette "Getting started". 
+
+```{r, include=FALSE, echo=FALSE, message= FALSE, warning=FALSE}
+library(mvmobster)
+
+# Simple fake dataset
+data('example_input_formats', package = 'mvmobster')
+
+x = dataset(
+  mutations = example_input_formats$long_mutations, 
+  segments = example_input_formats$long_segments, 
+  samples = c('Set42', 'Set44'), 
+  purity =  c(`Set42` = 0.8, `Set44` = 0.8), 
+  description = "A fake dataset"
+)
+```
+
+### MOBSTER analysis
+
+The wrapper `analyze_mobster` runs `mobster_fit` from the [MOBSTER](https://caravagn.github.io/MOBSTER/) package for tumour subclonal deconvolution, which combines Dirichlet  mixtures with distributions predicted by theoretical population genetics.
+
+If you want to pass extra parameters to the fitting function, please refer to  [MOBSTER vignettes ](https://caravagn.github.io/MOBSTER/) on possible parametrizations of the fit.
+
+```{r fig.width=8, fig.height=9}
+x = analyze_mobster(x, parallel = F, K = 1,  init = 'random')
+```
+
+Now the internal state of the object shows the fits as available analysis.
+```{r fig.width=8, fig.height=9}
+print(x)
+```
+
+Consequently, the S3 plotting function can now be asked to plot 2D points coloured by MOBSTER cluster (the samples are analyzed independently therefore there are two labels per point).
+
+```{r fig.width=3, fig.height=3}
+plot(x, clusters = 'MOBSTER')
+```
+
+The MOBSTER fits are accessible
+```{r fig.width=4, fig.height=4}
+plot(x$fit_MOBSTER$Set42$best)
+plot(x$fit_MOBSTER$Set44$best)
+```
+
+
+
+x_notail = filter_tails(x)
+x_notail = analyze_VIBER(x_notail)
+
+plot(x_notail, clusters = 'VIBER')
+
+```{r fig.width=4, fig.height=4}
+x = analyze_VIBER(x)
+print(x)
+plot(x, clusters = 'VIBER')
+```

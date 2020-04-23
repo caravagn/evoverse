@@ -1,57 +1,48 @@
-#' Coordinates for hg19 chromosomes.
+#' Example \code{evoverse} dataset.
 #'
 #' @docType data
 #'
-#' @usage data(chr_coordinates_hg19)
+#' @usage data(example_evoverse)
 #'
-#' @format A tibble that represents the coorinates for hg19 chromosome
-#' (chr, length, from, to, centromerStart and centromerEnd)
+#' @format A simple dataset created and analyzed with the
+#' \code{evoverse} package.
 #'
 #' @keywords datasets
 #'
-#' @references hg19
-#'
 #' @examples
-#' data(chr_coordinates_hg19)
-#' chr_coordinates_hg19
+#' data(example_evoverse)
+#' head(example_evoverse)
 #'
-"chr_coordinates_hg19"
+"example_evoverse"
 
-#' Cytobands for hg19 chromosome
+#' Example data in the wide and long formts supported by the
+#' \code{evoverse} package.
 #'
 #' @docType data
 #'
-#' @usage data(chr_cytoband_hg19)
+#' @usage data(example_input_formats)
 #'
-#' @format A tibble that represents the cytobands for hg19 chromosome
-#' (chr, from, to, cytoband and region).
+#' @format 4 tibbles, wide/long and mutations/copy number that
+#' show the format required to create an  \code{evoverse} object with
+#' function \link{\code{dataset}}.
 #'
 #' @keywords datasets
 #'
-#' @references hg19
-#'
 #' @examples
-#' data(chr_cytoband_hg19)
-#' head(chr_cytoband_hg19)
-#'
-"chr_cytoband_hg19"
+#' data(example_input_formats)
+#' head(example_input_formats)
+"example_input_formats"
 
-#' Example data in mvMOBSTER format.
+#' QC pre-trained Logistic classifier for timing of CNA with MOBSTER.
 #'
 #' @docType data
 #'
-#' @usage data(example_mvmobster)
+#' @usage data(qc_timing_model)
 #'
-#' @format A tibble that represents the cytobands for hg19 chromosome
-#' (chr, from, to, cytoband and region).
+#' @format A logistic classifier.... describe training ......
 #'
 #' @keywords datasets
 #'
-#' @references hg19
-#'
 #' @examples
-#' data(example_mvmobster)
-#' head(example_mvmobster)
-#'
-"example_mvmobster"
-
+#' print(qc_timing_model)
+"qc_timing_model"

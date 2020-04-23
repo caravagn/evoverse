@@ -1,0 +1,9 @@
+pandoc: 2.1.1
+pkgdown: 1.4.0
+pkgdown_sha: ~
+articles:
+  Colorectal_Cross: Colorectal_Cross.html
+  evoverse: evoverse.html
+  packages: packages.html
+  pipelines: pipelines.html
+

@@ -2,28 +2,53 @@
 % Please edit documentation in R/S3_methods_plot.R
 \name{plot.mbst_data}
 \alias{plot.mbst_data}
-\title{Plot a dataset (complex figure).}
+\title{Plot an \code{evoverse} dataset.}
 \usage{
-plot.mbst_data(x, scales = "fixed", cex = 1, ...)
+plot.mbst_data(x, ...)
 }
 \arguments{
-\item{x}{A dataset of class \code{"mbst_data"}.}
+\item{x}{An  \code{evoverse} object.}
 
-\item{scales}{Scales for ggplot facets, default is \code{'fixed'} but \code{'free'} can also help.}
-
-\item{cex}{Cex of the plots.}
-
-\item{...}{}
+\item{...}{Only one extra parameter is supported: \code{clusters}, which can be
+set to \code{"MOBSTER"} or \code{"VIBER"}.}
 }
 \value{
-A ggpubr figure object.
+A list of \code{ggplot} figures.
 }
 \description{
-Create a complex figure via \code{ggpubr} assembling several plots. The figure
-reports 1) the adjusted VAF (full spectrum), 2) the zoomed version of the adjusted
-VAF for values below 0.20 (low-frequency spectrum), 3) the depth against the VAF
-of each mutation and 4) the depth distribution.
+This function can return different types of lists of plots for an \code{evoverse} dataset;
+the control on which type of plot is generated is given by the ellipsis parameters.
+
+In particular, this function returns:
+
+\itemize{
+\item 2D VAF plots (sample versus sample), if there are more than one sample in this dataset.
+\item or a single histogram plot when there one sample in the dataset.
+}
+
+The plotting style depends on the ellipsis parameters:
+
+\itemize{
+\item without parameters, the mutations are left black. These plots are generated
+by ether function \link{plot_2D_VAF}, or \link{plot_1D_VAF};
+\item with \code{clusters = "MOBSTER"}, the mutations are coloured according to the
+\code{MOBSTER} clusters. These plots in 2D are generated
+by function \link{plot_2D_VAF_MOBSTER}, and in 1D by the
+\code{MOBSTER} S3 \code{plot} function (see MOBSTER's documentation);
+\item with \code{clusters = "VIBER"}, the mutations are plot according to the
+\code{VIBER} S3 \code{plot} function (see VIBER's documentation);
+}
 }
 \examples{
-TODO
+data('example_evoverse')
+
+# Plot the data
+plot(example_evoverse)
+
+# Plot the data augmented with MOBSTER clusters
+plot(example_evoverse, clusters = "MOBSTER")
+}
+\seealso{
+Plotting functions used by this S3 function are \link{\code{plot_2D_VAF}},
+\link{\code{plot_2D_VAF_MOBSTER}} and \link{\code{plot_1D_VAF}}.
 }

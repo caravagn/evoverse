@@ -1,176 +1,249 @@
-#' Create a dataset.
+#' Create an \code{evoverse} dataset.
 #'
-#' @description Create a mvMOBSTER dataset that can contain
-#' mutation data for a one, or more, bulk samples of the same
-#' tumour. The method requires mutations, copy number segments
-#' and sample purity to adjust the raw VAF for copy state and
-#' tumour content. The adjusted VAF of clonal mutations in
-#' diploid region is expect to be around 0.5 (heterozygous
-#' mutation) that corresponds to 100% of cancer cells fraction.
-#' Basic filtering options are provided.
+#' @description An \code{evoverse} dataset contains, for one or more bulk samples
+#' of the same tumour, the following sequencing information:
+#' \enumerate{
+#' \item mutation data, in the usual format of substitutions involving
+#' one or more nucleotides;
+#' \item absolute copy number data, reported as segments profiles;
+#' \item sample purity (proportion of tumour cells in each one of the samples).
+#' }
+#' This method uses all these information to create an object of
+#' class \code{mbs_data}, which provides different S3 methods to
+#' print, visualize and query the loaded data.
 #'
-#' @param mutations Dataframe of mutations. Must contain mutation
-#' coordinate as chr, from and to. Plus, for every sample named
-#' \code{x}, it must contain columns \code{x.DP}, \code{x.NV}
-#' and \code{x.VAF} with the values of tumour depth (DP), number
-#' of reads with the mutant allele (NV) and variant allele
-#' frequency (VAF). Exra columns are retained.
+#' Two different types of data formats for mutation and copy number data
+#' are supported by this function, which will try to determine
+#' automatically the type of input. All other parameters have a trivial
+#' data type, independently of mutation and copy number segments data.
+#'
+#' Format one for mutations and copy number segments (minimum information
+#' required):
+#'
+#' \itemize{
+#' \item A `dataframe` that must contain mutation coordinates as `chr`,
+#' `from`, `to` in `hg19` chromosome coordinates, plus `ref` and `alt`
+#' for the reference and alternative alleles. For every sample `X`,
+#' this dataframe must contain columns `X.DP`, `X.NV` and `X.VAF` for the depth
+#' (total number of reads with both alleles), the number of reads
+#' with the alternative allele and the allele frequency (\code{VAF = NV/DP}).
+#' Chromosome names must be in the format `chr1`, `chr2`, etc.; alleles should
+#' be characters and all other fields numeric.
+#' \item A `dataframe` that must contain copy number segments as `chr`,
+#' `from`, `to` in `hg19` chromosome coordinates, plus `X.Major` and `X.minor`
+#' for the number of copies of the major allele, and the minor (B-allele)
+#' allele in sample `X`'s segment. Chromosome names must be in the same
+#' format used by mutations.
+#' }
+#'
+#' Format two for mutations and copy number segments (minimum information
+#' required):
+#'
+#' \itemize{
+#' \item  A list of `dataframes` that contains mutations for a unique sample
+#' (instead than for all of the samples). Mutation genomic coordinates
+#' must follow the same guidelines and format discussed above, but this time
+#' the list entry for patient `X` can have columns `DP`, `NV` and `VAF`
+#' with the usual meaning. The list should be named, therefore the dataframe
+#' for sample `X` should be named `X`.
+#' \item  A list of `dataframes` that contains segments. As for mutations, in the list
+#' named for patient `X` the major an minor alleles can just be named `Major` and
+#' `minor` (i.e., without the sample appearing the column name).
+#' }
+#'
+#' Regardless the format, mutations are identified using as key the chromosome
+#' name, the genome location, the reference and alternative alleles. For instance,
+#' a SNV with a C>T substitution at chromosome 6, and nucleotide 10048079 will have
+#' id \code{"chr6:10048079:10048079:C:T"}. The ids are used to create an internal
+#' representation of the data that allows easy querys and modifications; and are
+#' accessibly with function \link{\code{keys}}. Extra columns
+#' available in the mutation and copy number data will be retained in internal
+#' representation of the data, and won't be manipulated.
+#'
+#' \strong{Important consistency requirements:} this function makes basic checks of
+#' input consistency, flagging dubious inputs and in some cases refusing to proceed.
+#' It is important that the user checks that:
+#' \itemize{
+#' \item All mutations are annotated in every sample, even if absent. So even if a mutation
+#' `x``has VAF 0 in a sample, its actual depth, NV, and VAF should be annotated.
+#' \item Copy number segments should be spanning the same intervals across all the input
+#' samples. So this means that segments calls are joinly called even if the samples are
+#' analysed independently.
+#' }
+#'
+#'\strong{Important note:} this package uses the \code{CNAqc} package to map mutations
+#' to copy number segments, and processing/ visualising copy number calls. Please see the
+#' webpage \url{https://github.com/caravagn/CNAqc} for how to use this
+#' package to asses the quality of your copy number calls.
+#'
+#' @param mutations Dataframe of mutations in all samples, or list of dataframes of
+#' mutations, one entry per sample. The formats and requirements are describe above.
+#' @param segments Dataframe of copy number segments in all samples, or list of dataframes of
+#' copy number segments, one entry per sample. The formats and requirements are describe above.
 #' @param samples Vector of samples names.
-#' @param segments Copy number segments, must contain segment
-#' coordinate as chr, from and to. for every sample named
-#' \code{x}, it must contain columns \code{x.minor} and
-#' \code{x.Major} with the minor and major number of copies
-#' of the segment.
-#' @param purity Vector of purities, with samples as names.
-#' @param N.min Minimum number of mutations that need to map to
-#' a segment. If a segment has less than \code{N.min}, the
-#' segment is rejected.
+#' @param purity Vector of purities, named consistently to \code{samples}.
 #' @param description Dataset synopsis.
-#' @param offset_around_centromers When mapping mutations to
-#' around segments, exclude this offset around the centromers
-#' of each chromosome (reference coordinates hg19).
 #'
-#' @return An object that represents a dataset from class
-#' \code{mbs_data}.
+#' @return An object that represents a dataset from class \code{mbs_data}.
+#'
+#' @seealso	Two related packages developed by Giulio Caravagna
+#' \itemize{
+#' \item MOBSTER, the model-based approach to cluster tumour sequencing
+#' data, available at \url{https://github.com/caravagn/MOBSTER}.
+#' \item CNAqc, the Copy Number Analysis quality check package,
+#'  available at \url{https://github.com/caravagn/CNAqc}.
+#' }
+#'
+#' @import CNAqc
+#' @import mobster
+#' @import pio
 #'
 #' @export
 #'
 #' @examples
-#' data(example_mvmobster)
-#' TODO
-mobster_dataset = function(
+#' data('example_evoverse')
+#' mutations = example_mvmobster$mutations
+#' segments = example_mvmobster$segments
+#' purity = example_mvmobster$purity
+dataset = function(
   mutations,
   segments,
   samples,
   purity,
-  description = "My multi-region MOBSTER dataset",
-  N.min = 500,
-  offset_around_centromers = 1e6
+  description = "My evoverse dataset"
 )
 {
-  pio::pioHdr("mvMOBSTER dataset")
-  data = mutations
+  # Structures to create
+  # - mutations: query-ready tibble with VAF, DP and NV, indexable by sample, with id key
+  # - mutations: location map, with id key
+  # - mutations: all-remaining information(s), indexable by sample, with id key
+  # - CNA: CNAqc objects
+
+  pio::pioHdr("evoverse dataset")
+
+  # Convert input if it is in the form of list (not tibble)
+  if(is.list(mutations) & !is_tibble(mutations))
+  {
+    conversion =  converted_dataset(
+      mutations,
+      segments,
+      purity,
+      samples
+    )
+
+    mutations = conversion[[1]]
+    segments = conversion[[2]]
+    purity = conversion[[3]]
+    samples = conversion[[4]]
+  }
 
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   # Check input format for data
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  columns_required =
+    check_input_format_df(mutations,
+                          segments,
+                          samples,
+                          purity)
 
-  # data should be dataframe
-  if(!is.data.frame(data)) stop("Data must be a dataframe")
+  mutation_columns_required = columns_required[[1]]
+  segments_columns_required = columns_required[[2]]
 
-  pioStr('Mutations', paste0('N = ', nrow(data)), suffix = '\n')
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  # Create IDs for database, and split information to retain in different formats
+  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+  mutations = mutations %>%
+    mutate(id = paste(chr, from, to, ref, alt, sep = ':'))
 
-  # Columns with data
-  DP.columns = paste0(samples, ".DP")
-  NV.columns = paste0(samples, ".NV")
-  VAF.columns = paste0(samples, ".VAF")
-
-  Major.columns = paste0(samples, ".Major")
-  minor.columns = paste0(samples, ".minor")
-
-  all.columns = c(DP.columns, NV.columns, VAF.columns)
-
-  if(any(!(DP.columns %in% colnames(data)))) stop("Missing DP columns in data.")
-  if(any(!(NV.columns %in% colnames(data)))) stop("Missing NV columns in data.")
-  if(any(!(VAF.columns %in% colnames(data)))) stop("Missing VAF columns in data.")
-
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Mutations must have chromosomal coordinated
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-  # mutations must have locations
-  if(any(!(c('chr', 'from', 'to') %in% colnames(data))))
-    stop("Missing location of the annotated mutations: chr, from, to.")
+  # retain only the information we actually need
+  mutations_retained = mutations %>% select(-!!mutation_columns_required, id)
+  mutations = mutations %>% select(!!mutation_columns_required, id)
+  mutations_locations = mutations %>% select(chr, from, to, ref, alt, id)
 
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   # NA values in the data are notified
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
   # NAs in any of the columns for values
-  if(any(is.na(data[, all.columns, drop = FALSE])))
+  if(any(is.na(mutations)))
   {
-    message("There are NA values in some of the entries for columns: ",
-            paste(all.columns, collapse = ', '),
-            '\nThese will be removed.')
+    warning("NA values in the DP, NV and VAF fields. Some mutations will be removed, you might want to check your data....")
 
-    data = data[
-      complete.cases(data[, all.columns, drop = FALSE]), , drop = FALSE
-    ]
-
-    pioStr('Removed NAs', paste0('N = ', nrow(data)))
+    mutations = mutations[
+      complete.cases(mutations), , drop = FALSE
+      ]
   }
 
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  # Create IDs for database
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  id_col = c('id', 'ID')
+  pioStr('Mutations', paste0('N = ', nrow(mutations)), suffix = '\n')
 
-  if(!all(id_col %in% colnames(data)))
-    data$id = paste0('__mut', 1:nrow(data))
-  else
-  {
-    message("Found 'id' column in data, will use that as identifier.")
+  require(CNAqc)
 
-    if(id_col[2] %in% colnames(data)) data$id = data$ID
-  }
+  # Sample-specific CNA maps data
+  CNAqc_mappings =
+    lapply(
+      samples,
+      function(s)
+      {
+        cat('\n')
+        pioTit(
+          "Creating CNAqc object for", s
+        )
 
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  # Check purity and CNA format
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  if(any(!(names(purity) %in% samples)))
-    stop("You forgot to report purity for some samples?")
+        data_s = mutations %>% select(chr, from, to, ref, alt, id, starts_with(paste0(s, '.')))
+        colnames(data_s) = gsub(paste0(s, '\\.'), '', colnames(data_s))
+        colnames(data_s) = gsub('\\.', '', colnames(data_s))
 
-  # Copy Number must havea similar format
-  if(
-    !is.data.frame(segments) |
-    !all(c('chr', 'from', 'to') %in% colnames(segments)) |
-    !all(Major.columns %in% colnames(segments)) |
-    !all(minor.columns %in% colnames(segments))
-  ) {
-    stop("Your segments do not look in the right format.")
-  }
+        segments_s = segments %>% select(chr, from, to, starts_with(paste0(s, '.')))
+        colnames(segments_s) = gsub(paste0(s, '\\.'), '', colnames(segments_s))
+        colnames(segments_s) = gsub('\\.', '', colnames(segments_s))
 
-  tib_data = as_tibble(data)
-  tib_segments = as_tibble(segments)
+        CNAqc::init(data_s, segments_s, purity[s])
+  })
+  names(CNAqc_mappings) = samples
 
-  # if(relative.coordinates)
-  # {
-  #   pio::pioStr("Switching to absolute chromosomal coordinates for", 'ref. hg19')
-  #
-  #   data('chr_coordinates_hg19', package = 'mvmobster')
-  #
-  #   starts = chr_coordinate_hg19$from
-  #   names(starts) = chr_coordinate_hg19$chr
-  #
-  #   tib_data = tib_data %>% mutate(
-  #     relative.from = from,
-  #     relative.to = to,
-  #     from = from + starts[chr],
-  #     to = to + starts[chr]
-  #   )
-  #
-  #   tib_segments = tib_segments %>% mutate(
-  #     relative.from = from,
-  #     relative.to = to,
-  #     from = from + starts[chr],
-  #     to = to + starts[chr]
-  #   )
-  # }
+  # Mapped mutations from CNAqc
+  mapped_mutations = lapply(
+    names(CNAqc_mappings),
+    function(x)
+      CNAqc_mappings[[x]]$snvs %>%
+      select(VAF, DP, NV, karyotype, id) %>%
+      mutate(sample = x) %>%
+      reshape2::melt(id = c('karyotype', 'id', 'sample')) %>%
+      mutate(variable = paste(variable)) %>%
+      as_tibble
+    )
 
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Melt data
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+  mapped_mutations = Reduce(bind_rows, mapped_mutations) %>%
+    select(id, sample, variable, value, karyotype)
 
-  # Melt data
-  pioStr("Melting data", "")
+  # Non-mappable mutation are cleaned up (removed across all samples)
+  non_mappable = mapped_mutations %>%
+    group_by(id, sample) %>%
+    filter(is.na(karyotype)) %>%
+    pull(id) %>%
+    unique
 
-  tib_data = tib_data %>%
-    reshape2::melt(id = 'id') %>%
-    as_tibble
+  # notify which wkll be removed
+  cat('\n')
+  pioStr('Non-mappable mutations per chromosome', length(non_mappable), suffix = '\n')
 
-  cat("OK\n")
+  # strsplit(non_mappable, split = ':') %>%
+  #   lapply(FUN = function(x) x[[1]]) %>%
+  #   unlist %>%
+  #   table %>%
+  #   table %>%
+  #   print
 
-  # make everything a chr
-  tib_data$variable = paste(tib_data$variable)
+  # Actual clean up of the data
+  mutations = mapped_mutations %>%
+    filter(!(id %in% non_mappable))
+
+  mutations_locations = mutations_locations %>%
+    filter(!(id %in% non_mappable))
+
+  mutations_retained = mutations_retained %>%
+    filter(!(id %in% non_mappable))
+
+  stopifnot(nrow(mutations_retained) == nrow(mutations_locations))
 
   # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   # Create a mbst_data object
@@ -178,232 +251,19 @@ mobster_dataset = function(
   x = list()
   class(x) <- "mbst_data"
 
+  x$mutations = mutations
+  x$mutations_locations = mutations_locations
+  x$mutations_annotations = mutations_retained
+
   x$samples = samples
+  x$purity = purity
+
+  x$CNAqc = CNAqc_mappings
 
   x$description = description
-
-  # Annotations: anything but VAF/ CN values
-  x$annotations = tib_data %>%
-    filter(!(variable %in%
-               c(all.columns, 'chr', 'from', 'to')))
-
-  # Data: DP, NV and VAF
-  x$data = tib_data %>%
-    filter(variable %in% all.columns)
-
-  x$data$value = as.numeric(x$data$value)
-
-  sp = strsplit(x$data$variable, '\\.')
-  x$data$variable = sapply(sp, function(w) w[2])
-  x$data$sample = sapply(sp, function(w) w[1])
-
-  # Locations: CN position of mutations
-  x$locations = tib_data %>%
-    filter(variable %in%  c('chr', 'from', 'to'))
 
   # Log creation
   x = logOp(x, "Initialization")
 
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  # Mapping mutations to CNAs
-  # =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-  #  tibble for the segments, we ID them
-  tib_segments$id = paste0("_CN_seg", 1:nrow(tib_segments))
-
-  tib_segments = tib_segments %>%
-    reshape2::melt(id = c('id', 'chr', 'from', 'to')) %>%
-    as_tibble
-
-  tib_segments$variable = paste(tib_segments$variable)
-
-  sp = strsplit(tib_segments$variable, '\\.')
-  tib_segments$variable = sapply(sp, function(w) w[2])
-  tib_segments$sample = sapply(sp, function(w) w[1])
-
-  # store segments in the obj
-  x$segments = tib_segments
-
-  # store purity
-  x$purity = purity
-
-  # check that all samples have segments available
-  if(!all(x$samples %in% unique(x$segments$sample)))
-    stop("Some samples are missing from the list of segments, will have to stop.")
-
-  if(any(!(unique(x$segments$sample) %in% x$samples)))
-  {
-    message("Your list of segments contains more sample IDs that those used -- will be dropped.")
-
-    x$segments = x$segments %>%
-      filter(sample %in% x$samples)
-  }
-
-  # we create a map for each mutation to each segment
-  pio::pioTit(paste0("Mapping mutations to CN segments."))
-  pio::pioStr("Offset around centromers (hg19)", offset_around_centromers, suffix = '\n', prefix = '')
-
-  if(nrow(segments) > 1) pb = txtProgressBar(min = 0, max = nrow(segments), style = 3)
-  segments_ids = unique(x$segments$id)
-
-  x$map_mut_seg = NULL
-
-  for(s in seq(segments_ids)) {
-    if(nrow(segments) > 1) setTxtProgressBar(pb, s)
-
-    mapped = byLoc(x, segments_ids[s], offset_around_centromers)
-    if(nrow(mapped) == 0) next;
-
-    mapped$seg_id = segments_ids[s]
-
-    x$map_mut_seg = bind_rows(x$map_mut_seg, mapped)
-  }
-
-  if(nrow(x$map_mut_seg) == 0) {
-    stop("None of the input mutations map to a segment, cannot do anything.")
-  }
-
-  # These have not been map to any segment
-  unmapped = VAF(x) %>%
-    filter(!id %in% x$map_mut_seg$id) %>% pull(id)
-  unmapped = unique(unmapped)
-
-  if(length(unmapped) > 0)
-  {
-    num = length(unmapped)
-    pnum = num/N(x) * 100
-
-    pio::pioStr(
-      '\n\nOutside segments',
-      paste0('N = ', num),
-      suffix = paste0('(', round(pnum, 0), '%)\n')
-    )
-
-    x = delete_entries(x, unmapped)
-  }
-
-  # A summary table with the number of mutations per segment
-  size_table = x$map_mut_seg %>%
-    group_by(seg_id) %>%
-    summarise(N = length(unique(id)))
-
-  # we reject those with N < N.min
-  rejected = size_table %>%
-    filter(N < !!N.min) %>%
-    arrange(desc(N)) %>%
-    inner_join(y = x$segments, by=c("seg_id" = "id")) %>%
-    select(seg_id, N, chr, from, to) %>%
-    distinct
-
-  accepted = size_table %>%
-    filter(N >= !!N.min) %>%
-    arrange(desc(N)) %>%
-    inner_join(y = x$segments, by=c("seg_id" = "id")) %>%
-    select(seg_id, N, chr, from, to) %>%
-    distinct
-
-  pioTit(paste0("Segments report (cutoff " , N.min, ' muts/seg)'))
-
-  pioStr(paste0("\nN < ", N.min), nrow(rejected), suffix = '(rejected)\n')
-  print(rejected)
-
-  pioStr(paste0("\nN >= ", N.min), nrow(accepted), suffix = '(accepted)')
-  print(accepted)
-
-  if(nrow(accepted) == 0)
-    stop("No segments can be used, aborting.")
-
-  # Subset to match accepted ... Non-accepted mutations can be immediately removed
-  rejected = x$map_mut_seg %>%
-    filter(seg_id %in% rejected$seg_id) %>%
-    pull(id)
-
-  # N(x)
-
-  if(length(rejected) > 0)
-    x = delete_entries(x, unique(rejected))
-
-  pio::pioTit(paste0("Adjusting the VAF for ",
-                     nrow(x$map_mut_seg)," entries across ", length(x$samples), " samples"))
-
-  new.VAF = NULL
-
-  # for every segment to map
-  seg_to_match = unique(x$map_mut_seg$seg_id)
-
-  if(nrow(segments) > 1) pb = txtProgressBar(min = 0, max = length(seg_to_match), style = 3)
-
-  for(seg in seq(seg_to_match))
-  {
-    if(length(seg_to_match) > 1) setTxtProgressBar(pb, seg)
-
-    # for every sample
-    for(s in x$samples)
-    {
-      # get VAF values for these entries
-      values = VAF(x,
-                   ids = x$map_mut_seg %>% filter(seg_id == seg_to_match[seg]) %>% pull(id),
-                   samples = s
-      ) %>% # Adjust VAF according to minor/ Major (CN=m+M)
-        mutate(
-          Major = Major(x, seg_to_match[seg], s),
-          minor = minor(x, seg_to_match[seg], s),
-          CN = Major + minor,
-          purity = purity[s],
-          adj_VAF = vaf_adjustCN(value, minor, Major, purity)
-        )
-
-      new.VAF = bind_rows(new.VAF, values)
-    }
-  }
-
-  # Save a copy of the mapping
-  x$VAF_cn_adjustment = new.VAF
-
-  new.VAF$value = new.VAF$adj_VAF
-  new.VAF = new.VAF %>% select(id, variable, value, sample)
-
-  x$data = bind_rows(
-    new.VAF,
-    DP(x),
-    NV(x)
-  )
-
-  # As CN, we can keep only those accepted
-  x$segments = x$segments %>%
-    filter(id %in% accepted$seg_id)
-
-  # Log update
-  x = logOp(x, "Added CN and adjusted VAF")
-
-  all_zeroes(x)
-
   return(x)
 }
-
-
-
-
-
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Private auxiliary functions
-# =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-logOp = function(obj, op)
-{
-  new.entry = tribble(~time, ~operation, Sys.time(),  op)
-  obj$operationLog = bind_rows(obj$operationLog, new.entry)
-
-  obj
-}
-
-
-
-# Conditional mutate
-mutate_cond <- function(.data, condition, ..., envir = parent.frame()) {
-  condition <- eval(substitute(condition), .data, envir)
-  .data[condition, ] <- .data[condition, ] %>% mutate(...)
-  .data
-}
-
-
-

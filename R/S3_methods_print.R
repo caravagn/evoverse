@@ -1,138 +1,143 @@
-#' Print for mvMOBSTER objects.
+#' Summary for an \code{evoverse} dataset.
 #'
-#' @param x A mvMOBSTER \code{mbst_data} object.
-#' @param ...
+#' @description The summary reports basic statistics on the stored
+#' input values concerning both mutations, segments, and fits if
+#' available
 #'
-#' @return Nothing
+#' @param x An  \code{evoverse} object.
+#' @param ... S3 parameters
+#'
+#' @return Nothing.
 #'
 #' @export
 #'
 #' @examples
-#' TODO
-print.mbst_data = function(x, ...)
+#' data('example_evoverse')
+#' summary(example_evoverse)
+summary.mbst_data = function(x, ...)
 {
-  pio::pioHdr(
-    paste("mvMOBSTER dataset"),
-    toPrint =
-      c(
-        `  Dataset` = x$description,
-        `  Samples` = paste(x$samples, collapse = ', '),
-        `Mutations` = paste('N =', N(x))
-      )
-  )
+  print_header_data(x)
 
-  prt = x$data %>%
+  pioTit('Mutation data')
+
+  pioStr("\nDepth (DP)", '', suffix = '\n')
+
+  DP(x) %>%
     group_by(sample, variable) %>%
-    filter(value > 0) %>%
     summarize(
       mean = round(mean(value), 2),
       median = round(median(value), 2),
       min = round(min(value), 2),
       max = round(max(value), 2)
     ) %>%
-    arrange(variable)
+    ungroup %>%
+    pioDisp
 
-  prt = prt %>% mutate(combo =
-                         paste0(
-                           sprintf('%3s', min),
-                           ' | ',
-                           sprintf('%3s', median),
-                           ' | ',
-                           sprintf('%3s', max)
-                         )) %>%
-    select(-mean,-median,-min,-max) %>%
-    ungroup()
+  pioStr("\nNumber of reads with variant (NV)", '', suffix = '\n')
 
-  df = lapply(x$samples,
-              function(s) {
-                sp = prt %>%
-                  filter(sample == s) %>% ungroup()
+  NV(x) %>%
+    group_by(sample, variable) %>%
+    summarize(
+      mean = round(mean(value), 2),
+      median = round(median(value), 2),
+      min = round(min(value), 2),
+      max = round(max(value), 2)
+    ) %>%
+    ungroup %>%
+    pioDisp
 
-                sp %>% spread(variable, combo)
-              })
+  pioStr("\nVariant allele frequency (VAF)", '', suffix = '\n')
 
-  df = Reduce(bind_rows, df)
-  # colnames(df)[2:4] = c(
-  #   'DP min | median | max',
-  #   'NV min | median | max',
-  #   'VAF min | median | max')
+  VAF(x) %>%
+    group_by(sample, variable) %>%
+    summarize(
+      mean = round(mean(value), 2),
+      median = round(median(value), 2),
+      min = round(min(value), 2),
+      max = round(max(value), 2)
+    ) %>%
+    ungroup %>%
+    pioDisp
 
-  pio::pioTit('Coverage (DP), reads with mutant (NV) and allele frequency (VAF) -- min | median | max')
-  print(data.frame(df, check.names = FALSE))
+  if (!is.null(x$mutations_annotations))
+    pio::pioStr('Annotations', prefix = '\n', suffix = '\n',
+                paste0(setdiff(colnames(x$mutations_annotations), 'id'),
+                       collapse = ', '))
 
+  # CNA data
+  pioTit('Copy Number Alteration data')
+  print(x$CNAqc)
 
-
-  # prt %>% ungroup() %>%
-  #   filter(variable != 'VAF')
-  #   # select(-mean, -min, -max) %>%
-  #   spread(variable, c(median, min, max))
-
-  # prt = prt %>%
-  #   nest() %>%
-  #   unlist(recursive = FALSE)
-  #
-  # prt
-  #
-
-  # cat(
-  #   sprintf(
-  #     ''
-  #     )
-  # )
-  #
-  # for(i in 1:nrow(prt))
-  # {
-  #   cat(prt$sample[i], "")
-  #
-  # }
-
-  # prt = function(x,
-  #                cols,
-  #                v)
-  # {
-  #   d = x$data[, cols]
-  #   f = apply(d, 2, summary)
-  #   f = apply(f, 2, round, digit = 2)
-  #
-  #   colnames(f) = x$samples
-  #
-  #   f = f[c(1,3,4,6), , drop = FALSE]
-  #
-  #   frmt = function(f, v)
-  #   {
-  #     if(f < v[1]) cat(crayon::red(sprintf('%8s', f)))
-  #     if(f >= v[1] & f <= v[2]) cat(crayon::yellow(sprintf('%8s', f)))
-  #     if(f > v[2]) cat(crayon::green(sprintf('%8s', f)))
-  #
-  #   }
-  #
-  #   for(i in 1:nrow(f)) {
-  #     cat(sprintf('  %10s', rownames(f)[i]))
-  #     for(j in 1:ncol(f)) {
-  #       frmt(f[i, j], v)
-  #     }
-  #
-  #     cat('\n')
-  #   }
-  #
-  # }
-  #
-
-  # print(prt)
-
-  if (!is.null(x$annotation))
-  {
-    lbl = head(unique(x$annotation$variable))
-
-    # pio::pioTit('ANNOTATION')
-    # print((x$annotation))
-    pio::pioStr('Annotations', prefix = '\n\n',
-                paste0(c(lbl, '...'), collapse = ', '))
+  # Print MOBSTER fits
+  if (has_mobster_fits(x)) {
+    lapply(names(x$fit_MOBSTER), function(w) {
+      pioTit('MOBSTER fit for sample', w)
+      print(x$fit_MOBSTER[[w]]$best)
+    })
   }
 
-  cat('\n')
+  # Print VIBER fits
+  if (has_viber_fits(x)) {
+    print(x$fit_VIBER)
+  }
+}
+
+#' Print for an \code{evoverse} dataset.
+#'
+#' @description The print reports basic statistics on the stored
+#' fits available in the input object.
+#'
+#' @param x An  \code{evoverse} object.
+#' @param ... S3 parameters
+#'
+#' @return Nothing.
+#'
+#' @export
+#'
+#' @examples
+#' data('example_evoverse')
+#' print(example_evoverse)
+print.mbst_data = function(x, ...)
+{
+  print_header_data(x)
+
+  # Print MOBSTER fits
+  if (has_mobster_fits(x)) {
+    lapply(names(x$fit_MOBSTER), function(w) {
+      pioTit('MOBSTER fit for sample', w)
+      print(x$fit_MOBSTER[[w]]$best)
+    })
+  }
+
+  # Print VIBER fits
+  if (has_viber_fits(x)) {
+    print(x$fit_VIBER)
+  }
+
+  # Logged operations
   pio::pioTit('LOGGED OPERATIONS')
 
   print(x$operationLog)
+}
+
+print_header_data = function(x)
+{
+  check_is_mobster_mvdata(x)
+
+  pioHdr(
+    paste("mvMOBSTER dataset"),
+    toPrint =
+      c(
+        `  Dataset` = x$description,
+        `  Samples` = paste(x$samples, collapse = ', '),
+        ` Purities` = paste(x$purity, collapse = ', '),
+        `Mutations` = paste('N =', N(x))
+      )
+  )
+
+  cat('\n')
+  pioStr("MOBSTER analysis", has_mobster_fits(x), suffix = '\n')
+  pioStr("  VIBER analysis", has_viber_fits(x), suffix = '\n')
 
 }
+

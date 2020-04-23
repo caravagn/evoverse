@@ -1,21 +1,62 @@
-# mvMOBSTER
 
-mvMOBSTER (multi-variate MOBSTER) is a package to run a MOBSTER-based analysis from multi-region sequencing data of a cancer patient. 
+# evoverse <img src='man/figures/logo.png' align="right" height="139" />
 
-MOBSTER is a model-based tumour subclonal deconvolution method to reconstruct the clonal architecture of a tumour. Through mvMOBSTER's
-functions it is easy to analyse multiple sequencing samples per patient, going from the read counts to the output Binomial clusters. 
+<!-- badges: start -->
 
-mvMOBSTER relies on VIBER to cluster mutant read count with variational Binomial mixtures. Wrappers to other sciClone and pyClone
-are also available, together with functions to visualize data and results of the fits. 
+[![Travis build
+status](https://travis-ci.org/caravagn/evoverse.svg?branch=master)](https://travis-ci.org/caravagn/evoverse)
+[![](https://img.shields.io/badge/Part%20of-evoverse-blue.svg)](https://caravagn.github.io/evoverse)
 
-Packages:
-- MOBSTER: https://github.com/caravagn/MOBSTER
-- VIBER: https://github.com/caravagn/VIBER
+<!-- badges: end -->
 
+The `evoverse` collects multiple R packages to implement Cancer
+Evolution analyses on cancer bulk sequencing data, which can be used to
+reconcile tumour heterogeneity (TH).
 
-***
-**Author:** [Giulio Caravagna](https://sites.google.com/site/giuliocaravagna/) , _Institute of Cancer Research, UK_.
+With the `evoverse` functions you can study TH across patients
+(inter-patient heterogeneity), or within a patient (intra-tumour
+heterogeneity).
 
-**Contact:** [[@gcaravagna](https://twitter.com/gcaravagna); [giulio.caravagna@icr.ac.uk](mailto:giulio.caravagna@icr.ac.uk)]
+#### Features
 
+  - functions to QC somatic calls (mutation and copy number segments)
+    for a Cancer Evolution analysis;
 
+  - functions to determine subclonal architectures integrating both
+    Population Genetics and Machine Learning (model based subclonal
+    deconvolution);
+
+  - determine repeated evolution across patients, comparing tumours for
+    their evolutionary trajectories (repeated evolutionary
+    trajectories).
+
+[![](https://img.shields.io/badge/Available-Pipelines-yellow.svg)](https://caravagn.github.io/evoverse/articles/pipelines.html)
+[![](https://img.shields.io/badge/Available-Packages-yellow.svg)](https://caravagn.github.io/evoverse/articles/packages.html)
+
+#### Help and support
+
+[![](https://img.shields.io/badge/GitHub%20Pages-https://caravagn.github.io/evoverse/-yellow.svg)](https://caravagn.github.io/evoverse)
+
+-----
+
+### Installation
+
+You can install the released version of `evoverse` from
+[GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("caravagn/evoverse")
+```
+
+-----
+
+#### Copyright and contacts
+
+Giulio Caravagna, PhD. *Institute of Cancer Research, London,
+UK*.
+
+[![](https://img.shields.io/badge/Github-caravagn-seagreen.svg)](https://github.com/caravagn)
+[![](https://img.shields.io/badge/Email-gcaravagn@gmail.com-seagreen.svg)](mailto:gcaravagn@gmail.com)
+[![](https://img.shields.io/badge/Twitter-@gcaravagna-steelblue.svg)](https://twitter.com/gcaravagna)
+[![](https://img.shields.io/badge/Personal%20webpage-https://bit.ly/2kc9E6Y-red.svg)](https://sites.google.com/site/giuliocaravagna/)
