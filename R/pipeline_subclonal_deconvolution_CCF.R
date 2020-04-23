@@ -48,7 +48,23 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
   #
   # 1) Check input data, subset by CNA data if available
   #
-  CNAqc_input = deconvolution_prepare_input(mutations, cna, purity, N_max, min_VAF = min_VAF)
+  cat("\n")
+  cli::cli_process_start("Loading input data")
+  cat("\n")
+
+  CNAqc_input = evoverse:::deconvolution_prepare_input(mutations, cna, purity, min_VAF = min_VAF)
+
+  # Downsample data if too many mutations
+  if(CNAqc_input$n_snvs > N_max) {
+
+    cli::boxx(paste0("n = ", CNAqc_input$n_snvs,  " mutations. n > ", N_max, " , downsampling input.")) %>% cat
+    cat('\n')
+
+    CNAqc_input = CNAqc_input %>% CNAqc::subsample(N = N_max, keep_drivers = TRUE)
+  }
+
+  print(CNAqc_input)
+  cli::cli_process_done()
 
   #
   # 2) MOBSTER analysis of CCF special function that computes CCF and adjust it for the VAF etc.

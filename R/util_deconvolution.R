@@ -22,21 +22,12 @@ deconvolution_prepare_input = function(mutations, cna, purity, N_max, min_VAF)
     mutations = mutations %>% dplyr::filter(VAF > min_VAF)
   }
 
-  # Downsample data
-  if(mutations %>% nrow > N_max) {
-
-    cli::boxx(paste0("n = ", mutations %>% nrow,  " mutations. n > ", N_max, " , downsampling input.")) %>% cat
-    cat('\n')
-
-    mutations = mutations %>% dplyr::sample_n(N_max)
-  }
-
   # Apply CNA mapping and retain only mappable mutations
   return(CNAqc::init(mutations, cna, purity))
 }
 
 ######################################################
-### DECONVOLUTION WITH MOBSTER WOTH AUTO QC AND AUTO-RERUN
+### DECONVOLUTION WITH MOBSTER WITH AUTO QC AND AUTO-RERUN
 ######################################################
 
 # # Fit every subset of mutations (defined by karyotypes) with MOBSTER. Skip those with < min_muts.
@@ -88,6 +79,7 @@ smartrun_mobster_qc = function(x, QC_type, model_description = "My model", ...)
 deconvolution_mobster_karyotypes_VAF = function(mutations,
                                             karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                             min_muts = 50,
+                                            N_max = 15000,
                                             QC_type = NULL,
                                             ...)
 {
@@ -108,7 +100,16 @@ deconvolution_mobster_karyotypes_VAF = function(mutations,
                      return(NULL)
                    }
 
-                   mfit = smartrun_mobster_qc(kmuts, QC_type, model_description = paste0("Raw VAF in ", k),  ...)
+                   # Downsample data
+                   if(kmuts %>% nrow > N_max) {
+
+                     cli::boxx(paste0("n = ", kmuts %>% nrow,  " mutations. n > ", N_max, " , downsampling input.")) %>% cat
+                     cat('\n')
+
+                     kmuts = kmuts %>% dplyr::sample_n(N_max)
+                   }
+
+                   mfit = smartrun_mobster_qc(kmuts, QC_type, model_description = paste0("Raw VAF for ", k),  ...)
 
                    return(mfit)
                  })
@@ -549,20 +550,5 @@ deconvolution_table_summary = function(mobster_fits, bmix_fits)
 }
 
 
-# bckg_color = RColorBrewer::brewer.pal(
-#   n = length(atab$CCF_cluster %>% unique), name = 'Set1') %>%
-#   alpha(.8)
-#
-# atab %>%
-#   ggplot(
-#     aes(x = CCF, fill = CCF_cluster)
-#   ) +
-#   geom_histogram(binwidth = 0.01, size = .1) +
-#   scale_fill_manual(values = bckg_color) +
-#   scale_color_brewer(palette = "Dark2") +
-#   # scale_col
-#   mobster:::my_ggplot_theme() +
-#   facet_wrap(~cluster, ncol = 1)
-#   #acet_grid(cluster ~ CCF_cluster)
 
 

@@ -46,7 +46,14 @@ pipeline_chromosome_timing = function(mutations,
   #
   # 1) Load input data -- this is a common function to all deconvolution-based pipelines
   #
-  CNAqc_input = evoverse:::deconvolution_prepare_input(mutations, cna, purity, N_max, min_VAF = min_VAF)
+  cat("\n")
+  cli::cli_process_start("Loading input data")
+  cat("\n")
+
+  CNAqc_input = evoverse:::deconvolution_prepare_input(mutations, cna, purity, min_VAF = min_VAF)
+
+  print(CNAqc_input)
+  cli::cli_process_done()
 
   #
   # 2) MOBSTER analysis of karyotypes, this returns only the best fit
