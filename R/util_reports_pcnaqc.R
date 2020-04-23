@@ -3,7 +3,7 @@ page1_pcnaqc = function(x) {
 
   # Segments
   A = cowplot::plot_grid(
-    CNAqc::plot_depth(x, N = N) + labs(
+    CNAqc::plot_gw_depth(x, N = N) + labs(
       title = paste0(
         "Ploidy ",
         x$ploidy,
