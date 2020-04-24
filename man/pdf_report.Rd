@@ -9,6 +9,9 @@ pdf_report(x, file, cex = 1)
 \arguments{
 \item{cex}{}
 }
+\value{
+
+}
 \description{
 Title
 }

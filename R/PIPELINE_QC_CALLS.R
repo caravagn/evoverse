@@ -5,6 +5,7 @@
 # reference = CNAqc::example_dataset_CNAqc$reference
 #
 # w = evoverse:::pipeline_qc_copynumbercalls(mutations, cna, purity, smooth = T)
+# evoverse:::pdf_report(w, file = 'a.pdf')
 # plot(w, cex = 1)
 
 #' Pipeline for QC of somatic calls (copy number and mutations).
@@ -149,34 +150,10 @@ print.evopipe_qc = function(x, ...)
 #' @examples
 plot.evopipe_qc = function(x, ...)
 {
-  get_param_ell = function(x, ...) {
-    p = list(...)
-    stopifnot(x %in% names(p))
-    p[x]
-  }
-
-  stop("Does Not work no save to file")
-
   stopifnot(inherits(x, 'evopipe_qc'))
 
   # Figure assembly
-    suppressWarnings(
-      evoverse:::report_multipage_cnaqc_pipeline(
-        x,
-        f = file,
-        cex = get_param_ell(x = 'cex', ...),
-        sample = x$description,
-        collate = TRUE,
-        score = x$QC$f_PASS
-      )
-    )
-
-  # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-  # Wrapper function for evopipe_qc
-  # -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-
-  cli::cli_process_done()
-
+  suppressWarnings(evoverse:::report_onepage_cnaqc_pipeline(x))
 }
 
 
