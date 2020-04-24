@@ -9,9 +9,6 @@ plot.evopipe_deconv(x)
 \arguments{
 \item{x}{}
 }
-\value{
-
-}
 \description{
 Title
 }

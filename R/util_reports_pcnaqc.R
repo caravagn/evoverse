@@ -152,7 +152,7 @@ report_multipage_cnaqc_pipeline = function(x,
   # Page one -- segments | vaf | qc
   # Page two -- Peak analysis and fragmentation
   # Page three -- Peak analysis and fragmentation
-  first_page = evoverse:::page1_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h =)
+  first_page = evoverse:::page1_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h =2)
   second_page = evoverse:::page2_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h = 2)
   third_page = evoverse:::page3_pcnaqc(x) %>% evoverse:::img_add_margin(fact = 1, w = 1, h = 2)
 
@@ -196,9 +196,9 @@ report_multipage_cnaqc_pipeline = function(x,
     message("Saving single-page collated PDF report")
 
     ggpubr::ggarrange(
-      first_page %>% evoverse:::annot_t(p1_tit),
-      second_page %>% evoverse:::annot_t(p2_tit),
-      third_page %>% evoverse:::annot_t(p3_tit),
+      first_page %>% evoverse:::img_annot_t(p1_tit),
+      second_page %>% evoverse:::img_annot_t(p2_tit),
+      third_page %>% evoverse:::img_annot_t(p3_tit),
       ncol = 3
     ) %>%
       ggsave(

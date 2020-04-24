@@ -9,9 +9,6 @@ evoparse_Sequenza_CNAs(x)
 \arguments{
 \item{x}{}
 }
-\value{
-
-}
 \description{
 Parese Sequenza Copy Number data.
 }

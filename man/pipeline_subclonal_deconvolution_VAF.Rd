@@ -4,21 +4,12 @@
 \alias{pipeline_subclonal_deconvolution_VAF}
 \title{Pipeline to perform subclonal deconvolution with MOBSTER.}
 \usage{
-pipeline_subclonal_deconvolution_VAF(
-  mutations,
-  cna = NULL,
-  purity = NULL,
-  sample = "XXX_YYY_ZZZ",
-  output = paste0(sample, "_evoverse_vaf_deconvolution.pdf"),
-  min_VAF = 0.05,
-  karyotypes = c("1:0", "1:1", "2:0", "2:1", "2:2"),
-  min_muts = 50,
-  N_max = 15000,
-  matching_epsilon_peaks = 0.025,
-  cex = 0.7,
-  collate = FALSE,
-  ...
-)
+pipeline_subclonal_deconvolution_VAF(mutations, cna = NULL,
+  purity = NULL, sample = "XXX_YYY_ZZZ", output = paste0(sample,
+  "_evoverse_vaf_deconvolution.pdf"), min_VAF = 0.05,
+  karyotypes = c("1:0", "1:1", "2:0", "2:1", "2:2"), min_muts = 50,
+  N_max = 15000, matching_epsilon_peaks = 0.025, cex = 0.7,
+  collate = FALSE, ...)
 }
 \arguments{
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
@@ -32,9 +23,6 @@ pipeline_subclonal_deconvolution_VAF(
 \item{cex}{}
 
 \item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
-}
-\value{
-
 }
 \description{
 For a list of input mutations, CNA and purity data from a tumour sample,
