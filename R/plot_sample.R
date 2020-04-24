@@ -47,22 +47,22 @@ plot_sample = function(x, sample, N_CNA = 10000)
   CNA = x$CNAqc[[sample]]
 
   CNA_panel = cowplot::plot_grid(
-    plot_counts(CNA),
-    plot_vaf(CNA, N = N_CNA),
-    plot_depth(CNA, N = N_CNA),
-    plot_segments(CNA),
+    CNAqc::plot_gw_counts(CNA),
+    CNAqc::plot_gw_vaf(CNA, N = N_CNA),
+    CNAqc::plot_gw_depth(CNA, N = N_CNA),
+    CNAqc::plot_segments(CNA),
     align = 'v',
     nrow = 4,
     rel_heights = c(.15, .15, .15, .8))
 
-  CNA_panel = annotate_figure(
+  CNA_panel = ggpubr::annotate_figure(
     CNA_panel,
     top = text_grob("CNA segments", x = 0, h = 0)
   )
 
   # VAF, DP and NV data
   vp = VAF(x, samples = sample) %>%
-    filter(value > 0) %>%
+    dplyr::filter(value > 0) %>%
     ggplot(aes(value, fill = karyotype)) +
     geom_histogram(binwidth = 0.01) +
     xlim(0, 1) +
