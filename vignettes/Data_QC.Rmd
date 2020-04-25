@@ -55,7 +55,7 @@ pipeline = pipeline_qc_copynumbercalls(
   cna = CNAqc::example_dataset_CNAqc$cna,         # Copy number segments
   purity = CNAqc::example_dataset_CNAqc$purity,   # Sample purity
   reference = 'GRCh38',                           # Genome reference
-  description = "Example  dataset",               # Dataset description
+  description = "Example  dataset for QC",       # Dataset description
   smooth = TRUE,                                  # Smooth copy number segments
   matching_epsilon_peaks = 0.025,                 # Peak-detection parameters
   CCF_computation = 'ENTROPY'                     # CCF computation
@@ -78,5 +78,4 @@ print(pipeline$QC)
 
 One-page plotting function (assembles a multi-panel figure)
 ```{r, fig.width=15, fig.height=6, eval=TRUE}
-plot(pipeline)
 ```

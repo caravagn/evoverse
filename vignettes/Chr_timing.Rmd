@@ -46,7 +46,7 @@ library(evoverse)
 
 Example input data from the example CNAqc dataset
 
-```{r, cache=TRUE, eval=TRUE}
+```{r, eval=TRUE}
 # Use example data in the CNAqc package
 data(example_dataset_CNAqc, package = 'CNAqc')
 
@@ -56,6 +56,8 @@ pipeline = pipeline_chromosome_timing(
   purity = CNAqc::example_dataset_CNAqc$purity,   # Sample purity
   reference = 'GRCh38',                           # Genome reference
   N_max = 10000,                                  # Downsample karyotypes with > 10K mutations (none here)
+  min_muts = 150,                                 # Minimum number of mutations per karyotype
+  min_VAF = 0.05,                                 # Minimum VAF 
   description = "Example timing dataset",         # Dataset description
   auto_setup = 'FAST'                             # Ellipsis (parameters forwarded to each mobster first run)
 )

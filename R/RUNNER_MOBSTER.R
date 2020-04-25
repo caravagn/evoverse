@@ -168,7 +168,8 @@ deconvolution_mobster_karyotypes_VAF = function(
   }
 
   # Timeable ones, processed one by one with MOBSTER
-  mfits = lapply(karyotypes, orun)
+  mfits = lapply(
+    , orun)
   names(mfits) = karyotypes
 
   mfits

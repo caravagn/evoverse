@@ -46,8 +46,7 @@ pipeline_qc_copynumbercalls = function(
   cli::cli_h1("Creating input object (smoothing {.field {smooth}}) for sample {.field {description}}")
   cat("\n")
 
-  x = CNAqc::init(mutations, cna, purity, ref = reference)
-
+  x = evoverse:::deconvolution_prepare_input(mutations, cna, purity, reference, min_VAF = 0)
   print(x)
 
   if(smooth) x = CNAqc::smooth_segments(x)
@@ -88,7 +87,7 @@ pipeline_qc_copynumbercalls = function(
   fit$type = "QC pipeline"
   fit$description = description
 
-  fit$fit = x
+  fit$cnaqc = x
 
   fit$QC$QC_table = xqc$QC_table
   fit$QC$f_PASS = xqc$percentage_PASS
@@ -121,20 +120,20 @@ print.evopipe_qc = function(x, ...)
   cat("\n")
 
   # Skinnier print
-  y = x$fit
-  y$peaks_analysis = y$CCF_estimates = y$arm_fragmentation = NULL
-  CNAqc:::print.cnaqc(y)
+  CNAqc:::print.cnaqc(x$cnaqc)
 
   # PASS/FAIL
   pass = x$QC$QC_table %>% dplyr::filter(QC == "PASS") %>% dplyr::select(-lab.ypos, -label, -value)
   fail = x$QC$QC_table %>% dplyr::filter(QC == "FAIL") %>% dplyr::select(-lab.ypos, -label, -value)
 
   if(nrow(pass) > 0) {
+    cat("\n")
     cli::cli_rule(crayon::bgGreen(" QC PASS "), right = paste0("PASS rate (%): ", x$QC$f_PASS))
     print(pass)
   }
 
   if(nrow(fail) > 0) {
+    cat("\n")
     cli::cli_rule(crayon::bgRed(" QC PASS "), right = paste0("FAIL rate (%): ", 100 - x$QC$f_PASS))
     print(fail)
   }
@@ -152,8 +151,40 @@ plot.evopipe_qc = function(x, ...)
 {
   stopifnot(inherits(x, 'evopipe_qc'))
 
-  # Figure assembly
-  suppressWarnings(evoverse:::report_onepage_cnaqc_pipeline(x))
+  # Segment plots
+  segments_plot = cowplot::plot_grid(
+    suppressWarnings(suppressMessages(CNAqc::plot_gw_depth(x$cnaqc))),
+    suppressWarnings(suppressMessages(CNAqc::plot_segments(x$cnaqc, highlight = c('1:0', '1:1', '2:0', '2:1', '2:2')))),
+    align = 'v',
+    nrow = 2,
+    rel_heights = c(.15, .8)
+  )
+
+  # Data histograms
+  hist_plot = ggpubr::ggarrange(
+    suppressWarnings(suppressMessages(plot_data_histogram(x$cnaqc, which = 'CCF'))),
+    suppressWarnings(suppressMessages(plot_data_histogram(x$cnaqc, which = 'VAF'))),
+    suppressWarnings(suppressMessages(plot_data_histogram(x$cnaqc, which = 'DP'))),
+    suppressWarnings(suppressMessages(plot_data_histogram(x$cnaqc, which = 'NV'))),
+    nrow = 1,
+    ncol = 4,
+    common.legend = TRUE,
+    legend = 'bottom'
+  )
+
+  peak_plot =  suppressWarnings(suppressMessages(CNAqc::plot_peaks_analysis(x$cnaqc)))
+  CCF_plot =  suppressWarnings(suppressMessages(CNAqc::plot_CCF(x$cnaqc)))
+
+  # One page
+  ggpubr::ggarrange(
+    segments_plot,
+    hist_plot,
+    peak_plot,
+    CCF_plot,
+    ncol = 1,
+    nrow = 4,
+    heights = c(1, .9, .9, .9)
+  )
 }
 
 
