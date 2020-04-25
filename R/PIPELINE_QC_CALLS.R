@@ -20,7 +20,7 @@
 #' @param cna Absolute Copy Number segments, in \code{CNAqc} input format.
 #' @param purity Tumour purity, in \code{CNAqc} input format.
 #' @param reference A reference supported by package \code{CNAqc}.
-#' @param sample A sample identifier; will appear in the plots.
+#' @param description A sample description; will appear in the plots.
 #' @param matching_epsilon_peaks Epsilon to match peaks with \code{CNAqc}.
 #' @param smooth If \code{TRUE}, smooths copy number data with \code{CNAqc}.
 #'
@@ -33,7 +33,7 @@ pipeline_qc_copynumbercalls = function(
   cna,
   purity,
   reference = 'GRCh38',
-  sample = "MyPAT00XX1",
+  description = "MyPAT00XX1",
   smooth = TRUE,
   matching_epsilon_peaks = 0.025,
   CCF_computation = 'ENTROPY'
@@ -43,7 +43,7 @@ pipeline_qc_copynumbercalls = function(
   cat('\n')
 
   # 1. Creating input CNAqc
-  cli::cli_h1("Creating input object (smoothing {.field {smooth}}) for sample {.field {sample}}")
+  cli::cli_h1("Creating input object (smoothing {.field {smooth}}) for sample {.field {description}}")
   cat("\n")
 
   x = CNAqc::init(mutations, cna, purity, ref = reference)
@@ -86,7 +86,7 @@ pipeline_qc_copynumbercalls = function(
   class(fit) = "evopipe_qc"
 
   fit$type = "QC pipeline"
-  fit$description = sample
+  fit$description = description
 
   fit$fit = x
 

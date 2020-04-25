@@ -1,6 +1,3 @@
-# setwd("~/Documents/Davros/Golden")
-# x = 'Golden_CS18_T'
-
 #' Parese Sequenza Copy Number data.
 #'
 #' @param x

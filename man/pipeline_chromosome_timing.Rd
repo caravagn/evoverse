@@ -4,9 +4,10 @@
 \alias{pipeline_chromosome_timing}
 \title{Pipeline to time aneuploidy.}
 \usage{
-pipeline_chromosome_timing(mutations, cna, purity, timeable = c("2:0",
-  "2:1", "2:2"), min_muts = 150, min_VAF = 0.05,
-  description = "Chromosomal timing sample", N_max = 15000, ...)
+pipeline_chromosome_timing(mutations, cna, purity, karyotypes = c("2:0",
+  "2:1", "2:2"), reference = "GRCh38", min_muts = 150,
+  min_VAF = 0.05, description = "Chromosomal timing sample",
+  N_max = 15000, ...)
 }
 \arguments{
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
@@ -15,7 +16,7 @@ pipeline_chromosome_timing(mutations, cna, purity, timeable = c("2:0",
 
 \item{purity}{Tumour purity, in [0, 1].}
 
-\item{timeable}{Karyotypes that can be timed, expressed as "Major:minor" notation. Default
+\item{karyotypes}{Karyotypes that can be timed, expressed as "Major:minor" notation. Default
 are the following states \code{timeable = c('2:0', '2:1', '2:2')}.}
 
 \item{min_muts}{Skip analysing karyotypes with less than \code{min_muts} mutations.}
