@@ -47,7 +47,6 @@
 <code>evoverse</code> package. — example_input_formats" />
 <meta property="og:description" content="Example data in the wide and long formts supported by the
 evoverse package." />
-<meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -106,13 +105,16 @@ evoverse package." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/Colorectal_Cross.html">Subclonal deconvolution of MSeq multi-region WGS colorectal cancer data</a>
+      <a href="../articles/0_packages.html">Packages inside `evoverse`</a>
     </li>
     <li>
-      <a href="../articles/packages.html">Packages in the `evoverse`</a>
+      <a href="../articles/a1_Data_QC.html">P1. Data quality check</a>
     </li>
     <li>
-      <a href="../articles/pipelines.html">Pipeline available with the `evoverse` packages</a>
+      <a href="../articles/a2_Chr_timing.html">P2. Timing chromosome aneuploidy</a>
+    </li>
+    <li>
+      <a href="../articles/a3_Deconv_vaf_karyo.html">P3. Subclonal deconvolution by VAF and karyotypes</a>
     </li>
   </ul>
 </li>
@@ -160,103 +162,103 @@ function <code>dataset</code>.</p>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='no'>example_input_formats</span>)
 <span class='fu'><a href='https://rdrr.io/r/utils/head.html'>head</a></span>(<span class='no'>example_input_formats</span>)</div><div class='output co'>#&gt; $wide_mutations
-#&gt; <span style='color: #555555;'># A tibble: 500 x 14</span><span>
+#&gt; <span style='color: #949494;'># A tibble: 500 x 14</span><span>
 #&gt;    Set6_42 Set6_44     NA NA    NA    NA    NA       NA    NA    NA    NA    NA
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #555555;'> 1</span><span> chr5     8.98</span><span style='color: #555555;'>e</span><span>7 8.98</span><span style='color: #555555;'>e</span><span>7 G     A     inte… LYSM… 0         0     0 0         0
-#&gt; </span><span style='color: #555555;'> 2</span><span> chrY     1.00</span><span style='color: #555555;'>e</span><span>7 1.00</span><span style='color: #555555;'>e</span><span>7 G     T     inte… TTTY… 0         0     0 0         0
-#&gt; </span><span style='color: #555555;'> 3</span><span> chr12    7.29</span><span style='color: #555555;'>e</span><span>7 7.29</span><span style='color: #555555;'>e</span><span>7 C     A     intr… TRHDE 0         0     0 0.116    43
-#&gt; </span><span style='color: #555555;'> 4</span><span> chr17    2.66</span><span style='color: #555555;'>e</span><span>7 2.66</span><span style='color: #555555;'>e</span><span>7 G     A     inte… NLK(… 0         0     0 0.127    63
-#&gt; </span><span style='color: #555555;'> 5</span><span> chr11    1.14</span><span style='color: #555555;'>e</span><span>7 1.14</span><span style='color: #555555;'>e</span><span>7 T     G     intr… GALN… 0         0     0 0         0
-#&gt; </span><span style='color: #555555;'> 6</span><span> chr1     5.47</span><span style='color: #555555;'>e</span><span>7 5.47</span><span style='color: #555555;'>e</span><span>7 A     G     intr… MRPL… 0         0     0 0         0
-#&gt; </span><span style='color: #555555;'> 7</span><span> chr19    2.45</span><span style='color: #555555;'>e</span><span>6 2.45</span><span style='color: #555555;'>e</span><span>6 C     G     intr… LMNB2 0         0     0 0         0
-#&gt; </span><span style='color: #555555;'> 8</span><span> chr10    8.48</span><span style='color: #555555;'>e</span><span>7 8.48</span><span style='color: #555555;'>e</span><span>7 A     C     inte… NRG3… 0         0     0 0         0
-#&gt; </span><span style='color: #555555;'> 9</span><span> chr3     3.01</span><span style='color: #555555;'>e</span><span>7 3.01</span><span style='color: #555555;'>e</span><span>7 A     G     inte… RBMS… 0         0     0 0         0
-#&gt; </span><span style='color: #555555;'>10</span><span> chr6     1.00</span><span style='color: #555555;'>e</span><span>7 1.00</span><span style='color: #555555;'>e</span><span>7 C     T     inte… LOC1… 0.509    53    27 0.513    39
-#&gt; </span><span style='color: #555555;'># … with 490 more rows, and 2 more variables: NA </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #555555;'>, NA </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>
+#&gt;    </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>  </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #BCBCBC;'> 1</span><span> chr5     8.98</span><span style='color: #949494;'>e</span><span>7 8.98</span><span style='color: #949494;'>e</span><span>7 G     A     inte… LYSM… 0         0     0 0         0
+#&gt; </span><span style='color: #BCBCBC;'> 2</span><span> chrY     1.00</span><span style='color: #949494;'>e</span><span>7 1.00</span><span style='color: #949494;'>e</span><span>7 G     T     inte… TTTY… 0         0     0 0         0
+#&gt; </span><span style='color: #BCBCBC;'> 3</span><span> chr12    7.29</span><span style='color: #949494;'>e</span><span>7 7.29</span><span style='color: #949494;'>e</span><span>7 C     A     intr… TRHDE 0         0     0 0.116    43
+#&gt; </span><span style='color: #BCBCBC;'> 4</span><span> chr17    2.66</span><span style='color: #949494;'>e</span><span>7 2.66</span><span style='color: #949494;'>e</span><span>7 G     A     inte… NLK(… 0         0     0 0.127    63
+#&gt; </span><span style='color: #BCBCBC;'> 5</span><span> chr11    1.14</span><span style='color: #949494;'>e</span><span>7 1.14</span><span style='color: #949494;'>e</span><span>7 T     G     intr… GALN… 0         0     0 0         0
+#&gt; </span><span style='color: #BCBCBC;'> 6</span><span> chr1     5.47</span><span style='color: #949494;'>e</span><span>7 5.47</span><span style='color: #949494;'>e</span><span>7 A     G     intr… MRPL… 0         0     0 0         0
+#&gt; </span><span style='color: #BCBCBC;'> 7</span><span> chr19    2.45</span><span style='color: #949494;'>e</span><span>6 2.45</span><span style='color: #949494;'>e</span><span>6 C     G     intr… LMNB2 0         0     0 0         0
+#&gt; </span><span style='color: #BCBCBC;'> 8</span><span> chr10    8.48</span><span style='color: #949494;'>e</span><span>7 8.48</span><span style='color: #949494;'>e</span><span>7 A     C     inte… NRG3… 0         0     0 0         0
+#&gt; </span><span style='color: #BCBCBC;'> 9</span><span> chr3     3.01</span><span style='color: #949494;'>e</span><span>7 3.01</span><span style='color: #949494;'>e</span><span>7 A     G     inte… RBMS… 0         0     0 0         0
+#&gt; </span><span style='color: #BCBCBC;'>10</span><span> chr6     1.00</span><span style='color: #949494;'>e</span><span>7 1.00</span><span style='color: #949494;'>e</span><span>7 C     T     inte… LOC1… 0.509    53    27 0.513    39
+#&gt; </span><span style='color: #949494;'># … with 490 more rows, and 2 more variables: NA </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span style='color: #949494;'>, NA </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>
 #&gt; 
 #&gt; $wide_segments
-#&gt; </span><span style='color: #555555;'># A tibble: 85 x 7</span><span>
+#&gt; </span><span style='color: #949494;'># A tibble: 85 x 7</span><span>
 #&gt;    chr      from      to Set6_42.minor Set6_42.Major Set6_44.minor Set6_44.Major
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>         </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>         </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>         </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>         </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>
-#&gt; </span><span style='color: #555555;'> 1</span><span> chr1   1.42</span><span style='color: #555555;'>e</span><span>6  2.54</span><span style='color: #555555;'>e</span><span>6             1             1             1             1
-#&gt; </span><span style='color: #555555;'> 2</span><span> chr1   3.43</span><span style='color: #555555;'>e</span><span>6  4.71</span><span style='color: #555555;'>e</span><span>7             0             1             0             1
-#&gt; </span><span style='color: #555555;'> 3</span><span> chr1   4.87</span><span style='color: #555555;'>e</span><span>7  2.48</span><span style='color: #555555;'>e</span><span>8             1             1             1             1
-#&gt; </span><span style='color: #555555;'> 4</span><span> chr1   2.48</span><span style='color: #555555;'>e</span><span>8  2.48</span><span style='color: #555555;'>e</span><span>8             0             2             0             2
-#&gt; </span><span style='color: #555555;'> 5</span><span> chr2   2.25</span><span style='color: #555555;'>e</span><span>5  2.43</span><span style='color: #555555;'>e</span><span>8             1             1             1             1
-#&gt; </span><span style='color: #555555;'> 6</span><span> chr3   2.91</span><span style='color: #555555;'>e</span><span>6  1.97</span><span style='color: #555555;'>e</span><span>8             1             1             1             1
-#&gt; </span><span style='color: #555555;'> 7</span><span> chr4   8.18</span><span style='color: #555555;'>e</span><span>5  1.74</span><span style='color: #555555;'>e</span><span>6             1             1             1             1
-#&gt; </span><span style='color: #555555;'> 8</span><span> chr4   1.75</span><span style='color: #555555;'>e</span><span>6  1.06</span><span style='color: #555555;'>e</span><span>7             1             1             1             1
-#&gt; </span><span style='color: #555555;'> 9</span><span> chr4   1.35</span><span style='color: #555555;'>e</span><span>7  1.91</span><span style='color: #555555;'>e</span><span>8             1             1             1             1
-#&gt; </span><span style='color: #555555;'>10</span><span> chr4   1.91</span><span style='color: #555555;'>e</span><span>8  1.91</span><span style='color: #555555;'>e</span><span>8             1             2             1             2
-#&gt; </span><span style='color: #555555;'># … with 75 more rows</span><span>
+#&gt;    </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>         </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>         </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>         </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>         </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>
+#&gt; </span><span style='color: #BCBCBC;'> 1</span><span> chr1   1.42</span><span style='color: #949494;'>e</span><span>6  2.54</span><span style='color: #949494;'>e</span><span>6             1             1             1             1
+#&gt; </span><span style='color: #BCBCBC;'> 2</span><span> chr1   3.43</span><span style='color: #949494;'>e</span><span>6  4.71</span><span style='color: #949494;'>e</span><span>7             0             1             0             1
+#&gt; </span><span style='color: #BCBCBC;'> 3</span><span> chr1   4.87</span><span style='color: #949494;'>e</span><span>7  2.48</span><span style='color: #949494;'>e</span><span>8             1             1             1             1
+#&gt; </span><span style='color: #BCBCBC;'> 4</span><span> chr1   2.48</span><span style='color: #949494;'>e</span><span>8  2.48</span><span style='color: #949494;'>e</span><span>8             0             2             0             2
+#&gt; </span><span style='color: #BCBCBC;'> 5</span><span> chr2   2.25</span><span style='color: #949494;'>e</span><span>5  2.43</span><span style='color: #949494;'>e</span><span>8             1             1             1             1
+#&gt; </span><span style='color: #BCBCBC;'> 6</span><span> chr3   2.91</span><span style='color: #949494;'>e</span><span>6  1.97</span><span style='color: #949494;'>e</span><span>8             1             1             1             1
+#&gt; </span><span style='color: #BCBCBC;'> 7</span><span> chr4   8.18</span><span style='color: #949494;'>e</span><span>5  1.74</span><span style='color: #949494;'>e</span><span>6             1             1             1             1
+#&gt; </span><span style='color: #BCBCBC;'> 8</span><span> chr4   1.75</span><span style='color: #949494;'>e</span><span>6  1.06</span><span style='color: #949494;'>e</span><span>7             1             1             1             1
+#&gt; </span><span style='color: #BCBCBC;'> 9</span><span> chr4   1.35</span><span style='color: #949494;'>e</span><span>7  1.91</span><span style='color: #949494;'>e</span><span>8             1             1             1             1
+#&gt; </span><span style='color: #BCBCBC;'>10</span><span> chr4   1.91</span><span style='color: #949494;'>e</span><span>8  1.91</span><span style='color: #949494;'>e</span><span>8             1             2             1             2
+#&gt; </span><span style='color: #949494;'># … with 75 more rows</span><span>
 #&gt; 
 #&gt; $long_mutations
 #&gt; $long_mutations$Set6_42
-#&gt; </span><span style='color: #555555;'># A tibble: 175 x 11</span><span>
+#&gt; </span><span style='color: #949494;'># A tibble: 175 x 11</span><span>
 #&gt;    chr      from      to ref   alt   region gene         VAF    DP    NV patient
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>  
-#&gt; </span><span style='color: #555555;'> 1</span><span> chr6   1.00</span><span style='color: #555555;'>e</span><span>7  1.00</span><span style='color: #555555;'>e</span><span>7 C     T     inter… LOC10050… 0.509     53    27 Set6   
-#&gt; </span><span style='color: #555555;'> 2</span><span> chr16  2.06</span><span style='color: #555555;'>e</span><span>7  2.06</span><span style='color: #555555;'>e</span><span>7 C     T     intro… ACSM2B    0.174     46     8 Set6   
-#&gt; </span><span style='color: #555555;'> 3</span><span> chr3   1.80</span><span style='color: #555555;'>e</span><span>8  1.80</span><span style='color: #555555;'>e</span><span>8 G     A     inter… LOC10050… 0.314     70    22 Set6   
-#&gt; </span><span style='color: #555555;'> 4</span><span> chr7   9.77</span><span style='color: #555555;'>e</span><span>7  9.77</span><span style='color: #555555;'>e</span><span>7 T     A     inter… OCM2(dis… 0.078</span><span style='text-decoration: underline;'>9</span><span>    38     3 Set6   
-#&gt; </span><span style='color: #555555;'> 5</span><span> chr2   1.39</span><span style='color: #555555;'>e</span><span>8  1.39</span><span style='color: #555555;'>e</span><span>8 A     C     intro… NXPH2     0.065</span><span style='text-decoration: underline;'>9</span><span>    91     6 Set6   
-#&gt; </span><span style='color: #555555;'> 6</span><span> chr4   4.92</span><span style='color: #555555;'>e</span><span>7  4.92</span><span style='color: #555555;'>e</span><span>7 G     T     inter… CWH43(di… 0.167     48     8 Set6   
-#&gt; </span><span style='color: #555555;'> 7</span><span> chr20  5.30</span><span style='color: #555555;'>e</span><span>7  5.30</span><span style='color: #555555;'>e</span><span>7 C     T     inter… PFDN4(di… 0.072</span><span style='text-decoration: underline;'>1</span><span>   111     8 Set6   
-#&gt; </span><span style='color: #555555;'> 8</span><span> chr15  4.39</span><span style='color: #555555;'>e</span><span>7  4.39</span><span style='color: #555555;'>e</span><span>7 C     G     intro… CATSPER2  0.032</span><span style='text-decoration: underline;'>3</span><span>    93     3 Set6   
-#&gt; </span><span style='color: #555555;'> 9</span><span> chr5   1.13</span><span style='color: #555555;'>e</span><span>8  1.13</span><span style='color: #555555;'>e</span><span>8 T     C     inter… YTHDC2(d… 0.479     94    45 Set6   
-#&gt; </span><span style='color: #555555;'>10</span><span> chr19  4.07</span><span style='color: #555555;'>e</span><span>6  4.07</span><span style='color: #555555;'>e</span><span>6 G     T     upstr… ZBTB7A    0.366     82    30 Set6   
-#&gt; </span><span style='color: #555555;'># … with 165 more rows</span><span>
+#&gt;    </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>  </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>      </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>  
+#&gt; </span><span style='color: #BCBCBC;'> 1</span><span> chr6   1.00</span><span style='color: #949494;'>e</span><span>7  1.00</span><span style='color: #949494;'>e</span><span>7 C     T     inter… LOC10050… 0.509     53    27 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 2</span><span> chr16  2.06</span><span style='color: #949494;'>e</span><span>7  2.06</span><span style='color: #949494;'>e</span><span>7 C     T     intro… ACSM2B    0.174     46     8 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 3</span><span> chr3   1.80</span><span style='color: #949494;'>e</span><span>8  1.80</span><span style='color: #949494;'>e</span><span>8 G     A     inter… LOC10050… 0.314     70    22 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 4</span><span> chr7   9.77</span><span style='color: #949494;'>e</span><span>7  9.77</span><span style='color: #949494;'>e</span><span>7 T     A     inter… OCM2(dis… 0.078</span><span style='text-decoration: underline;'>9</span><span>    38     3 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 5</span><span> chr2   1.39</span><span style='color: #949494;'>e</span><span>8  1.39</span><span style='color: #949494;'>e</span><span>8 A     C     intro… NXPH2     0.065</span><span style='text-decoration: underline;'>9</span><span>    91     6 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 6</span><span> chr4   4.92</span><span style='color: #949494;'>e</span><span>7  4.92</span><span style='color: #949494;'>e</span><span>7 G     T     inter… CWH43(di… 0.167     48     8 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 7</span><span> chr20  5.30</span><span style='color: #949494;'>e</span><span>7  5.30</span><span style='color: #949494;'>e</span><span>7 C     T     inter… PFDN4(di… 0.072</span><span style='text-decoration: underline;'>1</span><span>   111     8 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 8</span><span> chr15  4.39</span><span style='color: #949494;'>e</span><span>7  4.39</span><span style='color: #949494;'>e</span><span>7 C     G     intro… CATSPER2  0.032</span><span style='text-decoration: underline;'>3</span><span>    93     3 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 9</span><span> chr5   1.13</span><span style='color: #949494;'>e</span><span>8  1.13</span><span style='color: #949494;'>e</span><span>8 T     C     inter… YTHDC2(d… 0.479     94    45 Set6   
+#&gt; </span><span style='color: #BCBCBC;'>10</span><span> chr19  4.07</span><span style='color: #949494;'>e</span><span>6  4.07</span><span style='color: #949494;'>e</span><span>6 G     T     upstr… ZBTB7A    0.366     82    30 Set6   
+#&gt; </span><span style='color: #949494;'># … with 165 more rows</span><span>
 #&gt; 
 #&gt; $long_mutations$Set6_44
-#&gt; </span><span style='color: #555555;'># A tibble: 146 x 11</span><span>
+#&gt; </span><span style='color: #949494;'># A tibble: 146 x 11</span><span>
 #&gt;    chr      from      to ref   alt   region gene         VAF    DP    NV patient
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>      </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>  
-#&gt; </span><span style='color: #555555;'> 1</span><span> chr12  7.29</span><span style='color: #555555;'>e</span><span>7  7.29</span><span style='color: #555555;'>e</span><span>7 C     A     intro… TRHDE     0.116     43     5 Set6   
-#&gt; </span><span style='color: #555555;'> 2</span><span> chr17  2.66</span><span style='color: #555555;'>e</span><span>7  2.66</span><span style='color: #555555;'>e</span><span>7 G     A     inter… NLK(dist… 0.127     63     8 Set6   
-#&gt; </span><span style='color: #555555;'> 3</span><span> chr6   1.00</span><span style='color: #555555;'>e</span><span>7  1.00</span><span style='color: #555555;'>e</span><span>7 C     T     inter… LOC10050… 0.513     39    20 Set6   
-#&gt; </span><span style='color: #555555;'> 4</span><span> chr3   1.80</span><span style='color: #555555;'>e</span><span>8  1.80</span><span style='color: #555555;'>e</span><span>8 G     A     inter… LOC10050… 0.358     67    24 Set6   
-#&gt; </span><span style='color: #555555;'> 5</span><span> chr7   9.77</span><span style='color: #555555;'>e</span><span>7  9.77</span><span style='color: #555555;'>e</span><span>7 T     A     inter… OCM2(dis… 0.12      25     3 Set6   
-#&gt; </span><span style='color: #555555;'> 6</span><span> chr7   5.72</span><span style='color: #555555;'>e</span><span>7  5.72</span><span style='color: #555555;'>e</span><span>7 G     T     inter… ZNF479(d… 0.070</span><span style='text-decoration: underline;'>2</span><span>    57     4 Set6   
-#&gt; </span><span style='color: #555555;'> 7</span><span> chr9   1.33</span><span style='color: #555555;'>e</span><span>8  1.33</span><span style='color: #555555;'>e</span><span>8 T     G     intro… FNBP1     0.079</span><span style='text-decoration: underline;'>4</span><span>    63     5 Set6   
-#&gt; </span><span style='color: #555555;'> 8</span><span> chr5   1.13</span><span style='color: #555555;'>e</span><span>8  1.13</span><span style='color: #555555;'>e</span><span>8 T     C     inter… YTHDC2(d… 0.397     63    25 Set6   
-#&gt; </span><span style='color: #555555;'> 9</span><span> chrY   1.33</span><span style='color: #555555;'>e</span><span>7  1.33</span><span style='color: #555555;'>e</span><span>7 C     T     inter… NONE(dis… 0.176     51     9 Set6   
-#&gt; </span><span style='color: #555555;'>10</span><span> chr12  3.79</span><span style='color: #555555;'>e</span><span>7  3.79</span><span style='color: #555555;'>e</span><span>7 A     G     inter… NONE(dis… 0.054</span><span style='text-decoration: underline;'>1</span><span>    74     4 Set6   
-#&gt; </span><span style='color: #555555;'># … with 136 more rows</span><span>
+#&gt;    </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>  </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>      </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>  
+#&gt; </span><span style='color: #BCBCBC;'> 1</span><span> chr12  7.29</span><span style='color: #949494;'>e</span><span>7  7.29</span><span style='color: #949494;'>e</span><span>7 C     A     intro… TRHDE     0.116     43     5 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 2</span><span> chr17  2.66</span><span style='color: #949494;'>e</span><span>7  2.66</span><span style='color: #949494;'>e</span><span>7 G     A     inter… NLK(dist… 0.127     63     8 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 3</span><span> chr6   1.00</span><span style='color: #949494;'>e</span><span>7  1.00</span><span style='color: #949494;'>e</span><span>7 C     T     inter… LOC10050… 0.513     39    20 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 4</span><span> chr3   1.80</span><span style='color: #949494;'>e</span><span>8  1.80</span><span style='color: #949494;'>e</span><span>8 G     A     inter… LOC10050… 0.358     67    24 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 5</span><span> chr7   9.77</span><span style='color: #949494;'>e</span><span>7  9.77</span><span style='color: #949494;'>e</span><span>7 T     A     inter… OCM2(dis… 0.12      25     3 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 6</span><span> chr7   5.72</span><span style='color: #949494;'>e</span><span>7  5.72</span><span style='color: #949494;'>e</span><span>7 G     T     inter… ZNF479(d… 0.070</span><span style='text-decoration: underline;'>2</span><span>    57     4 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 7</span><span> chr9   1.33</span><span style='color: #949494;'>e</span><span>8  1.33</span><span style='color: #949494;'>e</span><span>8 T     G     intro… FNBP1     0.079</span><span style='text-decoration: underline;'>4</span><span>    63     5 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 8</span><span> chr5   1.13</span><span style='color: #949494;'>e</span><span>8  1.13</span><span style='color: #949494;'>e</span><span>8 T     C     inter… YTHDC2(d… 0.397     63    25 Set6   
+#&gt; </span><span style='color: #BCBCBC;'> 9</span><span> chrY   1.33</span><span style='color: #949494;'>e</span><span>7  1.33</span><span style='color: #949494;'>e</span><span>7 C     T     inter… NONE(dis… 0.176     51     9 Set6   
+#&gt; </span><span style='color: #BCBCBC;'>10</span><span> chr12  3.79</span><span style='color: #949494;'>e</span><span>7  3.79</span><span style='color: #949494;'>e</span><span>7 A     G     inter… NONE(dis… 0.054</span><span style='text-decoration: underline;'>1</span><span>    74     4 Set6   
+#&gt; </span><span style='color: #949494;'># … with 136 more rows</span><span>
 #&gt; 
 #&gt; 
 #&gt; $long_segments
 #&gt; $long_segments$Set6_42
-#&gt; </span><span style='color: #555555;'># A tibble: 85 x 5</span><span>
+#&gt; </span><span style='color: #949494;'># A tibble: 85 x 5</span><span>
 #&gt;    chr        from        to minor Major
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>
-#&gt; </span><span style='color: #555555;'> 1</span><span> chr1    1</span><span style='text-decoration: underline;'>421</span><span>022   2</span><span style='text-decoration: underline;'>538</span><span>349     1     1
-#&gt; </span><span style='color: #555555;'> 2</span><span> chr1    3</span><span style='text-decoration: underline;'>428</span><span>160  47</span><span style='text-decoration: underline;'>139</span><span>103     0     1
-#&gt; </span><span style='color: #555555;'> 3</span><span> chr1   48</span><span style='text-decoration: underline;'>708</span><span>250 247</span><span style='text-decoration: underline;'>694</span><span>949     1     1
-#&gt; </span><span style='color: #555555;'> 4</span><span> chr1  247</span><span style='text-decoration: underline;'>726</span><span>822 247</span><span style='text-decoration: underline;'>726</span><span>822     0     2
-#&gt; </span><span style='color: #555555;'> 5</span><span> chr2     </span><span style='text-decoration: underline;'>224</span><span>919 242</span><span style='text-decoration: underline;'>557</span><span>019     1     1
-#&gt; </span><span style='color: #555555;'> 6</span><span> chr3    2</span><span style='text-decoration: underline;'>908</span><span>335 197</span><span style='text-decoration: underline;'>273</span><span>077     1     1
-#&gt; </span><span style='color: #555555;'> 7</span><span> chr4     </span><span style='text-decoration: underline;'>818</span><span>440   1</span><span style='text-decoration: underline;'>739</span><span>252     1     1
-#&gt; </span><span style='color: #555555;'> 8</span><span> chr4    1</span><span style='text-decoration: underline;'>746</span><span>125  10</span><span style='text-decoration: underline;'>599</span><span>670     1     1
-#&gt; </span><span style='color: #555555;'> 9</span><span> chr4   13</span><span style='text-decoration: underline;'>529</span><span>990 190</span><span style='text-decoration: underline;'>894</span><span>246     1     1
-#&gt; </span><span style='color: #555555;'>10</span><span> chr4  190</span><span style='text-decoration: underline;'>903</span><span>688 190</span><span style='text-decoration: underline;'>904</span><span>832     1     2
-#&gt; </span><span style='color: #555555;'># … with 75 more rows</span><span>
+#&gt;    </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>     </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>
+#&gt; </span><span style='color: #BCBCBC;'> 1</span><span> chr1    1</span><span style='text-decoration: underline;'>421</span><span>022   2</span><span style='text-decoration: underline;'>538</span><span>349     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 2</span><span> chr1    3</span><span style='text-decoration: underline;'>428</span><span>160  47</span><span style='text-decoration: underline;'>139</span><span>103     0     1
+#&gt; </span><span style='color: #BCBCBC;'> 3</span><span> chr1   48</span><span style='text-decoration: underline;'>708</span><span>250 247</span><span style='text-decoration: underline;'>694</span><span>949     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 4</span><span> chr1  247</span><span style='text-decoration: underline;'>726</span><span>822 247</span><span style='text-decoration: underline;'>726</span><span>822     0     2
+#&gt; </span><span style='color: #BCBCBC;'> 5</span><span> chr2     </span><span style='text-decoration: underline;'>224</span><span>919 242</span><span style='text-decoration: underline;'>557</span><span>019     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 6</span><span> chr3    2</span><span style='text-decoration: underline;'>908</span><span>335 197</span><span style='text-decoration: underline;'>273</span><span>077     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 7</span><span> chr4     </span><span style='text-decoration: underline;'>818</span><span>440   1</span><span style='text-decoration: underline;'>739</span><span>252     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 8</span><span> chr4    1</span><span style='text-decoration: underline;'>746</span><span>125  10</span><span style='text-decoration: underline;'>599</span><span>670     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 9</span><span> chr4   13</span><span style='text-decoration: underline;'>529</span><span>990 190</span><span style='text-decoration: underline;'>894</span><span>246     1     1
+#&gt; </span><span style='color: #BCBCBC;'>10</span><span> chr4  190</span><span style='text-decoration: underline;'>903</span><span>688 190</span><span style='text-decoration: underline;'>904</span><span>832     1     2
+#&gt; </span><span style='color: #949494;'># … with 75 more rows</span><span>
 #&gt; 
 #&gt; $long_segments$Set6_44
-#&gt; </span><span style='color: #555555;'># A tibble: 85 x 5</span><span>
+#&gt; </span><span style='color: #949494;'># A tibble: 85 x 5</span><span>
 #&gt;    chr        from        to minor Major
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>     </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;int&gt;</span><span>
-#&gt; </span><span style='color: #555555;'> 1</span><span> chr1    1</span><span style='text-decoration: underline;'>421</span><span>022   2</span><span style='text-decoration: underline;'>538</span><span>349     1     1
-#&gt; </span><span style='color: #555555;'> 2</span><span> chr1    3</span><span style='text-decoration: underline;'>428</span><span>160  47</span><span style='text-decoration: underline;'>139</span><span>103     0     1
-#&gt; </span><span style='color: #555555;'> 3</span><span> chr1   48</span><span style='text-decoration: underline;'>708</span><span>250 247</span><span style='text-decoration: underline;'>694</span><span>949     1     1
-#&gt; </span><span style='color: #555555;'> 4</span><span> chr1  247</span><span style='text-decoration: underline;'>726</span><span>822 247</span><span style='text-decoration: underline;'>726</span><span>822     0     2
-#&gt; </span><span style='color: #555555;'> 5</span><span> chr2     </span><span style='text-decoration: underline;'>224</span><span>919 242</span><span style='text-decoration: underline;'>557</span><span>019     1     1
-#&gt; </span><span style='color: #555555;'> 6</span><span> chr3    2</span><span style='text-decoration: underline;'>908</span><span>335 197</span><span style='text-decoration: underline;'>273</span><span>077     1     1
-#&gt; </span><span style='color: #555555;'> 7</span><span> chr4     </span><span style='text-decoration: underline;'>818</span><span>440   1</span><span style='text-decoration: underline;'>739</span><span>252     1     1
-#&gt; </span><span style='color: #555555;'> 8</span><span> chr4    1</span><span style='text-decoration: underline;'>746</span><span>125  10</span><span style='text-decoration: underline;'>599</span><span>670     1     1
-#&gt; </span><span style='color: #555555;'> 9</span><span> chr4   13</span><span style='text-decoration: underline;'>529</span><span>990 190</span><span style='text-decoration: underline;'>894</span><span>246     1     1
-#&gt; </span><span style='color: #555555;'>10</span><span> chr4  190</span><span style='text-decoration: underline;'>903</span><span>688 190</span><span style='text-decoration: underline;'>904</span><span>832     1     2
-#&gt; </span><span style='color: #555555;'># … with 75 more rows</span><span>
+#&gt;    </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>     </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;int&gt;</span><span>
+#&gt; </span><span style='color: #BCBCBC;'> 1</span><span> chr1    1</span><span style='text-decoration: underline;'>421</span><span>022   2</span><span style='text-decoration: underline;'>538</span><span>349     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 2</span><span> chr1    3</span><span style='text-decoration: underline;'>428</span><span>160  47</span><span style='text-decoration: underline;'>139</span><span>103     0     1
+#&gt; </span><span style='color: #BCBCBC;'> 3</span><span> chr1   48</span><span style='text-decoration: underline;'>708</span><span>250 247</span><span style='text-decoration: underline;'>694</span><span>949     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 4</span><span> chr1  247</span><span style='text-decoration: underline;'>726</span><span>822 247</span><span style='text-decoration: underline;'>726</span><span>822     0     2
+#&gt; </span><span style='color: #BCBCBC;'> 5</span><span> chr2     </span><span style='text-decoration: underline;'>224</span><span>919 242</span><span style='text-decoration: underline;'>557</span><span>019     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 6</span><span> chr3    2</span><span style='text-decoration: underline;'>908</span><span>335 197</span><span style='text-decoration: underline;'>273</span><span>077     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 7</span><span> chr4     </span><span style='text-decoration: underline;'>818</span><span>440   1</span><span style='text-decoration: underline;'>739</span><span>252     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 8</span><span> chr4    1</span><span style='text-decoration: underline;'>746</span><span>125  10</span><span style='text-decoration: underline;'>599</span><span>670     1     1
+#&gt; </span><span style='color: #BCBCBC;'> 9</span><span> chr4   13</span><span style='text-decoration: underline;'>529</span><span>990 190</span><span style='text-decoration: underline;'>894</span><span>246     1     1
+#&gt; </span><span style='color: #BCBCBC;'>10</span><span> chr4  190</span><span style='text-decoration: underline;'>903</span><span>688 190</span><span style='text-decoration: underline;'>904</span><span>832     1     2
+#&gt; </span><span style='color: #949494;'># … with 75 more rows</span><span>
 #&gt; 
 #&gt; 
 #&gt; $purity
@@ -284,7 +286,7 @@ function <code>dataset</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

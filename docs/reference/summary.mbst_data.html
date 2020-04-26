@@ -46,7 +46,6 @@
 <meta property="og:description" content="The summary reports basic statistics on the stored
 input values concerning both mutations, segments, and fits if
 available" />
-<meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -105,13 +104,16 @@ available" />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/Colorectal_Cross.html">Subclonal deconvolution of MSeq multi-region WGS colorectal cancer data</a>
+      <a href="../articles/0_packages.html">Packages inside `evoverse`</a>
     </li>
     <li>
-      <a href="../articles/packages.html">Packages in the `evoverse`</a>
+      <a href="../articles/a1_Data_QC.html">P1. Data quality check</a>
     </li>
     <li>
-      <a href="../articles/pipelines.html">Pipeline available with the `evoverse` packages</a>
+      <a href="../articles/a2_Chr_timing.html">P2. Timing chromosome aneuploidy</a>
+    </li>
+    <li>
+      <a href="../articles/a3_Deconv_vaf_karyo.html">P3. Subclonal deconvolution by VAF and karyotypes</a>
     </li>
   </ul>
 </li>
@@ -168,13 +170,14 @@ available</p>
     <p>Nothing.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘example_evoverse’ not found</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>example_evoverse</span>)</div><div class='output co'>#&gt; <span style='color: #BBBBBB;background-color: #0000BB;'> [ mvMOBSTER dataset ] 
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>example_evoverse</span>)</div><div class='output co'>#&gt; <span style='color: #BBBBBB;background-color: #0000BB;'> [ mvMOBSTER dataset ] 
 #&gt; </span><span style='color: #000000;background-color: #BBBB00;'>  Dataset</span><span> My multi-region MOBSTER dataset </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt;   Samples</span><span> Set7_55, Set7_57, Set7_59, Set7_62 </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt;  Purities</span><span> 0.88, 0.88, 0.88, 0.8 </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; Mutations</span><span> N = 57317 </span><span style='color: #000000;background-color: #BBBB00;'>
+#&gt; Mutations</span><span> N = 12960 </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt; </span><span>
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>MOBSTER analysis</span><span> </span><span style='color: #00BB00;'>TRUE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
+#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>MOBSTER analysis</span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt;   VIBER analysis</span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt; </span><span>
 #&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-</span><span>
@@ -182,125 +185,49 @@ available</p>
 #&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-</span><span>
 #&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt; Depth (DP)</span><span>  </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; </span><span style='color: #555555;'># A tibble: 4 x 6</span><span>
+#&gt; </span><span style='color: #949494;'># A tibble: 4 x 6</span><span>
 #&gt;   sample  variable  mean median   min   max
-#&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #555555;'>1</span><span> Set7_55 DP        79.3     80     3  </span><span style='text-decoration: underline;'>3</span><span>577
-#&gt; </span><span style='color: #555555;'>2</span><span> Set7_57 DP        77.7     78     3  </span><span style='text-decoration: underline;'>3</span><span>889
-#&gt; </span><span style='color: #555555;'>3</span><span> Set7_59 DP        82.6     83     3  </span><span style='text-decoration: underline;'>3</span><span>823
-#&gt; </span><span style='color: #555555;'>4</span><span> Set7_62 DP        90.3     90     6  </span><span style='text-decoration: underline;'>4</span><span>403
+#&gt;   </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>    </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #BCBCBC;'>1</span><span> Set7_55 DP        79.3     80    13   576
+#&gt; </span><span style='color: #BCBCBC;'>2</span><span> Set7_57 DP        77.6     78    12   557
+#&gt; </span><span style='color: #BCBCBC;'>3</span><span> Set7_59 DP        82.8     84    16   587
+#&gt; </span><span style='color: #BCBCBC;'>4</span><span> Set7_62 DP        90.3     91    15   604
 #&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt; Number of reads with variant (NV)</span><span>  </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; </span><span style='color: #555555;'># A tibble: 4 x 6</span><span>
+#&gt; </span><span style='color: #949494;'># A tibble: 4 x 6</span><span>
 #&gt;   sample  variable  mean median   min   max
-#&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #555555;'>1</span><span> Set7_55 NV        9.81      0     0   470
-#&gt; </span><span style='color: #555555;'>2</span><span> Set7_57 NV        7.69      0     0   584
-#&gt; </span><span style='color: #555555;'>3</span><span> Set7_59 NV        8.72      0     0   516
-#&gt; </span><span style='color: #555555;'>4</span><span> Set7_62 NV        7.85      0     0   634
+#&gt;   </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>    </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #BCBCBC;'>1</span><span> Set7_55 NV        9.67      0     0    71
+#&gt; </span><span style='color: #BCBCBC;'>2</span><span> Set7_57 NV        7.57      0     0    99
+#&gt; </span><span style='color: #BCBCBC;'>3</span><span> Set7_59 NV        8.53      0     0    87
+#&gt; </span><span style='color: #BCBCBC;'>4</span><span> Set7_62 NV        7.68      0     0    85
 #&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt; Variant allele frequency (VAF)</span><span>  </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; </span><span style='color: #555555;'># A tibble: 4 x 6</span><span>
+#&gt; </span><span style='color: #949494;'># A tibble: 4 x 6</span><span>
 #&gt;   sample  variable  mean median   min   max
-#&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span>
-#&gt; </span><span style='color: #555555;'>1</span><span> Set7_55 VAF       0.14      0     0  0.76
-#&gt; </span><span style='color: #555555;'>2</span><span> Set7_57 VAF       0.11      0     0  0.76
-#&gt; </span><span style='color: #555555;'>3</span><span> Set7_59 VAF       0.12      0     0  0.73
-#&gt; </span><span style='color: #555555;'>4</span><span> Set7_62 VAF       0.11      0     0  0.76
+#&gt;   </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>    </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span>  </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span>
+#&gt; </span><span style='color: #BCBCBC;'>1</span><span> Set7_55 VAF       0.14      0     0  0.69
+#&gt; </span><span style='color: #BCBCBC;'>2</span><span> Set7_57 VAF       0.11      0     0  0.76
+#&gt; </span><span style='color: #BCBCBC;'>3</span><span> Set7_59 VAF       0.12      0     0  0.69
+#&gt; </span><span style='color: #BCBCBC;'>4</span><span> Set7_62 VAF       0.11      0     0  0.75
 #&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt; Annotations</span><span> gene, vaf_normal, cosmic, function., mutlocation, region </span><span style='color: #000000;background-color: #BBBB00;'>
 #&gt; </span><span>
 #&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
 #&gt; </span><span style='color: #00BBBB;'> Copy Number Alteration data</span><span>
 #&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
-#&gt; $Set7_55
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>      CNAqc </span><span> n = 47357 mutations for 60 CNA segments (60 clonal, 0 subclonal) </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;      Purity </span><span> 88% cellularity </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;  Karyotypes </span><span> 47357 (1:1) 
-#&gt;  </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;    Peaks QC </span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;         CCF </span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; </span><span>
-#&gt; $Set7_57
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>      CNAqc </span><span> n = 47357 mutations for 60 CNA segments (60 clonal, 0 subclonal) </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;      Purity </span><span> 88% cellularity </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;  Karyotypes </span><span> 47357 (1:1) 
-#&gt;  </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;    Peaks QC </span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;         CCF </span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; </span><span>
-#&gt; $Set7_59
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>      CNAqc </span><span> n = 47357 mutations for 60 CNA segments (60 clonal, 0 subclonal) </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;      Purity </span><span> 88% cellularity </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;  Karyotypes </span><span> 47357 (1:1) 
-#&gt;  </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;    Peaks QC </span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;         CCF </span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; </span><span>
-#&gt; $Set7_62
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>      CNAqc </span><span> n = 47357 mutations for 60 CNA segments (60 clonal, 0 subclonal) </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;      Purity </span><span> 80% cellularity </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;  Karyotypes </span><span> 47357 (1:1) 
-#&gt;  </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;    Peaks QC </span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;         CCF </span><span> </span><span style='color: #BB0000;'>FALSE</span><span> </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt; </span><span>
-#&gt; 
-#&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
-#&gt; </span><span style='color: #00BBBB;'> MOBSTER fit for sample Set7_55</span><span>
-#&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>[ MOBSTER ]</span><span> N = 20398 </span><span style='color: #00BBBB;'>points with</span><span> K = 1 </span><span style='color: #00BBBB;'>Beta clusters, fit by</span><span> </span><span style='color: #BBBB00;'>MM</span><span> </span><span style='color: #00BBBB;'>in</span><span> 10 </span><span style='color: #00BBBB;'>steps</span><span> </span><span style='color: #00BB00;'>[CONVERGED]</span><span> 
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;   Components (fit)  
-#&gt; </span><span>     Tail	n = 9184 (0.47) 	 Shape = 1.7 
-#&gt;   Beta C1 	n = 11214 (0.53) 	 Mean = 0.5
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;   Scores (model selection)  
-#&gt; </span><span>       NLL       BIC       AIC  entropy       ICL reduced.entropy     reICL
-#&gt;  -17664.43 -35269.33 -35316.87 1598.244 -33671.09               0 -35269.33
-#&gt;  size
-#&gt;     6
-#&gt; 
-#&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
-#&gt; </span><span style='color: #00BBBB;'> MOBSTER fit for sample Set7_57</span><span>
-#&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>[ MOBSTER ]</span><span> N = 19305 </span><span style='color: #00BBBB;'>points with</span><span> K = 1 </span><span style='color: #00BBBB;'>Beta clusters, fit by</span><span> </span><span style='color: #BBBB00;'>MM</span><span> </span><span style='color: #00BBBB;'>in</span><span> 10 </span><span style='color: #00BBBB;'>steps</span><span> </span><span style='color: #00BB00;'>[CONVERGED]</span><span> 
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;   Components (fit)  
-#&gt; </span><span>     Tail	n = 11387 (0.61) 	 Shape = 1.4 
-#&gt;   Beta C1 	n = 7918 (0.39) 	 Mean = 0.49
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;   Scores (model selection)  
-#&gt; </span><span>       NLL       BIC       AIC entropy       ICL reduced.entropy     reICL size
-#&gt;  -16489.14 -32919.08 -32966.29 2129.45 -30789.63               0 -32919.08    6
-#&gt; 
-#&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
-#&gt; </span><span style='color: #00BBBB;'> MOBSTER fit for sample Set7_59</span><span>
-#&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>[ MOBSTER ]</span><span> N = 22575 </span><span style='color: #00BBBB;'>points with</span><span> K = 1 </span><span style='color: #00BBBB;'>Beta clusters, fit by</span><span> </span><span style='color: #BBBB00;'>MM</span><span> </span><span style='color: #00BBBB;'>in</span><span> 9 </span><span style='color: #00BBBB;'>steps</span><span> </span><span style='color: #00BB00;'>[CONVERGED]</span><span> 
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;   Components (fit)  
-#&gt; </span><span>     Tail	n = 14248 (0.65) 	 Shape = 1.8 
-#&gt;   Beta C1 	n = 8327 (0.35) 	 Mean = 0.49
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;   Scores (model selection)  
-#&gt; </span><span>       NLL       BIC      AIC  entropy       ICL reduced.entropy     reICL size
-#&gt;  -24866.85 -49673.56 -49721.7 1641.651 -48031.91               0 -49673.56    6
-#&gt; 
-#&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
-#&gt; </span><span style='color: #00BBBB;'> MOBSTER fit for sample Set7_62</span><span>
-#&gt; </span><span style='color: #00BBBB;'>=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-</span><span>
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>[ MOBSTER ]</span><span> N = 19852 </span><span style='color: #00BBBB;'>points with</span><span> K = 1 </span><span style='color: #00BBBB;'>Beta clusters, fit by</span><span> </span><span style='color: #BBBB00;'>MM</span><span> </span><span style='color: #00BBBB;'>in</span><span> 13 </span><span style='color: #00BBBB;'>steps</span><span> </span><span style='color: #00BB00;'>[CONVERGED]</span><span> 
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;   Components (fit)  
-#&gt; </span><span>     Tail	n = 13106 (0.69) 	 Shape = 1.4 
-#&gt;   Beta C1 	n = 6746 (0.31) 	 Mean = 0.5
-#&gt; </span><span style='color: #000000;background-color: #BBBB00;'>
-#&gt;   Scores (model selection)  
-#&gt; </span><span>       NLL       BIC       AIC  entropy       ICL reduced.entropy     reICL
-#&gt;  -17069.28 -34079.18 -34126.55 2326.259 -31752.92               0 -34079.18
-#&gt;  size
-#&gt;     6</div></span></pre>
+#&gt; $Set7_55</div><div class='output co'>#&gt; <span class='message'>── </span><span style='color: #000000;background-color: #BBBB00;'>[ CNAqc ] </span><span> n = 47357 mutations in </span><span style='color: #00BB00;'>60</span><span> segments (60 clonal + 0 subclonal). Genome reference: . ───────</span></div><div class='output co'>#&gt; 
+#&gt;  1:1  [n = 47357] ■■■■■■■■■■■■■■■■■■■■■■■■■■■
+#&gt; </div><div class='output co'>#&gt; <span class='message'></span><span style='color: #00BBBB;'>ℹ</span><span> Sample Purity: 88% ~ Ploidy: .</span></div><div class='output co'>#&gt; 
+#&gt; $Set7_57</div><div class='output co'>#&gt; <span class='message'>── </span><span style='color: #000000;background-color: #BBBB00;'>[ CNAqc ] </span><span> n = 47357 mutations in </span><span style='color: #00BB00;'>60</span><span> segments (60 clonal + 0 subclonal). Genome reference: . ───────</span></div><div class='output co'>#&gt; 
+#&gt;  1:1  [n = 47357] ■■■■■■■■■■■■■■■■■■■■■■■■■■■
+#&gt; </div><div class='output co'>#&gt; <span class='message'></span><span style='color: #00BBBB;'>ℹ</span><span> Sample Purity: 88% ~ Ploidy: .</span></div><div class='output co'>#&gt; 
+#&gt; $Set7_59</div><div class='output co'>#&gt; <span class='message'>── </span><span style='color: #000000;background-color: #BBBB00;'>[ CNAqc ] </span><span> n = 47357 mutations in </span><span style='color: #00BB00;'>60</span><span> segments (60 clonal + 0 subclonal). Genome reference: . ───────</span></div><div class='output co'>#&gt; 
+#&gt;  1:1  [n = 47357] ■■■■■■■■■■■■■■■■■■■■■■■■■■■
+#&gt; </div><div class='output co'>#&gt; <span class='message'></span><span style='color: #00BBBB;'>ℹ</span><span> Sample Purity: 88% ~ Ploidy: .</span></div><div class='output co'>#&gt; 
+#&gt; $Set7_62</div><div class='output co'>#&gt; <span class='message'>── </span><span style='color: #000000;background-color: #BBBB00;'>[ CNAqc ] </span><span> n = 47357 mutations in </span><span style='color: #00BB00;'>60</span><span> segments (60 clonal + 0 subclonal). Genome reference: . ───────</span></div><div class='output co'>#&gt; 
+#&gt;  1:1  [n = 47357] ■■■■■■■■■■■■■■■■■■■■■■■■■■■
+#&gt; </div><div class='output co'>#&gt; <span class='message'></span><span style='color: #00BBBB;'>ℹ</span><span> Sample Purity: 80% ~ Ploidy: .</span></div><div class='output co'>#&gt; </div></span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -320,7 +247,7 @@ available</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

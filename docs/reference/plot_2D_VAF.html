@@ -50,7 +50,6 @@ points, which helps to allow for a faster rendering
 of the returned plot. The number of mutations shown
 is always reported, as well as the proportion with
 respect to the total number of mutations." />
-<meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -109,13 +108,16 @@ respect to the total number of mutations." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/Colorectal_Cross.html">Subclonal deconvolution of MSeq multi-region WGS colorectal cancer data</a>
+      <a href="../articles/0_packages.html">Packages inside `evoverse`</a>
     </li>
     <li>
-      <a href="../articles/packages.html">Packages in the `evoverse`</a>
+      <a href="../articles/a1_Data_QC.html">P1. Data quality check</a>
     </li>
     <li>
-      <a href="../articles/pipelines.html">Pipeline available with the `evoverse` packages</a>
+      <a href="../articles/a2_Chr_timing.html">P2. Timing chromosome aneuploidy</a>
+    </li>
+    <li>
+      <a href="../articles/a3_Deconv_vaf_karyo.html">P3. Subclonal deconvolution by VAF and karyotypes</a>
     </li>
   </ul>
 </li>
@@ -187,7 +189,8 @@ respect to the total number of mutations.</p>
 MOBSTER clusters' results.</p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘example_evoverse’ not found</span></div><div class='input'>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)
+
 <span class='co'># Plot the 1st vs the 2nd sample (default parameters)</span>
 <span class='fu'>plot_2D_VAF</span>(<span class='no'>example_evoverse</span>)</div><div class='img'><img src='plot_2D_VAF-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
@@ -210,7 +213,7 @@ MOBSTER clusters' results.</p></div>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

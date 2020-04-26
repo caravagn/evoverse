@@ -5,7 +5,7 @@
 \title{Pipeline for QC of somatic calls (copy number and mutations).}
 \usage{
 pipeline_qc_copynumbercalls(mutations, cna, purity, reference = "GRCh38",
-  sample = "MyPAT00XX1", smooth = TRUE,
+  description = "MyPAT00XX1", smooth = TRUE,
   matching_epsilon_peaks = 0.025, CCF_computation = "ENTROPY")
 }
 \arguments{
@@ -17,7 +17,7 @@ pipeline_qc_copynumbercalls(mutations, cna, purity, reference = "GRCh38",
 
 \item{reference}{A reference supported by package \code{CNAqc}.}
 
-\item{sample}{A sample identifier; will appear in the plots.}
+\item{description}{A sample description; will appear in the plots.}
 
 \item{smooth}{If \code{TRUE}, smooths copy number data with \code{CNAqc}.}
 

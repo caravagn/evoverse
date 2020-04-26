@@ -1,0 +1,41 @@
+---
+title: ""
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{The universe of Cancer Evolution packages}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Packages in the `evoverse`
+
+<div id="bg">
+<a href="https://caravagn.github.io/CNAqc" width="8%"><img src="https://caravagn.github.io/CNAqc/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/mobster" width="8%"><img src="https://caravagn.github.io/mobster/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/revolver" width="8%"><img src="https://caravagn.github.io/revolver/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/ctree" width="8%"><img src="https://caravagn.github.io/ctree/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/mtree" width="8%"><img src="https://caravagn.github.io/mtree/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/BMix" width="8%"><img src="https://caravagn.github.io/BMix/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/VIBER" width="8%"><img src="https://caravagn.github.io/VIBER/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/TINC" width="8%"><img src="https://caravagn.github.io/TINC/reference/figures/logo.png" width="8%"></a>
+</div>  
+<div id="bg">
+
+# Pipelines in the `evoverse`
+
+
+
+<a href='https://caravagn.github.io/evoverse/docs/articles/a1_Data_QC.html'>
+<img src="pipeline_qc.png" alt="drawing" height="100"/>
+</a>
+
+<a href='https://caravagn.github.io/evoverse/docs/articles/a2_Chr_timing.html'>
+<img src="pipeline_timing.png" alt="drawing" height="100"/>
+</a>

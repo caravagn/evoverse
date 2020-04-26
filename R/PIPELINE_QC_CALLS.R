@@ -123,8 +123,8 @@ print.evopipe_qc = function(x, ...)
   CNAqc:::print.cnaqc(x$cnaqc)
 
   # PASS/FAIL
-  pass = x$QC$QC_table %>% dplyr::filter(QC == "PASS") %>% dplyr::select(-lab.ypos, -label, -value)
-  fail = x$QC$QC_table %>% dplyr::filter(QC == "FAIL") %>% dplyr::select(-lab.ypos, -label, -value)
+  pass = x$QC$QC_table %>% dplyr::filter(QC == "PASS")
+  fail = x$QC$QC_table %>% dplyr::filter(QC == "FAIL")
 
   if(nrow(pass) > 0) {
     cat("\n")
@@ -173,18 +173,30 @@ plot.evopipe_qc = function(x, ...)
   )
 
   peak_plot =  suppressWarnings(suppressMessages(CNAqc::plot_peaks_analysis(x$cnaqc)))
-  CCF_plot =  suppressWarnings(suppressMessages(CNAqc::plot_CCF(x$cnaqc)))
+  CCF_plot =  suppressWarnings(suppressMessages(CNAqc::plot_CCF(x$cnaqc, strip = TRUE)))
 
   # One page
-  ggpubr::ggarrange(
+  figure = ggpubr::ggarrange(
     segments_plot,
     hist_plot,
     peak_plot,
     CCF_plot,
     ncol = 1,
     nrow = 4,
-    heights = c(1, .9, .9, .9)
+    heights = c(1.1, .9, .9, .9)
   )
+
+  # Set the figure title and captions
+  figure = ggpubr::annotate_figure(
+    figure,
+    bottom = ggpubr::text_grob(
+      bquote(.(x$log)),
+      hjust = 0,
+      x = 0,
+      size = 10
+    )
+  )
+
 }
 
 

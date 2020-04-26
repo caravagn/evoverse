@@ -47,7 +47,6 @@
 that refer to the VAF values. These can be subset by sample and mutation
 id; by default all entries are returned. The output is a tibble; no other
 transformations are executed." />
-<meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -106,13 +105,16 @@ transformations are executed." />
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/Colorectal_Cross.html">Subclonal deconvolution of MSeq multi-region WGS colorectal cancer data</a>
+      <a href="../articles/0_packages.html">Packages inside `evoverse`</a>
     </li>
     <li>
-      <a href="../articles/packages.html">Packages in the `evoverse`</a>
+      <a href="../articles/a1_Data_QC.html">P1. Data quality check</a>
     </li>
     <li>
-      <a href="../articles/pipelines.html">Pipeline available with the `evoverse` packages</a>
+      <a href="../articles/a2_Chr_timing.html">P2. Timing chromosome aneuploidy</a>
+    </li>
+    <li>
+      <a href="../articles/a3_Deconv_vaf_karyo.html">P3. Subclonal deconvolution by VAF and karyotypes</a>
     </li>
   </ul>
 </li>
@@ -173,37 +175,38 @@ transformations are executed.</p>
     <p>A tibble of the required entries.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘example_evoverse’ not found</span></div><div class='input'>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)
+
 <span class='co'># Default is everything</span>
-<span class='fu'>VAF</span>(<span class='no'>example_evoverse</span>)</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 189,428 x 5</span><span>
-#&gt;    id                          sample  variable value karyotype
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>                       </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>    
-#&gt; </span><span style='color: #555555;'> 1</span><span> chr16:48354070:48354070:C:A Set7_55 VAF      0.166 1:1      
-#&gt; </span><span style='color: #555555;'> 2</span><span> chr16:48790412:48790412:G:T Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 3</span><span> chr16:48897018:48897018:T:G Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 4</span><span> chr16:49152932:49152932:A:C Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 5</span><span> chr16:49159107:49159107:T:C Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 6</span><span> chr16:49159438:49159438:A:G Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 7</span><span> chr16:49170175:49170175:G:A Set7_55 VAF      0.111 1:1      
-#&gt; </span><span style='color: #555555;'> 8</span><span> chr16:49227855:49227855:C:G Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 9</span><span> chr16:49243873:49243873:A:T Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'>10</span><span> chr16:50247726:50247726:T:G Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'># … with 189,418 more rows</span><span></div><div class='input'>
+<span class='fu'>VAF</span>(<span class='no'>example_evoverse</span>)</div><div class='output co'>#&gt; <span style='color: #949494;'># A tibble: 12,000 x 5</span><span>
+#&gt;    id                          sample  variable  value karyotype
+#&gt;    </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>                       </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>    
+#&gt; </span><span style='color: #BCBCBC;'> 1</span><span> chr16:59352582:59352582:T:G Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 2</span><span> chr16:62382810:62382810:G:T Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 3</span><span> chr16:64333620:64333620:T:A Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 4</span><span> chr16:66927635:66927635:T:C Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 5</span><span> chr16:68665565:68665565:G:T Set7_55 VAF      0.058</span><span style='text-decoration: underline;'>8</span><span> 1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 6</span><span> chr16:69314468:69314468:C:T Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 7</span><span> chr16:70239087:70239087:A:C Set7_55 VAF      0.067</span><span style='text-decoration: underline;'>8</span><span> 1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 8</span><span> chr16:76123096:76123096:T:C Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 9</span><span> chr16:76581312:76581312:A:G Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'>10</span><span> chr16:79332345:79332345:A:T Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #949494;'># … with 11,990 more rows</span><span></div><div class='input'>
 <span class='co'># Only one sample</span>
-<span class='fu'>VAF</span>(<span class='no'>example_evoverse</span>, <span class='kw'>samples</span> <span class='kw'>=</span> <span class='no'>example_evoverse</span>$<span class='no'>samples</span>[<span class='fl'>1</span>])</div><div class='output co'>#&gt; </span><span style='color: #555555;'># A tibble: 47,357 x 5</span><span>
-#&gt;    id                          sample  variable value karyotype
-#&gt;    </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>                       </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>    </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>    
-#&gt; </span><span style='color: #555555;'> 1</span><span> chr16:48354070:48354070:C:A Set7_55 VAF      0.166 1:1      
-#&gt; </span><span style='color: #555555;'> 2</span><span> chr16:48790412:48790412:G:T Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 3</span><span> chr16:48897018:48897018:T:G Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 4</span><span> chr16:49152932:49152932:A:C Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 5</span><span> chr16:49159107:49159107:T:C Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 6</span><span> chr16:49159438:49159438:A:G Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 7</span><span> chr16:49170175:49170175:G:A Set7_55 VAF      0.111 1:1      
-#&gt; </span><span style='color: #555555;'> 8</span><span> chr16:49227855:49227855:C:G Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'> 9</span><span> chr16:49243873:49243873:A:T Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'>10</span><span> chr16:50247726:50247726:T:G Set7_55 VAF      0     1:1      
-#&gt; </span><span style='color: #555555;'># … with 47,347 more rows</span><span></div></span></pre>
+<span class='fu'>VAF</span>(<span class='no'>example_evoverse</span>, <span class='kw'>samples</span> <span class='kw'>=</span> <span class='no'>example_evoverse</span>$<span class='no'>samples</span>[<span class='fl'>1</span>])</div><div class='output co'>#&gt; </span><span style='color: #949494;'># A tibble: 3,000 x 5</span><span>
+#&gt;    id                          sample  variable  value karyotype
+#&gt;    </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>                       </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>   </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>     </span><span style='color: #949494;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #949494;font-style: italic;'>&lt;chr&gt;</span><span>    
+#&gt; </span><span style='color: #BCBCBC;'> 1</span><span> chr16:59352582:59352582:T:G Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 2</span><span> chr16:62382810:62382810:G:T Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 3</span><span> chr16:64333620:64333620:T:A Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 4</span><span> chr16:66927635:66927635:T:C Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 5</span><span> chr16:68665565:68665565:G:T Set7_55 VAF      0.058</span><span style='text-decoration: underline;'>8</span><span> 1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 6</span><span> chr16:69314468:69314468:C:T Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 7</span><span> chr16:70239087:70239087:A:C Set7_55 VAF      0.067</span><span style='text-decoration: underline;'>8</span><span> 1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 8</span><span> chr16:76123096:76123096:T:C Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'> 9</span><span> chr16:76581312:76581312:A:G Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #BCBCBC;'>10</span><span> chr16:79332345:79332345:A:T Set7_55 VAF      0      1:1      
+#&gt; </span><span style='color: #949494;'># … with 2,990 more rows</span><span></div></span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -223,7 +226,7 @@ transformations are executed.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

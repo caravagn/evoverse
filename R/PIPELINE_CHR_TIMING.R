@@ -29,25 +29,26 @@
 #'
 #' x = pipeline_chromosome_timing(mutations, cna = cna, purity = purity, auto_setup = 'FAST', N_max = 500)
 #' print(x)
-pipeline_chromosome_timing = function(mutations,
-                                      cna,
-                                      purity,
-                                      karyotypes = c('2:0', '2:1', '2:2'),
-                                      reference = 'GRCh38',
-                                      min_muts = 150,
-                                      min_VAF = 0.05,
-                                      description = "Chromosomal timing sample",
-                                      N_max = 15000,
-                                      ...)
-{
+pipeline_chromosome_timing =
+  function(mutations,
+           cna,
+           purity,
+           karyotypes = c('2:0', '2:1', '2:2'),
+           reference = 'GRCh38',
+           min_muts = 150,
+           min_VAF = 0.05,
+           description = "Chromosomal timing sample",
+           N_max = 15000,
+           ...)
+  {
+
   pio::pioHdr("Evoverse", crayon::italic('Chromosomal timing pipeline'))
   cat('\n')
 
   #
   # 1) Load input data -- this is a common function to all deconvolution-based pipelines
   #
-  cat("\n")
-  cli::cli_process_start("Loading input data")
+  cli::cli_h1("Loading input data for sample {.field {description}}")
   cat("\n")
 
   CNAqc_input = evoverse:::deconvolution_prepare_input(mutations,
@@ -57,14 +58,52 @@ pipeline_chromosome_timing = function(mutations,
                                                        min_VAF = min_VAF)
 
   print(CNAqc_input)
-  cli::cli_process_done()
+
+  # Return object will contain input data
+  results = list()
+  results$type = "Chromosome timing pipeline"
+  class(results) = "evopipe_ctime"
+
+  results$input = list(
+    mutations = mutations,
+    cna = cna,
+    purity = purity,
+    cnaqc = CNAqc_input
+  )
+
+  results$description = description
 
   #
   # 2) MOBSTER analysis of karyotypes, this returns only the best fit
   #
+  which_karyo = CNAqc_input$n_karyotype[karyotypes]
+  which_karyo = which_karyo[!is.na(which_karyo) & which_karyo > min_muts]
+  which_karyo = names(which_karyo)
+
+  # Force exit if there is no suitable karyotype among the ones required
+  if(length(which_karyo) == 0)
+  {
+    results$with_fits = FALSE
+    results$mobster = results$bmix = results$table$clustering_assignments = results$table$summary = NULL
+
+    # Data id
+    results$log = paste0(
+      Sys.time(),
+      '. evoverse pipeline for subclonal deconvolution from VAF data and karyotype: with fits ', results$with_fits
+    )
+
+    return(results)
+  }
+
+  cli::boxx(
+    paste0('The pipeline will analyse: ', paste0(which_karyo, collapse = ', ')),
+    background_col = "blue",
+    col = 'white'
+  )
+
   all_fits = evoverse:::deconvolution_mobster_karyotypes_VAF(
     x = CNAqc_input,
-    karyotypes = karyotypes,    # Required karyotypes
+    karyotypes = which_karyo,   # Required karyotypes
     BMix = FALSE,               # Withouth downstream clustering of reads
     min_muts = min_muts,        # Skip karyotypes with less then these muts
     QC_type = "T",              # QC with the timing classifier
@@ -85,10 +124,6 @@ pipeline_chromosome_timing = function(mutations,
   cat("\n")
   cli::cli_process_start("Pipeline results assembly")
   cat("\n")
-
-  results = list()
-  results$type = "Chromosome timing pipeline"
-  class(results) = "evopipe_ctime"
 
   # Special case ~ nothing to time, annotate it
   if(length(all_fits) > 0) results$with_fits = TRUE
@@ -129,7 +164,6 @@ pipeline_chromosome_timing = function(mutations,
   # Data id
   results$description = description
   results$log = paste0(
-    "",
     Sys.time(),
     '. evoverse pipeline for chromosome timing: with fits ', results$with_fits
     )

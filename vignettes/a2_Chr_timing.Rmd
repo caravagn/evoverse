@@ -1,0 +1,94 @@
+---
+title: "Pipeline 2. Timing chromosome aneuploidy"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Timing chromosome aneuploidy}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, message=F, warning=F}
+library(evoverse)
+```
+
+# Pipeline `pipeline_chromosome_timing`
+
+<img src="pipeline_timing.png" alt="drawing" height="100"/>
+
+## Input requirements
+
+The followind data are required to run this pipeline.
+
+* one [CNAqc](https://caravagn.github.io/CNAqc/) input dataset, which consists of: 
+  * somatic mutations  (with read counts data);
+  * absolute copy number segments;
+  * tumour purity.
+  
+* a list of karyotypes to "time". Supported ones are `c('2:0', '2:1', '2:2')`, and are used by default; 
+
+* pipeline parameters, which allow to constraint the set of mutations to analyse (by minimum VAF, by number etc.) or customise some aspects of the computation (e.g., the genome reference).
+
+## Pipeline skeleton
+
+The following steps are performed by `pipeline_qc_copynumbercalls`.
+
+1. input mutations are mapped to copy number segments, integrating also tumour purity using [CNAqc](https://caravagn.github.io/CNAqc/);
+
+2. input mutations are subset according to the required input list of karyotypes; mutations that map to karyotypes with less than the required number of mutations (pipeline input), are disregarded by the analysis.
+
+3. [MOBSTER](https://caravagn.github.io/mobster/) is used to perform deconvolution from raw VAF data of each karyotype; the following procedure is followed for each karyotype:
+   * a first run of `mobster_fit` is performed forwarding the ellipsis parameters to the function call;
+   * the [timing classifier](https://caravagn.github.io/evoverse/docs/articles/1_qc_models.html) of `evoverse` is used to determine a QC `"PASS"` or `"FAIL"` status for the run;
+   * If the status is `"PASS"`, the deconvolution with this karyotype is completed. If the status is `"FAIL"`, a second run is computed using `mobster`'s default parameters; the QC is re-computed for the new run and that is considered the final result. 
+
+4. Output summary and assignments tables are generated, and a final estimate of the tumour clonal architecture is proposed .
+
+
+
+# Example run
+
+```{r, eval=F}
+# Use example data in the CNAqc package
+data(example_dataset_CNAqc, package = 'CNAqc')
+
+pipeline = pipeline_chromosome_timing(
+  mutations = CNAqc::example_dataset_CNAqc$snvs,  # Somatic mutations
+  cna = CNAqc::example_dataset_CNAqc$cna,         # Copy number segments
+  purity = CNAqc::example_dataset_CNAqc$purity,   # Sample purity
+  reference = 'GRCh38',                           # Genome reference
+  N_max = 10000,                                  # Downsample karyotypes with > 10K mutations (none here)
+  min_muts = 150,                                 # Minimum number of mutations per karyotype
+  min_VAF = 0.05,                                 # Minimum VAF 
+  description = "Example timing dataset",         # Dataset description
+  auto_setup = 'FAST'                             # Ellipsis (parameters forwarded to each mobster first run)
+)
+```
+
+S3 output object
+```{r, eval=F}
+print(pipeline)
+```
+
+Output fields
+```{r, eval=F}
+# MOBSTER fits per karyotype
+print(pipeline$mobster)
+
+# Clustering assignments
+print(pipeline$table$clustering_assignments)
+
+# Summary QC
+print(pipeline$table$summary)
+```
+
+One-page plotting function (assembles a multi-panel figure)
+```{r, fig.width=15, fig.height=6, eval=F}
+plot(pipeline)
+```

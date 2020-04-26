@@ -1,8 +1,8 @@
 ---
-title: "Timing chromosome aneuploidy"
+title: "Pipeline 1. Data quality check"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Timing chromosome aneuploidy}
+  %\VignetteIndexEntry{Data quality check}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -18,9 +18,9 @@ knitr::opts_chunk$set(
 library(evoverse)
 ```
 
-# Pipeline
+# Pipeline `pipeline_qc_copynumbercalls`
 
-<img src="pipeline_timing.png" alt="drawing" height="100"/>
+<img src="pipeline_qc.png" alt="drawing" height="100"/>
 
 **Input requirements.** 
 
@@ -33,10 +33,14 @@ library(evoverse)
 
 **Pipeline skeletons.**
 
-1. map mutations to copy number segments, with [CNAqc](https://caravagn.github.io/CNAqc/);
-2. subset mutations according to the input list of karyotypes;
-3. perform [MOBSTER](https://caravagn.github.io/mobster/) deconvolution from raw VAF data:
-   * attempt a first run using the ellipsis parameters;
+The following steps are performed by `pipeline_qc_copynumbercalls`.
+
+1. input mutations are mapped to copy number segments, integrating also tumour purity using [CNAqc](https://caravagn.github.io/CNAqc/);
+
+2. input mutations are subset according to the required input list of karyotypes; mutations that map to karyotypes with less than the required number of mutations (pipeline input), are disregarded by the analysis.
+
+3. [MOBSTER](https://caravagn.github.io/mobster/) is used to perform deconvolution from raw VAF data of each karyotype:
+   * a first run is attemptanted, forwarding the ellipsis parameters;
    * use the timing classifier of `evoverse` to determine QC PASS/ FAIL status per karyotype;
    * attempt a second run with karyotyepes that fail QC, using `mobster`'s default parameters;
    * re-assess QC for the re-run cases.
@@ -44,23 +48,20 @@ library(evoverse)
 
 # Example run
 
-Example input data from the example CNAqc dataset
-
-```{r, eval=TRUE}
+```{r, cache=TRUE, eval=TRUE}
 # Use example data in the CNAqc package
 data(example_dataset_CNAqc, package = 'CNAqc')
 
-pipeline = pipeline_chromosome_timing(
+pipeline = pipeline_qc_copynumbercalls(
   mutations = CNAqc::example_dataset_CNAqc$snvs,  # Somatic mutations
   cna = CNAqc::example_dataset_CNAqc$cna,         # Copy number segments
   purity = CNAqc::example_dataset_CNAqc$purity,   # Sample purity
   reference = 'GRCh38',                           # Genome reference
-  N_max = 10000,                                  # Downsample karyotypes with > 10K mutations (none here)
-  min_muts = 150,                                 # Minimum number of mutations per karyotype
-  min_VAF = 0.05,                                 # Minimum VAF 
-  description = "Example timing dataset",         # Dataset description
-  auto_setup = 'FAST'                             # Ellipsis (parameters forwarded to each mobster first run)
-)
+  description = "Example dataset for QC",         # Dataset description
+  smooth = TRUE,                                  # Smooth copy number segments
+  matching_epsilon_peaks = 0.025,                 # Peak-detection parameters
+  CCF_computation = 'ENTROPY'                     # CCF computation
+  )
 ```
 
 S3 output object
@@ -70,17 +71,14 @@ print(pipeline)
 
 Output fields
 ```{r, eval=TRUE}
-# MOBSTER fits per karyotype
-print(pipeline$mobster)
-
-# Clustering assignments
-print(pipeline$table$clustering_assignments)
+# CNAqc object
+print(pipeline$cnaqc)
 
 # Summary QC
-print(pipeline$table$summary)
+print(pipeline$QC)
 ```
 
 One-page plotting function (assembles a multi-panel figure)
-```{r, fig.width=15, fig.height=6, eval=TRUE}
+```{r, fig.width=15, fig.height=15, eval=TRUE}
 plot(pipeline)
 ```

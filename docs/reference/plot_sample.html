@@ -58,7 +58,6 @@ The copy number segments, plot via the CNAqc package
 available at https://github.com/caravagn/CNAqc.
 
 " />
-<meta property="og:image" content="/logo.png" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -117,13 +116,16 @@ available at https://github.com/caravagn/CNAqc.
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/Colorectal_Cross.html">Subclonal deconvolution of MSeq multi-region WGS colorectal cancer data</a>
+      <a href="../articles/0_packages.html">Packages inside `evoverse`</a>
     </li>
     <li>
-      <a href="../articles/packages.html">Packages in the `evoverse`</a>
+      <a href="../articles/a1_Data_QC.html">P1. Data quality check</a>
     </li>
     <li>
-      <a href="../articles/pipelines.html">Pipeline available with the `evoverse` packages</a>
+      <a href="../articles/a2_Chr_timing.html">P2. Timing chromosome aneuploidy</a>
+    </li>
+    <li>
+      <a href="../articles/a3_Deconv_vaf_karyo.html">P3. Subclonal deconvolution by VAF and karyotypes</a>
     </li>
   </ul>
 </li>
@@ -200,11 +202,12 @@ combined with functions from the <code>cowplot</code> and <code>ggpubr</code>
 packages.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘example_evoverse’ not found</span></div><div class='input'>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='st'>'example_evoverse'</span>)
+
 <span class='co'># Plot the data</span>
-<span class='fu'>plot_sample</span>(<span class='no'>example_evoverse</span>, <span class='kw'>sample</span> <span class='kw'>=</span> <span class='no'>example_evoverse</span>$<span class='no'>samples</span>[<span class='fl'>1</span>])</div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 26959 rows containing missing values (geom_point).</span></div><div class='img'><img src='plot_sample-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='fu'>plot_sample</span>(<span class='no'>example_evoverse</span>, <span class='kw'>sample</span> <span class='kw'>=</span> <span class='no'>example_evoverse</span>$<span class='no'>samples</span>[<span class='fl'>1</span>])</div><div class='output co'>#&gt; <span class='error'>Error in if (ref %in% c("hg19", "GRCh37")) return(CNAqc::chr_coordinates_hg19): argument is of length zero</span></div><div class='input'>
 <span class='co'># Plot the data - only 100 mutations in the segments plot, faster rendering</span>
-<span class='fu'>plot_sample</span>(<span class='no'>example_evoverse</span>, <span class='kw'>sample</span> <span class='kw'>=</span> <span class='no'>example_evoverse</span>$<span class='no'>samples</span>[<span class='fl'>1</span>], <span class='kw'>N_CNA</span> <span class='kw'>=</span> <span class='fl'>100</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 2 rows containing missing values (geom_bar).</span></div><div class='output co'>#&gt; <span class='warning'>Warning: Removed 26959 rows containing missing values (geom_point).</span></div><div class='img'><img src='plot_sample-2.png' alt='' width='700' height='433' /></div></pre>
+<span class='fu'>plot_sample</span>(<span class='no'>example_evoverse</span>, <span class='kw'>sample</span> <span class='kw'>=</span> <span class='no'>example_evoverse</span>$<span class='no'>samples</span>[<span class='fl'>1</span>], <span class='kw'>N_CNA</span> <span class='kw'>=</span> <span class='fl'>100</span>)</div><div class='output co'>#&gt; <span class='error'>Error in if (ref %in% c("hg19", "GRCh37")) return(CNAqc::chr_coordinates_hg19): argument is of length zero</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -224,7 +227,7 @@ packages.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

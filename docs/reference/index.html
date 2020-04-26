@@ -43,8 +43,6 @@
 
 
 <meta property="og:title" content="Function reference" />
-<meta property="og:image" content="/logo.png" />
-<meta name="twitter:card" content="summary" />
 
 
 
@@ -102,13 +100,16 @@
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/Colorectal_Cross.html">Subclonal deconvolution of MSeq multi-region WGS colorectal cancer data</a>
+      <a href="../articles/0_packages.html">Packages inside `evoverse`</a>
     </li>
     <li>
-      <a href="../articles/packages.html">Packages in the `evoverse`</a>
+      <a href="../articles/a1_Data_QC.html">P1. Data quality check</a>
     </li>
     <li>
-      <a href="../articles/pipelines.html">Pipeline available with the `evoverse` packages</a>
+      <a href="../articles/a2_Chr_timing.html">P2. Timing chromosome aneuploidy</a>
+    </li>
+    <li>
+      <a href="../articles/a3_Deconv_vaf_karyo.html">P3. Subclonal deconvolution by VAF and karyotypes</a>
     </li>
   </ul>
 </li>
@@ -232,15 +233,27 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="chr_coordinates_hg19.html">chr_coordinates_hg19</a></code> </p>
-        </td>
-        <td><p>Coordinates for hg19 chromosomes.</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="dataset.html">dataset()</a></code> </p>
         </td>
         <td><p>Create an <code>evoverse</code> dataset.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="evoparse_Sequenza_CNAs.html">evoparse_Sequenza_CNAs()</a></code> </p>
+        </td>
+        <td><p>Parese Sequenza Copy Number data.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="evoparse_mutect_mutations.html">evoparse_mutect_mutations()</a></code> </p>
+        </td>
+        <td><p>Pares Platypus mutation data.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="evoparse_platypus_mutations.html">evoparse_platypus_mutations()</a></code> </p>
+        </td>
+        <td><p>Pares Platypus mutation data.</p></td>
       </tr><tr>
         
         <td>
@@ -299,6 +312,54 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="pdf_report.html">pdf_report()</a></code> </p>
+        </td>
+        <td><p>Title</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="pipeline_chromosome_timing.html">pipeline_chromosome_timing()</a></code> </p>
+        </td>
+        <td><p>Pipeline to time aneuploidy.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="pipeline_clonal_mutations_purity.html">pipeline_clonal_mutations_purity()</a></code> </p>
+        </td>
+        <td><p>Determine clonal mutations and sample purity from mutation data.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="pipeline_qc_copynumbercalls.html">pipeline_qc_copynumbercalls()</a></code> </p>
+        </td>
+        <td><p>Pipeline for QC of somatic calls (copy number and mutations).</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="pipeline_subclonal_deconvolution_CCF.html">pipeline_subclonal_deconvolution_CCF()</a></code> </p>
+        </td>
+        <td><p>Pipeline to perform subclonal deconvolution with MOBSTER.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="pipeline_subclonal_deconvolution_VAF_karyotype.html">pipeline_subclonal_deconvolution_VAF_karyotype()</a></code> </p>
+        </td>
+        <td><p>Pipeline to perform subclonal deconvolution with MOBSTER.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="plot.evopipe_deconv.html">plot.evopipe_deconv()</a></code> </p>
+        </td>
+        <td><p>Title</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="plot.evopipe_rawk.html">plot.evopipe_rawk()</a></code> </p>
+        </td>
+        <td><p>S3 plot for the deconvolution pipeline from raw VAF with karyotypes</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="plot.mbst_data.html">plot.mbst_data()</a></code> </p>
         </td>
         <td><p>Plot an <code>evoverse</code> dataset.</p></td>
@@ -323,21 +384,45 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="plot_icon_CNA.html">plot_icon_CNA()</a></code> </p>
-        </td>
-        <td><p>Title</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="plot_sample.html">plot_sample()</a></code> </p>
         </td>
         <td><p>Plot a report of the data available for a sample.</p></td>
       </tr><tr>
         
         <td>
+          <p><code><a href="print.evopipe_ctime.html">print(<i>&lt;evopipe_ctime&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>S3 print for the chromosome timing pipeline results.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print.evopipe_deconv.html">print(<i>&lt;evopipe_deconv&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>Title</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print.evopipe_qc.html">print(<i>&lt;evopipe_qc&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>S3 print for the pipeline results</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="print.evopipe_rawk.html">print(<i>&lt;evopipe_rawk&gt;</i>)</a></code> </p>
+        </td>
+        <td><p>S3 print for the deconvolution pipeline from raw VAF with karyotypes</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="print.mbst_data.html">print(<i>&lt;mbst_data&gt;</i>)</a></code> </p>
         </td>
         <td><p>Print for an <code>evoverse</code> dataset.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="qc_timing_model.html">qc_timing_model</a></code> </p>
+        </td>
+        <td><p>QC pre-trained Logistic classifier for timing of CNA with MOBSTER.</p></td>
       </tr><tr>
         
         <td>
@@ -364,7 +449,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>

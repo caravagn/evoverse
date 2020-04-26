@@ -1,0 +1,107 @@
+---
+title: "Packages inside `evoverse`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Packages inside `evoverse`}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+<div id="bg">
+<a href="https://caravagn.github.io/CNAqc" width="8%"><img src="https://caravagn.github.io/CNAqc/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/mobster" width="8%"><img src="https://caravagn.github.io/mobster/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/revolver" width="8%"><img src="https://caravagn.github.io/revolver/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/ctree" width="8%"><img src="https://caravagn.github.io/ctree/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/mtree" width="8%"><img src="https://caravagn.github.io/mtree/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/BMix" width="8%"><img src="https://caravagn.github.io/BMix/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/VIBER" width="8%"><img src="https://caravagn.github.io/VIBER/reference/figures/logo.png" width="8%"></a>
+<a href="https://caravagn.github.io/TINC" width="8%"><img src="https://caravagn.github.io/TINC/reference/figures/logo.png" width="8%"></a>
+</div>  
+
+<div id="bg">
+ 
+-----
+
+ **CNAqc - Copy Number Alterations quality check** <img src="https://caravagn.github.io/CNAqc/reference/figures/logo.png" align="right" width="8%"> 
+
+ [![Travis build status](https://travis-ci.org/caravagn/CNAqc.svg?branch=master)](https://travis-ci.org/caravagn/CNAqc)
+ 
+
+Copy Number Alterations quality check package to assess the concordance between segments and somatic mutations, peak detection metrics and Cancer Cell Fractions estimation.
+
+-----
+
+ **MOBSTER - Model-based tumour subclonal deconvolution** <img src="https://caravagn.github.io/mobster/reference/figures/logo.png" align="right" width="8%"> 
+
+ [![Travis build status](https://travis-ci.org/caravagn/mobster.svg?branch=master)](https://travis-ci.org/caravagn/mobster)
+ 
+
+A mixture model that can analyse the frequency spectrum of somatic mutations and determine ongoing subclonal expansion and neutral evolutionary dynamics.
+
+-----
+
+
+ **REVOLVER - Repeated evolution in cancer** <img src="https://caravagn.github.io/revolver/reference/figures/logo.png" align="right" width="8%"> 
+
+ [![Travis build status](https://travis-ci.org/caravagn/revolver.svg?branch=master)](https://travis-ci.org/caravagn/revolver)
+ 
+
+A model to computed repeated evolutionary trajectories from a cohort of multi-region samples of multiple tumour patients. It can be used to stratify the cohort and determine evolutionary subgroups.
+
+-----
+
+ **ctree - Cancer clones trees** <img src="https://caravagn.github.io/ctree/reference/figures/logo.png" align="right" width="8%"> 
+
+ [![Travis build status](https://travis-ci.org/caravagn/ctree.svg?branch=master)](https://travis-ci.org/caravagn/ctree)
+ 
+
+Cancer clones trees from multi-region bulk sequencing data, built of Cancer Cell Franctions (CCFs) clusters computed by tumour subclonal deconvolution.
+
+
+-----
+
+ **mtree - Cancer mutation trees** <img src="https://caravagn.github.io/mtree/reference/figures/logo.png" align="right" width="8%"> 
+
+ [![Travis build status](https://travis-ci.org/caravagn/mtree.svg?branch=master)](https://travis-ci.org/caravagn/mtree)
+ 
+
+Cancer mutation trees from multi-region bulk or single-cell sequencing data, where  the presence or absence of a somatic mutation, a Copy Number event, or any other event is available in binary format.
+
+
+-----
+
+ **BMix - Univariate Binomial and Beta-Binomial mixture models** <img src="https://caravagn.github.io/BMix/reference/figures/logo.png" align="right" width="8%"> 
+
+ [![Travis build status](https://travis-ci.org/caravagn/BMix.svg?branch=master)](https://travis-ci.org/caravagn/BMix)
+ 
+
+Univariate Binomial and/ or Beta-Binomial mixture models for clustering of sequencing read counts. To be used for subclonal deconvolution from bulk sequencing.
+
+
+-----
+
+ **VIBER - Variational multivariate Binomial mixture models** <img src="https://caravagn.github.io/VIBER/reference/figures/logo.png" align="right" width="8%"> 
+
+ [![Travis build status](https://travis-ci.org/caravagn/VIBER.svg?branch=master)](https://travis-ci.org/caravagn/VIBER)
+ 
+
+Multivariate Binomial  mixture models fit by variational inference, which can be ued to cluster read counts from multi-region sequencing data and carry out subclonal deconvolution from bulk sequencing.
+ 
+ -----
+
+ **TINC - Tumour-in-normal contamination estimation** <img src="https://caravagn.github.io/TINC/reference/figures/logo.png" align="right" width="8%"> 
+
+ [![Travis build status](https://travis-ci.org/caravagn/TINC.svg?branch=master)](https://travis-ci.org/caravagn/TINC)
+ 
+
+A method to determine thee contamination of a tumour sample by normal cells, which can be used to assess if a putative "normal" sample can be used as a germline to call somatic variants.
+ 
+</div>

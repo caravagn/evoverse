@@ -168,8 +168,7 @@ deconvolution_mobster_karyotypes_VAF = function(
   }
 
   # Timeable ones, processed one by one with MOBSTER
-  mfits = lapply(
-    , orun)
+  mfits = lapply(karyotypes, orun)
   names(mfits) = karyotypes
 
   mfits
@@ -187,13 +186,13 @@ deconvolution_mobster_CCF = function(x,
                                      QC_type = NULL,
                                      ...)
 {
-  if (all(is.null(x$CCF_estimates)) | length(CCF_karyotypes) == 0) {
+  if (all(is.null(x$CCF_estimates))) {
     warning("No CCF estimates in the input data")
     return(NULL)
   }
 
   cat("\n")
-  cli::cli_h1("MOBSTER clustering CCF for mutations with karyotype(s) {.field {CCF_karyotypes}}")
+  cli::cli_h1("MOBSTER clustering CCF for mutations with karyotype(s) {.field {names(x$CCF_estimates)}}")
   cat("\n")
 
   # Get CCF in cna_obj; we remove things that make no sense.. NA for CCF
@@ -544,63 +543,63 @@ deconvolution_table_summary = function(M, B)
 
 
 
-# Assemble the plot
-deconvolution_plot_assembly = function(mobster_fits, cna_obj, bmix_fits, figure_caption, figure_title)
-{
-  groups = names(mobster_fits)
-  empty_panel = ggplot() + geom_blank()
-
-  # MOBSTER plots, sourrounded by a coloured box by QC
-  mob_fits_plot = lapply(groups, function(y) evoverse:::qc_mobster_plot(mobster_fits[[y]]))
-
-  # CNA plot
-  cna_plot = empty_panel
-  if(!is.null(cna_obj)) cna_plot = CNAqc::plot_segments(cna_obj, circular = TRUE)
-
-  # Top panel: CNA + MOBSTER
-  mob_fits_plot =  append(list(cna_plot), mob_fits_plot)
-  figure = ggpubr::ggarrange(
-    plotlist = mob_fits_plot,
-    nrow = 1,
-    ncol = length(groups) + 1,
-    labels = c("CNA", groups)
-  )
-
-  # If there is a second panel, we put it below
-  if(!all(is.null(bmix_fits)))
-  {
-    # BMIx: a panel like the one above, same dimension
-    bmix_panel = lapply(
-      groups,
-      function(x)
-      {
-        if (all(is.null(bmix_fits[[x]]))) return(empty_panel)
-        BMix::plot_clusters(bmix_fits[[x]], bmix_fits[[x]]$input %>% dplyr::select(NV, DP))
-      })
-
-    bmix_panel = ggarrange(plotlist = append(list(empty_panel), bmix_panel),
-                           nrow = 1,
-                           ncol = length(groups) + 1,
-                           labels = c("", groups))
-
-    # Assemble a one-page final figure with both MOBSTER and BMix panels
-    figure =  ggpubr::ggarrange(
-      figure,
-      bmix_panel,
-      nrow = 2,
-      ncol = 1
-    )
-  }
-
-  # Set the figure title and captions
-  figure = ggpubr::annotate_figure(
-    figure,
-    top = ggpubr::text_grob(bquote(bold("Dataset. ") ~ .(figure_title)), hjust = 0, x = 0, size = 15),
-    bottom = ggpubr::text_grob(bquote(.(figure_caption)), hjust = 0, x = 0, size = 8)
-  )
-
-  return(figure)
-}
+# # Assemble the plot
+# deconvolution_plot_assembly = function(mobster_fits, cna_obj, bmix_fits, figure_caption, figure_title)
+# {
+#   groups = names(mobster_fits)
+#   empty_panel = ggplot() + geom_blank()
+#
+#   # MOBSTER plots, sourrounded by a coloured box by QC
+#   mob_fits_plot = lapply(groups, function(y) evoverse:::qc_mobster_plot(mobster_fits[[y]]))
+#
+#   # CNA plot
+#   cna_plot = empty_panel
+#   if(!is.null(cna_obj)) cna_plot = CNAqc::plot_segments(cna_obj, circular = TRUE)
+#
+#   # Top panel: CNA + MOBSTER
+#   mob_fits_plot =  append(list(cna_plot), mob_fits_plot)
+#   figure = ggpubr::ggarrange(
+#     plotlist = mob_fits_plot,
+#     nrow = 1,
+#     ncol = length(groups) + 1,
+#     labels = c("CNA", groups)
+#   )
+#
+#   # If there is a second panel, we put it below
+#   if(!all(is.null(bmix_fits)))
+#   {
+#     # BMIx: a panel like the one above, same dimension
+#     bmix_panel = lapply(
+#       groups,
+#       function(x)
+#       {
+#         if (all(is.null(bmix_fits[[x]]))) return(empty_panel)
+#         BMix::plot_clusters(bmix_fits[[x]], bmix_fits[[x]]$input %>% dplyr::select(NV, DP))
+#       })
+#
+#     bmix_panel = ggarrange(plotlist = append(list(empty_panel), bmix_panel),
+#                            nrow = 1,
+#                            ncol = length(groups) + 1,
+#                            labels = c("", groups))
+#
+#     # Assemble a one-page final figure with both MOBSTER and BMix panels
+#     figure =  ggpubr::ggarrange(
+#       figure,
+#       bmix_panel,
+#       nrow = 2,
+#       ncol = 1
+#     )
+#   }
+#
+#   # Set the figure title and captions
+#   figure = ggpubr::annotate_figure(
+#     figure,
+#     top = ggpubr::text_grob(bquote(bold("Dataset. ") ~ .(figure_title)), hjust = 0, x = 0, size = 15),
+#     bottom = ggpubr::text_grob(bquote(.(figure_caption)), hjust = 0, x = 0, size = 8)
+#   )
+#
+#   return(figure)
+# }
 
 
 
