@@ -7,8 +7,7 @@
 pipeline_subclonal_deconvolution_CCF(mutations, cna, purity,
   karyotypes = c("1:0", "1:1", "2:0", "2:1", "2:2"),
   ccf_method = "ENTROPY", reference = "GRCh38", min_VAF = 0.05,
-  min_muts = 50,
-  description = "Subclonal deconvolution dataset (MOBSTER + BMix)",
+  min_muts = 50, description = "Example CCF deconvolution",
   N_max = 15000, ...)
 }
 \arguments{
@@ -41,6 +40,6 @@ mutations = CNAqc::example_dataset_CNAqc$snvs
 purity = CNAqc::example_dataset_CNAqc$purity
 
 # We use auto_setup = 'FAST' to speed up the analysis
-x = pipeline_subclonal_deconvolution(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
+x = pipeline_subclonal_deconvolution_CCF(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
 print(x)
 }

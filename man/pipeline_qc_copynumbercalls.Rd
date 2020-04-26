@@ -6,7 +6,7 @@
 \usage{
 pipeline_qc_copynumbercalls(mutations, cna, purity, reference = "GRCh38",
   description = "MyPAT00XX1", smooth = TRUE,
-  matching_epsilon_peaks = 0.025, CCF_computation = "ENTROPY")
+  matching_epsilon_peaks = 0.025, ccf_method = "ENTROPY")
 }
 \arguments{
 \item{mutations}{Somatic mutation calls, in \code{CNAqc} input format.}

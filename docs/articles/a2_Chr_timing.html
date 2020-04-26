@@ -75,7 +75,7 @@
       <a href="../articles/a2_Chr_timing.html">Pipeline 2. Timing chromosome aneuploidy</a>
     </li>
     <li>
-      <a href="../articles/a3_Deconv_vaf_karyo.html">P3. Subclonal deconvolution by VAF and karyotypes</a>
+      <a href="../articles/a3_Deconv_vaf_karyo.html">Pipeline 3. Subclonal deconvolution by VAF and karyotypes</a>
     </li>
   </ul>
 </li>
@@ -111,44 +111,67 @@
     
     
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(evoverse)</a></code></pre></div>
-<div id="pipeline-pipeline_chromosome_timing" class="section level1">
+<div id="pipeline-overview" class="section level1">
 <h1 class="hasAnchor">
-<a href="#pipeline-pipeline_chromosome_timing" class="anchor"></a>Pipeline <code>pipeline_chromosome_timing</code>
-</h1>
+<a href="#pipeline-overview" class="anchor"></a>Pipeline overview</h1>
 <p><img src="pipeline_timing.png" alt="drawing" height="100"></p>
 <div id="input-requirements" class="section level2">
 <h2 class="hasAnchor">
 <a href="#input-requirements" class="anchor"></a>Input requirements</h2>
-<p>The followind data are required to run this pipeline.</p>
+<p>The following data are required to run this pipeline.</p>
 <ul>
 <li>one <a href="https://caravagn.github.io/CNAqc/">CNAqc</a> input dataset, which consists of:
 <ul>
-<li>somatic mutations (with read counts data);</li>
-<li>absolute copy number segments;</li>
-<li>tumour purity.</li>
+<li>somatic mutations (with read counts data), <code>mutations</code>;</li>
+<li>absolute copy number segments, <code>cna</code>;</li>
+<li>tumour purity, <code>purity</code>;</li>
+<li>a genome reference supported by <a href="https://caravagn.github.io/CNAqc/">CNAqc</a>.</li>
 </ul>
 </li>
-<li><p>a list of karyotypes to “time”. Supported ones are <code><a href="https://rdrr.io/r/base/c.html">c('2:0', '2:1', '2:2')</a></code>, and are used by default;</p></li>
-<li><p>pipeline parameters, which allow to constraint the set of mutations to analyse (by minimum VAF, by number etc.) or customise some aspects of the computation (e.g., the genome reference).</p></li>
+<li>a list <code>karyotypes</code> of shorthands (in <code>Major:minor</code> notation) for karyotypes that should be used to perform subclonal deconvolution.
+<ul>
+<li>By default, <code><a href="https://rdrr.io/r/base/c.html">c('2:0', '2:1', '2:2')</a></code> are used;</li>
 </ul>
+</li>
+<li>pipeline parameters, which allow to:
+<ul>
+<li>impose a minimum VAF on the data to analyse, <code>min_VAF</code>;</li>
+<li>impose a mimumin (<code>min_muts</code>) and maximum (<code>N_max</code>) for the number of mutations to analyse;</li>
+<li>identify a run by a <code>description</code>;</li>
+<li>forward parameters to customise the fit(s), using an ellypsis.</li>
+</ul>
+</li>
+</ul>
+<p>The input format of input data is <a href="https://caravagn.github.io/CNAqc/articles/Introduction.html">discussed in a CNAqc vignette.</a>.</p>
 </div>
 <div id="pipeline-skeleton" class="section level2">
 <h2 class="hasAnchor">
 <a href="#pipeline-skeleton" class="anchor"></a>Pipeline skeleton</h2>
-<p>The following steps are performed by <code>pipeline_qc_copynumbercalls</code>.</p>
+<p>The following steps are performed by <code>pipeline_chromosome_timing</code>.</p>
 <ol style="list-style-type: decimal">
 <li><p>input mutations are mapped to copy number segments, integrating also tumour purity using <a href="https://caravagn.github.io/CNAqc/">CNAqc</a>;</p></li>
 <li><p>input mutations are subset according to the required input list of karyotypes; mutations that map to karyotypes with less than the required number of mutations (pipeline input), are disregarded by the analysis.</p></li>
 <li>
-<a href="https://caravagn.github.io/mobster/">MOBSTER</a> is used to perform deconvolution from raw VAF data of each karyotype; the following procedure is followed for each karyotype:
+<p><a href="https://caravagn.github.io/mobster/">MOBSTER</a> is used to perform deconvolution from <em>raw VAF data of each karyotype</em>; the following procedure is followed for each karyotype:</p>
 <ul>
-<li>a first run of <code>mobster_fit</code> is performed forwarding the ellipsis parameters to the function call;</li>
-<li>the <a href="https://caravagn.github.io/evoverse/docs/articles/1_qc_models.html">timing classifier</a> of <code>evoverse</code> is used to determine a QC <code>"PASS"</code> or <code>"FAIL"</code> status for the run;</li>
-<li>If the status is <code>"PASS"</code>, the deconvolution with this karyotype is completed. If the status is <code>"FAIL"</code>, a second run is computed using <code>mobster</code>’s default parameters; the QC is re-computed for the new run and that is considered the final result.</li>
+<li><p>a first run of <code>mobster_fit</code> is performed forwarding the ellipsis parameters to the function call;</p></li>
+<li>
+<p>the <a href="https://caravagn.github.io/evoverse/docs/articles/1_qc_models.html">timing classifier</a> of <code>evoverse</code> is used to determine a QC <code>"PASS"</code> or <code>"FAIL"</code> status for the run;</p>
+<ul>
+<li>If the status is <code>"PASS"</code>, the deconvolution with this karyotype is completed.</li>
+<li>If the status is <code>"FAIL"</code>, a second run is computed using <code>mobster</code>’s default parameters; the QC is re-computed for the new run and that is considered the final result.</li>
 </ul>
 </li>
-<li><p>Output summary and assignments tables are generated, and a final estimate of the tumour clonal architecture is proposed .</p></li>
+</ul>
+</li>
+<li>Compute output tables:
+<ul>
+<li>one summary table reporting the generated fits and their QC scores;</li>
+<li>one assignment table with the assignements for each one of the analysed mutations.</li>
+</ul>
+</li>
 </ol>
+<p>For each <a href="https://caravagn.github.io/mobster">MOBSTER</a> fit, a QC <code>"PASS"</code> or <code>"FAIL"</code> score is obtained by the <a href="https://caravagn.github.io/evoverse/docs/articles/1_qc_models.html">timing classifier</a>. The list of timeable karyotypes consists of all <a href="https://caravagn.github.io/mobster">MOBSTER</a> fits with QC <code>"PASS"</code>.</p>
 </div>
 </div>
 <div id="example-run" class="section level1">
@@ -191,7 +214,7 @@
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li>
-<a href="#pipeline-pipeline_chromosome_timing">Pipeline <code>pipeline_chromosome_timing</code></a><ul class="nav nav-pills nav-stacked">
+<a href="#pipeline-overview">Pipeline overview</a><ul class="nav nav-pills nav-stacked">
 <li><a href="#input-requirements">Input requirements</a></li>
       <li><a href="#pipeline-skeleton">Pipeline skeleton</a></li>
       </ul>

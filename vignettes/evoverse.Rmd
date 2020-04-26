@@ -14,7 +14,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Packages in the `evoverse`
+# `evoverse` packages 
+
+<br><br>
 
 <div id="bg">
 <a href="https://caravagn.github.io/CNAqc" width="8%"><img src="https://caravagn.github.io/CNAqc/reference/figures/logo.png" width="8%"></a>
@@ -28,14 +30,25 @@ knitr::opts_chunk$set(
 </div>  
 <div id="bg">
 
-# Pipelines in the `evoverse`
+<br><br>
 
+# `evoverse` pipelines
 
+<br><br>
 
-<a href='https://caravagn.github.io/evoverse/docs/articles/a1_Data_QC.html'>
+<a href='https://caravagn.github.io/evoverse/articles/a1_Data_QC.html'>
 <img src="pipeline_qc.png" alt="drawing" height="100"/>
 </a>
 
-<a href='https://caravagn.github.io/evoverse/docs/articles/a2_Chr_timing.html'>
+<a href='https://caravagn.github.io/evoverse/articles/a2_Chr_timing.html'>
 <img src="pipeline_timing.png" alt="drawing" height="100"/>
 </a>
+
+<a href='https://caravagn.github.io/evoverse/articles/a3_Deconv_vaf_karyo.html'>
+<img src="pipeline_vaf_karyo.png" alt="drawing" height="100"/>
+</a>
+
+<a href='https://caravagn.github.io/evoverse/articles/a4_Deconv_CCF.html'>
+<img src="pipeline_CCF.png" alt="drawing" height="100"/>
+</a>
+

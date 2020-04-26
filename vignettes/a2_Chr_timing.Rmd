@@ -18,39 +18,56 @@ knitr::opts_chunk$set(
 library(evoverse)
 ```
 
-# Pipeline `pipeline_chromosome_timing`
+# Pipeline overview 
 
 <img src="pipeline_timing.png" alt="drawing" height="100"/>
 
+**Main function: ** ``pipeline_chromosome_timing`.
+
 ## Input requirements
 
-The followind data are required to run this pipeline.
+The following data are required to run this pipeline.
 
 * one [CNAqc](https://caravagn.github.io/CNAqc/) input dataset, which consists of: 
-  * somatic mutations  (with read counts data);
-  * absolute copy number segments;
-  * tumour purity.
+  * somatic mutations (with read counts data), `mutations`;
+  * absolute copy number segments, `cna`;
+  * tumour purity, `purity`;
+  * a genome reference supported by [CNAqc](https://caravagn.github.io/CNAqc/).
   
-* a list of karyotypes to "time". Supported ones are `c('2:0', '2:1', '2:2')`, and are used by default; 
+* a list `karyotypes` of shorthands (in `Major:minor` notation) for karyotypes that should be used to perform subclonal deconvolution. 
+    - By default, `c('2:0', '2:1', '2:2')` are used; 
 
-* pipeline parameters, which allow to constraint the set of mutations to analyse (by minimum VAF, by number etc.) or customise some aspects of the computation (e.g., the genome reference).
+* pipeline parameters, which allow to:
+   * impose a minimum VAF on the data to analyse, `min_VAF`;
+   * impose a mimumin (`min_muts`) and maximum (`N_max`) for the number of mutations to analyse;
+   * identify a run by a `description`;
+   * forward parameters to customise the fit(s), using an ellypsis. 
+   
+The input format of input data is [discussed in a CNAqc vignette.](https://caravagn.github.io/CNAqc/articles/Introduction.html).  
+
 
 ## Pipeline skeleton
 
-The following steps are performed by `pipeline_qc_copynumbercalls`.
+The following steps are performed by `pipeline_chromosome_timing`.
 
 1. input mutations are mapped to copy number segments, integrating also tumour purity using [CNAqc](https://caravagn.github.io/CNAqc/);
 
 2. input mutations are subset according to the required input list of karyotypes; mutations that map to karyotypes with less than the required number of mutations (pipeline input), are disregarded by the analysis.
 
-3. [MOBSTER](https://caravagn.github.io/mobster/) is used to perform deconvolution from raw VAF data of each karyotype; the following procedure is followed for each karyotype:
+3. [MOBSTER](https://caravagn.github.io/mobster/) is used to perform deconvolution from _raw VAF data of each karyotype_; the following procedure is followed for each karyotype:
+
    * a first run of `mobster_fit` is performed forwarding the ellipsis parameters to the function call;
+   
    * the [timing classifier](https://caravagn.github.io/evoverse/docs/articles/1_qc_models.html) of `evoverse` is used to determine a QC `"PASS"` or `"FAIL"` status for the run;
-   * If the status is `"PASS"`, the deconvolution with this karyotype is completed. If the status is `"FAIL"`, a second run is computed using `mobster`'s default parameters; the QC is re-computed for the new run and that is considered the final result. 
+   
+      * If the status is `"PASS"`, the deconvolution with this karyotype is completed. 
+      * If the status is `"FAIL"`, a second run is computed using `mobster`'s default parameters; the QC is re-computed for the new run and that is considered the final result. 
 
-4. Output summary and assignments tables are generated, and a final estimate of the tumour clonal architecture is proposed .
+4. Compute output tables:
+   * one summary table  reporting the generated fits and their QC scores;
+   * one assignment table with the assignements for each one of the analysed mutations.
 
-
+For each [MOBSTER](https://caravagn.github.io/mobster) fit, a QC `"PASS"` or `"FAIL"` score is obtained by the [timing classifier](https://caravagn.github.io/evoverse/docs/articles/1_qc_models.html). The list of timeable karyotypes consists of all [MOBSTER](https://caravagn.github.io/mobster) fits with QC `"PASS"`.
 
 # Example run
 
@@ -71,14 +88,22 @@ pipeline = pipeline_chromosome_timing(
 )
 ```
 
-S3 output object
-```{r, eval=F}
+## Extracting output information
+
+A special S3 output object is used to store results from this pipeline; the object implements methods for `print` and `plot`.
+
+```{r, eval=TRUE}
+# S3 object
+class(pipeline)
+
+# Summary of the results
 print(pipeline)
 ```
 
-Output fields
+Fits by `mobster` are available per karyotype, as well as one table with clustering assignments and one with the summary QC results.
+
 ```{r, eval=F}
-# MOBSTER fits per karyotype
+# MOBSTER fits 
 print(pipeline$mobster)
 
 # Clustering assignments
@@ -88,7 +113,10 @@ print(pipeline$table$clustering_assignments)
 print(pipeline$table$summary)
 ```
 
-One-page plotting function (assembles a multi-panel figure)
+## Plots
+
+A multi-panel figure is assembled by the S3 `plot` method, wich reports CNA segments in circular layout, and `mobster` fits with the classical green or red contour to determine the QC status of the fit.
+
 ```{r, fig.width=15, fig.height=6, eval=F}
 plot(pipeline)
 ```

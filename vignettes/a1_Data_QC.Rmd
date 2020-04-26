@@ -18,33 +18,42 @@ knitr::opts_chunk$set(
 library(evoverse)
 ```
 
-# Pipeline `pipeline_qc_copynumbercalls`
+# Pipeline overview 
 
 <img src="pipeline_qc.png" alt="drawing" height="100"/>
 
-**Input requirements.** 
+**Main function: ** ``pipeline_qc_copynumbercalls`.
 
-* one [CNAqc](https://caravagn.github.io/CNAqc/) input dataset, 
-  * somatic mutations  (with read counts data);
-  * absolute copy number segments;
-  * tumour purity.
-* a list of karyotypes to time, supported ones are `c('2:0', '2:1', '2:2')` (default); 
-* pipeline parameters.
+## Input requirements
 
-**Pipeline skeletons.**
+The following data are required to run this pipeline.
+
+* one [CNAqc](https://caravagn.github.io/CNAqc/) input dataset, which consists of: 
+  * somatic mutations (with read counts data), `mutations`;
+  * absolute copy number segments, `cna`;
+  * tumour purity, `purity`;
+  * a genome reference supported by [CNAqc](https://caravagn.github.io/CNAqc/).
+  
+* pipeline parameters, which allow to:
+   * identify a run by a `description`;
+   * decide if input segments should be [smoothed by CNAqc](https://caravagn.github.io/CNAqcarticles/a5_smoothing.html), `smooth`;
+   * decide how peaks  should be [matched by CNAqc](https://caravagn.github.io/CNAqc/articles/a3_peaks_detection.html), `matching_epsilon_peaks`;
+   * decide how CCF should be [computed by CNAqc](https://caravagn.github.io/CNAqc/articles/a4_ccf_computation.html), `CCF_computation`;
+
+
+## Pipeline skeleton
 
 The following steps are performed by `pipeline_qc_copynumbercalls`.
 
-1. input mutations are mapped to copy number segments, integrating also tumour purity using [CNAqc](https://caravagn.github.io/CNAqc/);
+1. input mutations are mapped to copy number segments, integrating also tumour purity using [CNAqc](https://caravagn.github.io/CNAqc/); if required input segments are [smoothed](https://caravagn.github.io/CNAqcarticles/a5_smoothing.html).
 
-2. input mutations are subset according to the required input list of karyotypes; mutations that map to karyotypes with less than the required number of mutations (pipeline input), are disregarded by the analysis.
+2. [peak-detection](https://caravagn.github.io/CNAqc/articles/a3_peaks_detection.html) is used to determine the quality of each karyotype, with a QC `"PASS"` or `"FAIL"` assessment;
 
-3. [MOBSTER](https://caravagn.github.io/mobster/) is used to perform deconvolution from raw VAF data of each karyotype:
-   * a first run is attemptanted, forwarding the ellipsis parameters;
-   * use the timing classifier of `evoverse` to determine QC PASS/ FAIL status per karyotype;
-   * attempt a second run with karyotyepes that fail QC, using `mobster`'s default parameters;
-   * re-assess QC for the re-run cases.
-* create output summary and assignments tables.
+3. [CCFs are computed](https://caravagn.github.io/CNAqc/articles/a4_ccf_computation.html), with a QC `"PASS"` or `"FAIL"` assessment per karyotype;
+
+4. [Arm-level fragmentation](https://caravagn.github.io/CNAqc/articles/a6_fragmentation.html) is used to determine chromosome arms that seem to have an excess of small fragments;
+
+4. On output table is computed to report QC results from all data.
 
 # Example run
 
@@ -60,25 +69,41 @@ pipeline = pipeline_qc_copynumbercalls(
   description = "Example dataset for QC",         # Dataset description
   smooth = TRUE,                                  # Smooth copy number segments
   matching_epsilon_peaks = 0.025,                 # Peak-detection parameters
-  CCF_computation = 'ENTROPY'                     # CCF computation
+  ccf_method = 'ENTROPY'                          # CCF computation
   )
 ```
 
-S3 output object
+## Extracting output information
+
+A special S3 output object is used to store results from this pipeline; the object implements methods for `print` and `plot`.
+
 ```{r, eval=TRUE}
+# S3 object
+class(pipeline)
+
+# Summary of the results
 print(pipeline)
 ```
 
-Output fields
+
+The fields `pipeline$cnaqc` is the [CNAqc](https://caravagn.github.io/CNAqc/) object computed by the pipeline; it contains CCF, peaks analysis etc. and can be accessed with the [methods of the package](https://caravagn.github.io/CNAqc/).
+
 ```{r, eval=TRUE}
 # CNAqc object
 print(pipeline$cnaqc)
+```
 
-# Summary QC
+
+A summary QC table of the pipeline can be accessed; scores `f_PASS` and `NA_test` are percentages of tests that have achieved QC `"PASS"`, and tests that could not be computed (because of constraints of parameters, or missing data etc.) 
+
+```{r, eval=TRUE}
 print(pipeline$QC)
 ```
 
-One-page plotting function (assembles a multi-panel figure)
-```{r, fig.width=15, fig.height=15, eval=TRUE}
+## Plots
+
+A multi-panel figure is assembled by the S3 `plot` method, wich reports (by row) CNA segments and genome-wide depth of sequencing, CCF and raw data histograms, results from peak-detection and a strip plot of mutation multiplicity estimates that are used to compute CCFs.
+
+```{r, fig.width=15, fig.height=16.5, eval=TRUE}
 plot(pipeline)
 ```

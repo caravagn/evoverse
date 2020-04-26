@@ -36,7 +36,7 @@ pipeline_qc_copynumbercalls = function(
   description = "MyPAT00XX1",
   smooth = TRUE,
   matching_epsilon_peaks = 0.025,
-  CCF_computation = 'ENTROPY'
+  ccf_method = 'ENTROPY'
  )
 {
   pio::pioHdr("Evoverse", crayon::italic(paste0('~ Pipeline to QC somatic mutations and CNA segments')))
@@ -68,7 +68,7 @@ pipeline_qc_copynumbercalls = function(
   cli::cli_h1("CCF estimation and QC")
   cat("\n")
 
-  x = CNAqc::compute_CCF(x, karyotypes = USE_KARYOTYPES, method = CCF_computation)
+  x = CNAqc::compute_CCF(x, karyotypes = USE_KARYOTYPES, method = ccf_method)
 
   # 4. Fragmentation (after smoothing)
   cli::cli_h1("Detecting patterns of overfragmentation")
@@ -197,6 +197,7 @@ plot.evopipe_qc = function(x, ...)
     )
   )
 
+  return(figure)
 }
 
 

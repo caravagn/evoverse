@@ -1,8 +1,8 @@
 ---
-title: "Pipeline 3. Subclonal deconvolution by VAF and karyotypes"
+title: "Pipeline 4. Subclonal deconvolution by CCF"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Subclonal deconvolution by VAF and karyotypes}
+  %\VignetteIndexEntry{Subclonal deconvolution by CCF}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,9 +20,9 @@ library(evoverse)
 
 # Pipeline overview 
 
-<img src="pipeline_vaf_karyo.png" alt="drawing" height="100"/>
+<img src="pipeline_CCF.png" alt="drawing" height="100"/>
 
-**Main function: ** ``pipeline_subclonal_deconvolution_VAF_karyotype`.
+**Main function: ** ``pipeline_subclonal_deconvolution_CCF`.
 
 ## Input requirements
 
@@ -34,14 +34,14 @@ The following data are required to run this pipeline.
   * tumour purity, `purity`;
   * a genome reference supported by [CNAqc](https://caravagn.github.io/CNAqc/).
   
-* a list `karyotypes` of shorthands (in `Major:minor` notation) for karyotypes that should be used to perform subclonal deconvolution. 
+* a list `karyotypes` of shorthands (in `Major:minor` notation) for karyotypes that should be used to compute CCF for subclonal deconvolution. 
     - By default, `c('1:0', '1:1, '2:0', '2:1', '2:2')` are used; 
 
 * pipeline parameters, which allow to:
    * impose a minimum VAF on the data to analyse, `min_VAF`;
    * impose a mimumin (`min_muts`) and maximum (`N_max`) for the number of mutations to analyse;
    * identify a run by a `description`;
-   * decide how peaks  should be [matched by CNAqc](https://caravagn.github.io/CNAqc/articles/a3_peaks_detection.html), `matching_epsilon_peaks`;
+   * decide how CCF should be [computed by CNAqc](https://caravagn.github.io/CNAqc/articles/a4_ccf_computation.html), `CCF_computation`;
    * forward parameters to customise the fit(s), using an ellypsis. 
    
 The input format of input data is [discussed in a CNAqc vignette.](https://caravagn.github.io/CNAqc/articles/Introduction.html).  
@@ -49,13 +49,13 @@ The input format of input data is [discussed in a CNAqc vignette.](https://carav
 
 ## Pipeline skeleton
 
-The following steps are performed by `pipeline_subclonal_deconvolution_VAF_karyotype`.
+The following steps are performed by `pipeline_subclonal_deconvolution_CCF`.
 
-1. input mutations are mapped to copy number segments, integrating also tumour purity using [CNAqc](https://caravagn.github.io/CNAqc/);
+1. input mutations are mapped to copy number segments, integrating also tumour purity using [CNAqc](https://caravagn.github.io/CNAqc/). 
 
-2. input mutations are subset according to the required input list of karyotypes; mutations that map to karyotypes with less than the required number of mutations (pipeline input), are disregarded by the analysis.
+2. input mutations are subset according to the required input list of karyotypes; mutations that map to karyotypes with less than the required number of mutations (pipeline input), are disregarded by the analysis. CCF estimates are computed from all the remaining mutations, and the [QC score from CNAqc](https://caravagn.github.io/CNAqc/articles/a4_ccf_computation.html) is used to determine which karyotypes can be associated to mutations with reliable CCF values. Only karyotypes with QC `"PASS"` are retained.
 
-3. [MOBSTER](https://caravagn.github.io/mobster/) is used to perform deconvolution from _raw VAF data of each karyotype_; the following procedure is followed for each karyotype:
+3. [MOBSTER](https://caravagn.github.io/mobster/) is used to perform deconvolution from _adjusted CCF values_ (i.e., clonal peaks at 50% value, to avoid truncations); the following procedure is followed for each karyotype:
 
    * a first run of `mobster_fit` is performed forwarding the ellipsis parameters to the function call;
    
@@ -72,28 +72,17 @@ The following steps are performed by `pipeline_subclonal_deconvolution_VAF_karyo
 
 ### Architecture estimation
 
-The rationale to determine the clonality of the input sample is as follows:
+The rationale to determine the clonality of the input sample is simple. Since CCF are computed only from for those karyotypes that pass the QC analysis with [CNAqc](https://caravagn.github.io/CNAqc/articles/a3_peaks_detection.html), the overall QC of the analysis and tumour clonality are estimated from the analysis done with [MOBSTER](https://caravagn.github.io/mobster).
 
-* For each karyotype analysed, a QC `"PASS"` or `"FAIL"` score is obtained by [peak detection from CNAqc](https://caravagn.github.io/CNAqc/articles/a3_peaks_detection.html). 
-* For each [MOBSTER](https://caravagn.github.io/mobster) fit, a QC `"PASS"` or `"FAIL"` score is obtained by the [deconvolution classifier](https://caravagn.github.io/evoverse/articles/1_qc_models.html).
-
-This joint classification can be used to assess the quality of the input data and the fits. Karyotypes that `"PASS"` both QCs are used to determine the architecture, with an overall decision that is taken considering the number of mutations in each karyotype. In this cases, an overall QC `"PASS"` is assigned to this analysis.
-
-
-* Example:  80% of mutations in diploid regions (`karyotype = "1:1"`) suggest a `"Monoclonal"` tumour, but 20% in genome-doubled regions (`karyotype = "2:2"`) suggest `"Polyclonal"`: the overall decision is dominated by diploid mutations 
-
-To determine the clonality of a fit we consider the input `karyotype`, and the number of Binomial components (`BMix_K_B`) that fit non-tail mutations with [BMix](https://caravagn.github.io/BMix), after [MOBSTER](https://caravagn.github.io/mobster). The `case_when` diagram is this.
+The rationale to determine the tumour architecture is the same adopted in other pipelines. We consider the snumber of Binomial components (`BMix_K_B`) that fit non-tail mutations with [BMix](https://caravagn.github.io/BMix), after [MOBSTER](https://caravagn.github.io/mobster). The `case_when` diagram is this.
 ```{r, eval=FALSE}
 case_when(
-  karyotype %in% c("1:0", "1:1") & BMix_K_B  > 1 ~ "Polyclonal",
-  karyotype %in% c("1:0", "1:1") & BMix_K_B  == 1 ~ "Monoclonal",
-  karyotype %in% c("2:0", "2:1", "2:2") & BMix_K_B  > 2 ~ "Polyclonal",
-  karyotype %in% c("2:0", "2:1", "2:2") & BMix_K_B  <= 2 ~ "Monoclonal"
+  BMix_K_B  > 1 ~ "Polyclonal",
+  BMix_K_B  == 1 ~ "Monoclonal"
 )
 ```
    
-In the unfortunates case that all karyotypes `"FAIL"` peak detection (poor quality data), the architecture cannot be determined and an overall QC `"FAIL"` is assigned to this analysis.
-
+In the unfortunates case that all karyotypes `"FAIL"` CCF computation (poor quality data), the architecture cannot be determined and an overall QC `"FAIL"` is assigned to this analysis.
 
 # Example run
 
@@ -101,7 +90,7 @@ In the unfortunates case that all karyotypes `"FAIL"` peak detection (poor quali
 # Use example data in the CNAqc package
 data(example_dataset_CNAqc, package = 'CNAqc')
 
-pipeline = pipeline_subclonal_deconvolution_VAF_karyotype(
+pipeline = pipeline_subclonal_deconvolution_CCF(
   mutations = CNAqc::example_dataset_CNAqc$snvs,  # Somatic mutations
   cna = CNAqc::example_dataset_CNAqc$cna,         # Copy number segments
   purity = CNAqc::example_dataset_CNAqc$purity,   # Sample purity
@@ -109,6 +98,7 @@ pipeline = pipeline_subclonal_deconvolution_VAF_karyotype(
   N_max = 10000,                                  # Downsample karyotypes with > 10K mutations (none here)
   min_muts = 150,                                 # Minimum number of mutations per karyotype
   min_VAF = 0.05,                                 # Minimum VAF 
+  ccf_method = 'ENTROPY'                          # CCF computation
   description = "Example CNAqc",                  # Dataset description
   auto_setup = 'FAST'                             # Ellipsis (parameters forwarded to each mobster first run)
 )

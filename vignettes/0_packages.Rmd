@@ -1,8 +1,8 @@
 ---
-title: "Packages inside `evoverse`"
+title: "`evoverse` packages"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Packages inside `evoverse`}
+  %\VignetteIndexEntry{`evoverse` packages}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -7,7 +7,8 @@
 pipeline_subclonal_deconvolution_VAF_karyotype(mutations, cna, purity,
   reference = "GRCh38", karyotypes = c("1:0", "1:1", "2:0", "2:1",
   "2:2"), description = "VAF by karyotype deconvolution sample",
-  min_VAF = 0.05, min_muts = 50, N_max = 15000, ...)
+  min_VAF = 0.05, min_muts = 50, N_max = 15000,
+  matching_epsilon_peaks = 0.025, ...)
 }
 \arguments{
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
@@ -18,9 +19,9 @@ pipeline_subclonal_deconvolution_VAF_karyotype(mutations, cna, purity,
 
 \item{min_muts}{Skip analysing karyotypes with less than \code{min_muts} mutations.}
 
-\item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
+\item{matching_epsilon_peaks}{}
 
-\item{cex}{}
+\item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
 }
 \description{
 For a list of input mutations, CNA and purity data from a tumour sample,
@@ -29,6 +30,9 @@ aneuploidy state (copy state). Assignments and plots are returned, and
 an automatic QC pipeline (supervised logistic classifier) is used to
 flag which fits pass quality check. The trained set for the classifier
 consists in n = 377 colorectal whole genome samples.
+
+Run \code{vignette("a3_Deconv_vaf_karyo", package = "evoverse")} to see
+the corresponding vignette.
 }
 \examples{
 # We use data released with the CNAqc package
@@ -38,6 +42,6 @@ mutations = CNAqc::example_dataset_CNAqc$snvs
 purity = CNAqc::example_dataset_CNAqc$purity
 
 # We use auto_setup = 'FAST' to speed up the analysis
-x = pipeline_subclonal_deconvolution_VAF(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
+x = pipeline_subclonal_deconvolution_VAF_karyotype(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
 print(x)
 }
