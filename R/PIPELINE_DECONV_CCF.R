@@ -98,7 +98,8 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
     paste0('The pipeline will analyse: ', paste0(which_karyo, collapse = ', ')),
     background_col = "blue",
     col = 'white'
-  )
+  ) %>% cat()
+
 
   # Compute CCF, and determine the QC = PASS CCF estimates
   CNAqc_input = CNAqc::compute_CCF(CNAqc_input,
@@ -117,7 +118,7 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
   which_bad_karyotypes = setdiff(names(CNAqc_input$CCF_estimates), karyotypes_with_good_CCF)
 
   if(length(which_bad_karyotypes) > 0){
-    cli::cli_alert_warning("Karyotype(s) {.field{which_bad_karyotypes}} have CCF that do not pass QC and will not be used; try to use another CCF computation method.")
+    cli::cli_alert_warning("Karyotype(s) {.field {which_bad_karyotypes}} have CCF that do not pass QC and will not be used; try to use another CCF computation method.")
 
     CNAqc_input$CCF_estimates = CNAqc_input$CCF_estimates[karyotypes_with_good_CCF]
   }

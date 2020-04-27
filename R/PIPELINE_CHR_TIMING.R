@@ -99,7 +99,7 @@ pipeline_chromosome_timing =
     paste0('The pipeline will analyse: ', paste0(which_karyo, collapse = ', ')),
     background_col = "blue",
     col = 'white'
-  )
+  ) %>% cat()
 
   all_fits = evoverse:::deconvolution_mobster_karyotypes_VAF(
     x = CNAqc_input,
