@@ -162,10 +162,10 @@ plot.evopipe_qc = function(x, ...)
 
   # Data histograms
   hist_plot = ggpubr::ggarrange(
-    suppressWarnings(suppressMessages(plot_data_histogram(x$cnaqc, which = 'CCF'))),
-    suppressWarnings(suppressMessages(plot_data_histogram(x$cnaqc, which = 'VAF'))),
-    suppressWarnings(suppressMessages(plot_data_histogram(x$cnaqc, which = 'DP'))),
-    suppressWarnings(suppressMessages(plot_data_histogram(x$cnaqc, which = 'NV'))),
+    suppressWarnings(suppressMessages(CNAqc::plot_data_histogram(x$cnaqc, which = 'CCF'))),
+    suppressWarnings(suppressMessages(CNAqc::plot_data_histogram(x$cnaqc, which = 'VAF'))),
+    suppressWarnings(suppressMessages(CNAqc::plot_data_histogram(x$cnaqc, which = 'DP'))),
+    suppressWarnings(suppressMessages(CNAqc::plot_data_histogram(x$cnaqc, which = 'NV'))),
     nrow = 1,
     ncol = 4,
     common.legend = TRUE,
