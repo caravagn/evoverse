@@ -226,7 +226,7 @@ deconvolution_mobster_CCF = function(x,
   {
     cli::boxx(
       paste0(
-        "n = ", sum(mutations$CCF/2 > 1),
+        "n = ", sum(CCF_entries$CCF/2 > 1),
         " mutation(s) with CCF/2 > 1 will be removed (50% adjusted VAF).")) %>%
       cat
     cat('\n')
