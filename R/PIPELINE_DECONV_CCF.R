@@ -35,6 +35,7 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
                                                 purity,
                                                 karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                                 ccf_method = "ENTROPY",
+                                                cutoff_QC_PASS = 0.25,
                                                 reference = 'GRCh38',
                                                 min_VAF = 0.05,
                                                 min_muts = 50,
@@ -104,6 +105,7 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
   # Compute CCF, and determine the QC = PASS CCF estimates
   CNAqc_input = CNAqc::compute_CCF(CNAqc_input,
                                    karyotypes = which_karyo,
+                                   cutoff_QC_PASS = cutoff_QC_PASS,
                                    method = ccf_method)
 
   # Store this upgraded version of mapping
