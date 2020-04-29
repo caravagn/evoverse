@@ -112,7 +112,7 @@ deconvolution_mobster_karyotypes_VAF = function(
 
     # VAF required in 0/1, and in this "k"
     kmuts = CNAqc::subset_by_segment_karyotype(x, karyotypes = k)
-    kmuts = CNAqc::subsample(kmuts, N = N_max, keep_drivers = FALSE)
+    kmuts = CNAqc::subsample(kmuts, N = N_max, keep_drivers = TRUE)
     mutations = kmuts$snvs %>%
       dplyr::filter(VAF > 0, VAF < 1)
 
