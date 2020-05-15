@@ -4,11 +4,20 @@
 \alias{pipeline_subclonal_deconvolution_CCF}
 \title{Pipeline to perform subclonal deconvolution with MOBSTER.}
 \usage{
-pipeline_subclonal_deconvolution_CCF(mutations, cna, purity,
+pipeline_subclonal_deconvolution_CCF(
+  mutations,
+  cna,
+  purity,
   karyotypes = c("1:0", "1:1", "2:0", "2:1", "2:2"),
-  ccf_method = "ENTROPY", reference = "GRCh38", min_VAF = 0.05,
-  min_muts = 50, description = "Example CCF deconvolution",
-  N_max = 15000, ...)
+  ccf_method = "ENTROPY",
+  cutoff_QC_PASS = 0.25,
+  reference = "GRCh38",
+  min_VAF = 0.05,
+  min_muts = 50,
+  description = "Example CCF deconvolution",
+  N_max = 15000,
+  ...
+)
 }
 \arguments{
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
@@ -23,6 +32,9 @@ pipeline_subclonal_deconvolution_CCF(mutations, cna, purity,
 
 \item{timeable}{Karyotypes that can be timed, expressed as "Major:minor" notation. Default
 are the following states \code{timeable = c('2:0', '2:1', '2:2')}.}
+}
+\value{
+
 }
 \description{
 For a list of input mutations, CNA and purity data from a tumour sample,

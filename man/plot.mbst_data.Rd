@@ -4,7 +4,7 @@
 \alias{plot.mbst_data}
 \title{Plot an \code{evoverse} dataset.}
 \usage{
-plot.mbst_data(x, ...)
+\method{plot}{mbst_data}(x, ...)
 }
 \arguments{
 \item{x}{An  \code{evoverse} object.}

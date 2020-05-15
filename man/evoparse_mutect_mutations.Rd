@@ -9,6 +9,9 @@ evoparse_mutect_mutations(x, sample = NULL)
 \arguments{
 \item{x}{}
 }
+\value{
+
+}
 \description{
 Pares Platypus mutation data.
 }

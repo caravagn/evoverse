@@ -9,6 +9,9 @@
 \arguments{
 \item{x}{}
 }
+\value{
+
+}
 \description{
 S3 print for the deconvolution pipeline from raw VAF with karyotypes
 }

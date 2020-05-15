@@ -4,10 +4,13 @@
 \alias{plot.evopipe_deconv}
 \title{Title}
 \usage{
-plot.evopipe_deconv(x)
+\method{plot}{evopipe_deconv}(x)
 }
 \arguments{
 \item{x}{}
+}
+\value{
+
 }
 \description{
 Title

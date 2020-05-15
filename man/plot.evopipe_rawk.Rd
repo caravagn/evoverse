@@ -4,10 +4,13 @@
 \alias{plot.evopipe_rawk}
 \title{S3 plot for the deconvolution pipeline from raw VAF with karyotypes}
 \usage{
-plot.evopipe_rawk(x, ...)
+\method{plot}{evopipe_rawk}(x, ...)
 }
 \arguments{
 \item{x}{}
+}
+\value{
+
 }
 \description{
 S3 plot for the deconvolution pipeline from raw VAF with karyotypes

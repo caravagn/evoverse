@@ -5,7 +5,9 @@
 \alias{qc_deconvolution_polyclonal}
 \title{QC pre-trained Logistic classifier for deconvolution with multiple Beta component with MOBSTER
 (polyclonal case).}
-\format{A logistic classifier.... describe training ......}
+\format{
+A logistic classifier.... describe training ......
+}
 \usage{
 data(qc_deconvolution_polyclonal)
 }

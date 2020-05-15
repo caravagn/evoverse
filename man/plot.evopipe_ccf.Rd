@@ -4,10 +4,13 @@
 \alias{plot.evopipe_ccf}
 \title{S3 plot for the deconvolution pipeline from raw VAF with karyotypes}
 \usage{
-plot.evopipe_ccf(x, ...)
+\method{plot}{evopipe_ccf}(x, ...)
 }
 \arguments{
 \item{x}{}
+}
+\value{
+
 }
 \description{
 S3 plot for the deconvolution pipeline from raw VAF with karyotypes

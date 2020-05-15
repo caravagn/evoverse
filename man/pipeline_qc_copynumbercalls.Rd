@@ -4,9 +4,16 @@
 \alias{pipeline_qc_copynumbercalls}
 \title{Pipeline for QC of somatic calls (copy number and mutations).}
 \usage{
-pipeline_qc_copynumbercalls(mutations, cna, purity, reference = "GRCh38",
-  description = "MyPAT00XX1", smooth = TRUE,
-  matching_epsilon_peaks = 0.025, ccf_method = "ENTROPY")
+pipeline_qc_copynumbercalls(
+  mutations,
+  cna,
+  purity,
+  reference = "GRCh38",
+  description = "MyPAT00XX1",
+  smooth = TRUE,
+  matching_epsilon_peaks = 0.025,
+  ccf_method = "ENTROPY"
+)
 }
 \arguments{
 \item{mutations}{Somatic mutation calls, in \code{CNAqc} input format.}
@@ -22,6 +29,9 @@ pipeline_qc_copynumbercalls(mutations, cna, purity, reference = "GRCh38",
 \item{smooth}{If \code{TRUE}, smooths copy number data with \code{CNAqc}.}
 
 \item{matching_epsilon_peaks}{Epsilon to match peaks with \code{CNAqc}.}
+}
+\value{
+
 }
 \description{
 This is ...

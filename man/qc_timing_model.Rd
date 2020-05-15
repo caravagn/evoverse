@@ -4,7 +4,9 @@
 \name{qc_timing_model}
 \alias{qc_timing_model}
 \title{QC pre-trained Logistic classifier for timing of CNA with MOBSTER.}
-\format{A logistic classifier.... describe training ......}
+\format{
+A logistic classifier.... describe training ......
+}
 \usage{
 data(qc_timing_model)
 }
