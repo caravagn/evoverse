@@ -36,7 +36,8 @@ pipeline_qc_copynumbercalls = function(
   description = "MyPAT00XX1",
   smooth = TRUE,
   matching_epsilon_peaks = 0.025,
-  ccf_method = 'ENTROPY'
+  ccf_method = 'ROUGH',
+  peak_method = 'closest'
  )
 {
   pio::pioHdr("Evoverse", crayon::italic(paste0('~ Pipeline to QC somatic mutations and CNA segments')))
@@ -61,7 +62,8 @@ pipeline_qc_copynumbercalls = function(
   x = CNAqc::analyze_peaks(
     x,
     matching_epsilon = matching_epsilon_peaks,
-    karyotypes = USE_KARYOTYPES
+    karyotypes = USE_KARYOTYPES,
+    matching_strategy = peak_method
     )
 
   # 3. CCF values
