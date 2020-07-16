@@ -5,31 +5,26 @@
 \title{Pipeline to perform subclonal deconvolution with MOBSTER.}
 \usage{
 pipeline_subclonal_deconvolution_VAF_karyotype(
-  mutations,
-  cna,
-  purity,
-  reference = "GRCh38",
+  x,
   karyotypes = c("1:0", "1:1", "2:0", "2:1", "2:2"),
   description = "VAF by karyotype deconvolution sample",
-  min_VAF = 0.05,
-  min_muts = 50,
+  min_muts = 150,
   N_max = 15000,
-  matching_epsilon_peaks = 0.025,
   ...
 )
 }
 \arguments{
+\item{min_muts}{Skip analysing karyotypes with less than \code{min_muts} mutations.}
+
+\item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
+
 \item{mutations}{Input mutations in the format for package \code{CNAqc}.}
 
 \item{cna}{Absolute Copy Number Alterations in the format for package \code{CNAqc}.}
 
 \item{purity}{Tumour purity, in [0, 1].}
 
-\item{min_muts}{Skip analysing karyotypes with less than \code{min_muts} mutations.}
-
 \item{matching_epsilon_peaks}{}
-
-\item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
 }
 \value{
 

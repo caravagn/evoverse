@@ -30,13 +30,9 @@
 #' # We use auto_setup = 'FAST' to speed up the analysis
 #' x = pipeline_subclonal_deconvolution_CCF(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
 #' print(x)
-pipeline_subclonal_deconvolution_CCF = function(mutations,
-                                                cna,
-                                                purity,
-                                                karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
-                                                ccf_method = "ENTROPY",
-                                                cutoff_QC_PASS = 0.25,
-                                                reference = 'GRCh38',
+pipeline_subclonal_deconvolution_CCF = function(
+  x,
+  karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
                                                 min_VAF = 0.05,
                                                 min_muts = 50,
                                                 description = "Example CCF deconvolution",
@@ -47,102 +43,73 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
               crayon::italic('~ Subclonal deconvolution pipeline for CCF data'))
   cat('\n')
 
-  #
-  # 1) Load input data -- this is a common function to all deconvolution-based pipelines
-  #
-  cli::cli_h1("Loading input data for sample {.field {description}}")
+  if(!inherits(x, "evopipe_qc")) stop("Input 'x' should be the output of the evoverse data QC pipeline. See ?pipeline_qc_copynumbercalls.")
+
+  # Load input data
+  cli::cli_h1("Input data for sample {.field {description}}")
   cat("\n")
 
-  CNAqc_input = evoverse:::deconvolution_prepare_input(mutations,
-                                                       cna,
-                                                       purity,
-                                                       reference = reference,
-                                                       min_VAF = min_VAF)
+  CNAqc_input = x$cnaqc
 
-  print(CNAqc_input)
+  print(x)
 
   # Return object will contain input data
   results = list()
   results$type = "Deconvolution pipeline with CCFs"
   class(results) = "evopipe_ccf"
 
-  results$input = list(
-    mutations = mutations,
-    cna = cna,
-    purity = purity,
-    cnaqc = CNAqc_input
-  )
-
+  results$input = CNAqc_input
   results$description = description
 
-  # Check what is actually available in cna_obj
-  which_karyo = CNAqc_input$n_karyotype[karyotypes]
-  which_karyo = which_karyo[!is.na(which_karyo) & which_karyo > min_muts]
-  which_karyo = names(which_karyo)
+  # Determine what segments can be used. Check the inputs against the QC status inside x.
+  CCF_entries = x$QC$QC_table %>% filter(type == "CCF")
+  QC_CCF = CCF_entries %>% filter(QC == "PASS") %>% pull(karyotype)
 
-  # Force exit if there is no suitable karyotype among the ones required
+  which_karyo = intersect(QC_CCF, karyotypes)
+
+  # Handle special cases where we cannot run mobster
   if(length(which_karyo) == 0)
   {
+    reason = case_when(
+      is.null(x$QC$QC_table) ~ "There are no QC tables for input 'x', rerun the evoverse data QC pipeline",
+      (nrow(v) == 0) ~ "There are no 'CCF' in the QC tables for input 'x', rerun the evoverse data QC pipeline",
+      all(CCF_entries$QC != "PASS") ~ "All CCF estimation in the input data are failed, there's no CCF estimate to use here.",
+      TRUE ~ paste0("Unknown error - the following CCF karyotypes are PASS: ", paste(QC_CCF, collapse = ', '), '.')
+    )
+
+    cat("\n")
+    cat(
+      cli::boxx(
+        paste0("There is nothing to perform deconvolution here! ",reason),
+        padding = 1,
+        col = 'white',
+        float = 'center',
+        background_col = "brown")
+    )
+    cat("\n")
+
+    # Setup a minimum object
     results$with_fits = FALSE
     results$mobster = results$bmix = results$table$clustering_assignments = results$table$summary = NULL
 
     # Data id
     results$log = paste0(
       Sys.time(),
-      '. evoverse pipeline for subclonal deconvolution from CCFs: with fits ', results$with_fits
+      '. evoverse pipeline for subclonal deconvolution from CCF: with fits ', results$with_fits
     )
 
     return(results)
   }
 
   cli::boxx(
-    paste0('The pipeline will analyse: ', paste0(which_karyo, collapse = ', ')),
+    paste0('The pipeline will analyse CCF karyotypes: ', paste0(which_karyo, collapse = ', ')),
     background_col = "blue",
     col = 'white'
   ) %>% cat()
 
+  # Retain inside the input object only the CCF entries that are required
+  CNAqc_input$CCF_estimates = CNAqc_input$CCF_estimates[which_karyo]
 
-  # Compute CCF, and determine the QC = PASS CCF estimates
-  CNAqc_input = CNAqc::compute_CCF(CNAqc_input,
-                                   karyotypes = which_karyo,
-                                   cutoff_QC_PASS = cutoff_QC_PASS,
-                                   method = ccf_method)
-
-  # Store this upgraded version of mapping
-  results$input$cnaqc = CNAqc_input
-
-  # These have PASS CCF
-  karyotypes_with_good_CCF = CNAqc:::compute_QC_table(CNAqc_input)$QC_table %>%
-    dplyr::filter(type == 'CCF', QC == 'PASS') %>%
-    pull(karyotype)
-
-  # These not, we remove them from inside CNAqc_input
-  which_bad_karyotypes = setdiff(names(CNAqc_input$CCF_estimates), karyotypes_with_good_CCF)
-
-  if(length(which_bad_karyotypes) > 0){
-    cli::cli_alert_warning("Karyotype(s) {.field {which_bad_karyotypes}} have CCF that do not pass QC and will not be used; try to use another CCF computation method.")
-
-    CNAqc_input$CCF_estimates = CNAqc_input$CCF_estimates[karyotypes_with_good_CCF]
-  }
-
-  # Force exit if there is no suitable karyotype among the ones required
-  if(length(karyotypes_with_good_CCF) == 0)
-  {
-    results$with_fits = FALSE
-    results$mobster = results$bmix = results$table$clustering_assignments = results$table$summary = NULL
-
-    # Data id
-    results$log = paste0(
-      Sys.time(),
-      '. evoverse pipeline for subclonal deconvolution from CCFs: with fits ', results$with_fits
-    )
-
-    return(results)
-  }
-
-  #
-  # 2) MOBSTER analysis of CCF, this adjust CCF for the VAF etc.
-  #
   CCF_fit = evoverse:::deconvolution_mobster_CCF(
     x = CNAqc_input,
     BMix = TRUE,                # With downstream clustering of reads
@@ -162,7 +129,7 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
   cli::cli_process_start("Pipeline results assembly")
   cat("\n")
 
-  # Special case ~ nothing to time, annotate it
+  # Special case ~ nothing to do, annotate it
   if(is_null_mobster & is_null_bmix) results$with_fits = FALSE
   else results$with_fits = TRUE
 
@@ -223,8 +190,7 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
   results$table$QC_table = QC_mobster_CCF
   results$table$QC_CCF = QC_CNAqc
 
-  # Marginalise the architecture, the one in the top row
-  # is the selected one (Monoclonal or polyclonal)
+  # Overall CCF architecture (Monoclonal or polyclonal)
   Architecture_table = QC_mobster_CCF %>%
     dplyr::filter(mobster_QC == "PASS")
 
@@ -319,7 +285,7 @@ plot.evopipe_ccf = function(x, ...)
   # Figure assembly
   mobster_fits = x$mobster
   bmix_fits = x$bmix
-  cna_obj = x$input$cnaqc
+  cna_obj = x$input
 
   qc_table = x$table$summary
 

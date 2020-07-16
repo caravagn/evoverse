@@ -28,17 +28,20 @@
 #'
 #' @examples
 #' # We use data released with the CNAqc package
+#' x = pipeline_qc_copynumbercalls(
+#'   mutations = CNAqc::example_dataset_CNAqc$snvs,
+#'   cna = CNAqc::example_dataset_CNAqc$cna,
+#'   purity = CNAqc::example_dataset_CNAqc$purity
+#'   )
 #'
-#' cna = CNAqc::example_dataset_CNAqc$cna
-#' mutations = CNAqc::example_dataset_CNAqc$snvs
-#' purity = CNAqc::example_dataset_CNAqc$purity
-#'
-#' # We use auto_setup = 'FAST' to speed up the analysis
-#' x = pipeline_subclonal_deconvolution_VAF_karyotype(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
 #' print(x)
+#'
+#' # We use x to run the pipeline
+#' y = pipeline_subclonal_deconvolution_VAF_karyotype(x, auto_setup = 'FAST', N_max = 500)
+#'
+#' print(y)
 pipeline_subclonal_deconvolution_VAF_karyotype = function(
   x,
-  reference = 'GRCh38',
   karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
   description = "VAF by karyotype deconvolution sample",
   min_muts = 150,
@@ -56,7 +59,7 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
 
   CNAqc_input = x$cnaqc
 
-  print(CNAqc_input)
+  print(x)
 
   # Return object will contain input data
   results = list()
@@ -66,7 +69,7 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
   results$input = CNAqc_input
   results$description = description
 
-  # Determine what segments can be used. Check the required inputs against the QC status inside x.
+  # Determine what segments can be used. Check the inputs against the QC status inside x.
   Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
   QC_peaks = Peaks_entries %>% filter(QC == "PASS") %>% pull(karyotype)
 
@@ -173,8 +176,10 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
   cli::cli_h1("Assessing the tumour architecture")
   cat("\n")
 
-  # Get QC results for each one of the peaks we analysed. We want to:
-  # - take a decision based only on the karyotypes that pass peak detection
+  # Get QC results for each one of the peaks we analysed. By definition
+  # the peaks are OK in the CNAqc object; now we can superimpose the QC
+  # status from the deconvolution. We want to
+  # - take a decision based only on  karyotypes that pass peak detection and mobster QC
   # - include the karyotype size in the weighted decision
   QC_CNAqc = CNAqc:::compute_QC_table(CNAqc_input)$QC_table %>%
     dplyr::filter(karyotype %in% which_karyo, type == 'Peaks') %>%
@@ -274,7 +279,7 @@ print.evopipe_rawk = function(x, ...)
   cat("\n")
 
   # Skinnier print
-  CNAqc:::print.cnaqc(x$input$cnaqc)
+  CNAqc:::print.cnaqc(x$input)
 
   # QC of the analysis
   cat("\n")
@@ -316,39 +321,55 @@ plot.evopipe_rawk = function(x, ...)
   # Figure assembly
   mobster_fits = x$mobster
   bmix_fits = x$bmix
-  cna_obj = x$input$cnaqc
+  cna_obj = x$input
 
   qc_table = x$table$summary
 
   # 2 x 1 CNAqc plot
   groups = names(mobster_fits)
 
+  karyotypes_list = c("1:0", "1:1" , "2:0", "2:1", "2:2")
+
   # MOBSTER plots, sourrounded by a coloured box by QC
-  mob_fits_plot = lapply(mobster_fits, evoverse:::qc_mobster_plot)
+  mob_fits_plot = lapply(karyotypes_list,
+                         function(x)
+                         {
+                           if (x %in% groups)
+                             return(evoverse:::qc_mobster_plot(mobster_fits[[x]]))
+                           else
+                             return(CNAqc:::eplot())
+                         })
 
   # BMix plots
-  bmix_fits_plots = lapply(bmix_fits,
-                           function(x) {
-                             if (all(is.null(x)))
-                               return(CNAqc:::eplot())
+  bmix_fits_plots = lapply(karyotypes_list,
+                         function(x)
+                         {
+                           if (x %in% groups)
+                           {
+                             if (all(is.null(bmix_fits[[x]]))) return(CNAqc:::eplot())
+                             else{
+                               x = bmix_fits[[x]]
 
-                             subl = paste0('n = ',
-                                           nrow(x$input),
-                                           ", ",
-                                           paste(
-                                             names(x$pi),
-                                             ' ',
-                                             round(x$pi * 100),
-                                             '%',
-                                             collapse = ', ',
-                                             sep = ''
-                                           ))
+                               subl = paste0('n = ',
+                                             nrow(x$input),
+                                             ", ",
+                                             paste(
+                                               names(x$pi),
+                                               ' ',
+                                               round(x$pi * 100),
+                                               '%',
+                                               collapse = ', ',
+                                               sep = ''
+                                             ))
 
-                             BMix::plot_clusters(x, data = x$input %>% select(NV, DP)) +
-                               scale_fill_brewer(palette = 'Set2') +
-                               labs(title = subl, subtitle = NULL)
-                           })
-
+                               BMix::plot_clusters(x, data = x$input %>% select(NV, DP)) +
+                                 scale_fill_brewer(palette = 'Set2') +
+                                 labs(title = subl, subtitle = NULL)
+                             }
+                           }
+                           else
+                             return(CNAqc:::eplot())
+                         })
 
   figure = ggpubr::ggarrange(
     CNAqc::plot_segments(cna_obj, circular = FALSE, highlight = groups) + labs(title = x$description),

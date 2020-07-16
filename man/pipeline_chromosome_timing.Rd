@@ -14,18 +14,21 @@ pipeline_chromosome_timing(
 )
 }
 \arguments{
-\item{karyotypes}{Karyotypes that can be timed, expressed as "Major:minor" notation. Default
-are the following states \code{timeable = c('2:0', '2:1', '2:2')}.}
+\item{x}{An object result from the evoverse data QC pipeline, which must contain results
+from peak detection analysis to decide which CNA events can be timed. This object contains
+also somatic mutations and CNA data; see function \code{pipeline_qc_copynumbercalls}.}
 
-\item{min_muts}{Skip analysing karyotypes with less than \code{min_muts} mutations.}
+\item{karyotypes}{Karyotypes that should be timed, expressed as "Major:minor" notation. Default
+are the following states \code{timeable = c('2:0', '2:1', '2:2')}. This list of karyotypes will
+be checked against the list of peaks that PASS QC in \code{x}; only karyotypes that pass and are
+listed will be used.}
 
-\item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
+\item{min_muts}{Karyotypes with less than \code{min_muts} mutations will not be analysed, even
+if they PASS all the data metrics in \code{x} and are in \code{karyotypes}.}
 
-\item{mutations}{Input mutations in the format for package \code{CNAqc}.}
-
-\item{cna}{Absolute Copy Number Alterations in the format for package \code{CNAqc}.}
-
-\item{purity}{Tumour purity, in [0, 1].}
+\item{...}{Parameters passed to \code{mobster_fit} in package \code{mobster} to perform the
+signal deconvolution. Each run is atteempted twice if it FAILS at first; the first run uses
+parameters specified by this ellipsis, the second run uses the default parameters of \code{mobster_fit}.}
 }
 \value{
 
@@ -43,11 +46,19 @@ consists in n = 377 colorectal whole genome samples.
 }
 \examples{
 # We use data released with the CNAqc package
+x = pipeline_qc_copynumbercalls(
+  mutations = CNAqc::example_dataset_CNAqc$snvs,
+  cna = CNAqc::example_dataset_CNAqc$cna,
+  purity = CNAqc::example_dataset_CNAqc$purity
+  )
 
-cna = CNAqc::example_dataset_CNAqc$cna
-mutations = CNAqc::example_dataset_CNAqc$snvs
-purity = CNAqc::example_dataset_CNAqc$purity
-
-x = pipeline_chromosome_timing(mutations, cna = cna, purity = purity, auto_setup = 'FAST', N_max = 500)
 print(x)
+
+# We use x to run the timing pipeline
+y = pipeline_chromosome_timing(x, auto_setup = 'FAST', N_max = 500)
+
+print(y)
+}
+\seealso{
+pipeline_qc_copynumbercalls
 }
