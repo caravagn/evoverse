@@ -36,39 +36,25 @@
 #' # We use auto_setup = 'FAST' to speed up the analysis
 #' x = pipeline_subclonal_deconvolution_VAF_karyotype(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
 #' print(x)
-
 pipeline_subclonal_deconvolution_VAF_karyotype = function(
-  mutations,
-  cna,
-  purity,
+  x,
   reference = 'GRCh38',
   karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
   description = "VAF by karyotype deconvolution sample",
-  min_VAF = 0.05,
-  min_muts = 50,
+  min_muts = 150,
   N_max = 15000,
-  matching_epsilon_peaks = 0.025,
   ...)
 {
   pio::pioHdr("Evoverse", crayon::italic('Raw VAF by karyotype subclonal deconvolution pipeline'))
   cat('\n')
 
-  #
-  # 1) Load input data -- this is a common function to all deconvolution-based pipelines
-  #
-  cli::cli_h1("Loading input data for sample {.field {description}}")
+  if(!inherits(x, "evopipe_qc")) stop("Input 'x' should be the output of the evoverse data QC pipeline. See ?pipeline_qc_copynumbercalls.")
+
+  # Load input data
+  cli::cli_h1("Input data for sample {.field {description}}")
   cat("\n")
 
-  CNAqc_input = evoverse:::deconvolution_prepare_input(mutations,
-                                                       cna,
-                                                       purity,
-                                                       reference = reference,
-                                                       min_VAF = min_VAF)
-
-  # Determine karyotypes with sufficiently good quality data (used later)
-  CNAqc_input = CNAqc::analyze_peaks(CNAqc_input,
-                                     min_karyotype_size = 1e-9, # No karyotypes are disregarded
-                                     matching_epsilon = matching_epsilon_peaks)
+  CNAqc_input = x$cnaqc
 
   print(CNAqc_input)
 
@@ -77,25 +63,37 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
   results$type = "Deconvolution pipeline with raw VAF and karyotypes"
   class(results) = "evopipe_rawk"
 
-  results$input = list(
-    mutations = mutations,
-    cna = cna,
-    purity = purity,
-    cnaqc = CNAqc_input
-  )
-
+  results$input = CNAqc_input
   results$description = description
 
-  #
-  # 2) MOBSTER + BMix analysis of karyotypes, this returns only the best fit
-  #
-  which_karyo = CNAqc_input$n_karyotype[karyotypes]
-  which_karyo = which_karyo[!is.na(which_karyo) & which_karyo > min_muts]
-  which_karyo = names(which_karyo)
+  # Determine what segments can be used. Check the required inputs against the QC status inside x.
+  Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
+  QC_peaks = Peaks_entries %>% filter(QC == "PASS") %>% pull(karyotype)
 
-  # Force exit if there is no suitable karyotype among the ones required
+  which_karyo = intersect(QC_peaks, karyotypes)
+
+  # Handle special cases where we cannot run mobster
   if(length(which_karyo) == 0)
   {
+    reason = case_when(
+      is.null(x$QC$QC_table) ~ "There are no QC tables for input 'x', rerun the evoverse data QC pipeline",
+      (nrow(Peaks_entries) == 0) ~ "There are no 'Peaks' in the QC tables for input 'x', rerun the evoverse data QC pipeline",
+      all(Peaks_entries$QC != "PASS") ~ "All peaks in the input data are failed, there's nothing to compute timings with.",
+      TRUE ~ paste0("Unknown error - the following karyotypes are PASS: ", paste(QC_peaks, collapse = ', '), '.')
+    )
+
+    cat("\n")
+    cat(
+      cli::boxx(
+        paste0("There is nothing to perform deconvolution here! ",reason),
+        padding = 1,
+        col = 'white',
+        float = 'center',
+        background_col = "brown")
+    )
+    cat("\n")
+
+    # Setup a minimum object
     results$with_fits = FALSE
     results$mobster = results$bmix = results$table$clustering_assignments = results$table$summary = NULL
 
@@ -109,7 +107,7 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
   }
 
   cli::boxx(
-    paste0('The pipeline will analyse: ', paste0(which_karyo, collapse = ', ')),
+    paste0('The pipeline will analyse karyotypes: ', paste0(which_karyo, collapse = ', ')),
     background_col = "blue",
     col = 'white'
   )

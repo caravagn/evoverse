@@ -12,7 +12,8 @@ pipeline_qc_copynumbercalls(
   description = "MyPAT00XX1",
   smooth = TRUE,
   matching_epsilon_peaks = 0.025,
-  ccf_method = "ENTROPY"
+  ccf_method = "ROUGH",
+  peak_method = "closest"
 )
 }
 \arguments{
