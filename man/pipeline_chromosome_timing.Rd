@@ -2,7 +2,7 @@
 % Please edit documentation in R/PIPELINE_CHR_TIMING.R
 \name{pipeline_chromosome_timing}
 \alias{pipeline_chromosome_timing}
-\title{}
+\title{Pipeline to time aneuploidy.}
 \usage{
 pipeline_chromosome_timing(
   x,
@@ -41,9 +41,6 @@ an automatic QC pipeline (supervised logistic classifier) is used to
 flag which fits pass quality check. The trained set for the classifier
 consists in n = 377 colorectal whole genome samples.
 }
-\details{
-
-}
 \examples{
 # We use data released with the CNAqc package
 x = pipeline_qc_copynumbercalls(
@@ -54,7 +51,7 @@ x = pipeline_qc_copynumbercalls(
 
 print(x)
 
-# We use x to run the timing pipeline
+# We use x to run the pipeline
 y = pipeline_chromosome_timing(x, auto_setup = 'FAST', N_max = 500)
 
 print(y)

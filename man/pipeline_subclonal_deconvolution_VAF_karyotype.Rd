@@ -42,12 +42,16 @@ the corresponding vignette.
 }
 \examples{
 # We use data released with the CNAqc package
+x = pipeline_qc_copynumbercalls(
+  mutations = CNAqc::example_dataset_CNAqc$snvs,
+  cna = CNAqc::example_dataset_CNAqc$cna,
+  purity = CNAqc::example_dataset_CNAqc$purity
+  )
 
-cna = CNAqc::example_dataset_CNAqc$cna
-mutations = CNAqc::example_dataset_CNAqc$snvs
-purity = CNAqc::example_dataset_CNAqc$purity
-
-# We use auto_setup = 'FAST' to speed up the analysis
-x = pipeline_subclonal_deconvolution_VAF_karyotype(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
 print(x)
+
+# We use x to run the pipeline
+y = pipeline_subclonal_deconvolution_VAF_karyotype(x, auto_setup = 'FAST', N_max = 500)
+
+print(y)
 }
