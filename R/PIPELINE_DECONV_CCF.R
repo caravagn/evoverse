@@ -167,8 +167,8 @@ pipeline_subclonal_deconvolution_CCF = function(
     dplyr::mutate(
       architecture =
         case_when(
-          karyotype %in% "CCF" & BMix_K_B  > 1 ~ "Polyclonal",
-          karyotype %in% "CCF" & BMix_K_B  == 1 ~ "Monoclonal"
+          karyotype %in% "CCF" & BMix_K  > 1 ~ "Polyclonal",
+          karyotype %in% "CCF" & BMix_K  == 1 ~ "Monoclonal"
         )
     ) %>%
     dplyr::select(karyotype,
@@ -178,10 +178,10 @@ pipeline_subclonal_deconvolution_CCF = function(
                   architecture,
                   K_beta,
                   tail,
-                  BMix_K_B) %>%
+                  BMix_K) %>%
     dplyr::rename(
       K_mobster = K_beta,
-      K_BMix = BMix_K_B,
+      K_BMix = BMix_K,
       mobster_QC = QC,
       mobster_QC_prob = QC_prob,
       mobster_QC_type = QC_type

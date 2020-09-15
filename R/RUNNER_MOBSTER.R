@@ -153,10 +153,11 @@ deconvolution_mobster_karyotypes_VAF = function(
 
       # Fit: use 2 times the clusters detected at max
       Kbeta = min(mobster_fit$Kbeta * 2, 4)
+      KbetaBin = mobster_fit$Kbeta
 
       fit_readcounts = BMix::bmixfit(
         non_tail %>% dplyr::select(NV, DP),
-        K.BetaBinomials = 0,
+        K.BetaBinomials = 1:KbetaBin,
         K.Binomials = 1:Kbeta,
         samples = 3
       )
@@ -305,11 +306,13 @@ deconvolution_mobster_CCF = function(x,
       ) %>%
       data.frame
 
+    # As for VAF karyo fits, we test Binomial and Beta-Binomial models
     Kbeta = min(x$Kbeta * 2, 4)
+    KbetaBin = x$Kbeta
 
     fit_readcounts = BMix::bmixfit(
       non_tail %>% dplyr::select(NV, DP),
-      K.BetaBinomials = 0,
+      K.BetaBinomials = 1:KbetaBin,
       K.Binomials = 1:Kbeta,
       samples = 3)
 

@@ -193,13 +193,13 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
     dplyr::mutate(
       architecture =
         case_when(
-          karyotype %in% c("1:0", "1:1") & BMix_K_B  > 1 ~ "Polyclonal",
+          karyotype %in% c("1:0", "1:1") & BMix_K  > 1 ~ "Polyclonal",
           karyotype %in% c("1:0", "1:1") &
-            BMix_K_B  == 1 ~ "Monoclonal",
+            BMix_K  == 1 ~ "Monoclonal",
           karyotype %in% c("2:0", "2:1", "2:2") &
-            BMix_K_B  > 2 ~ "Polyclonal",
+            BMix_K  > 2 ~ "Polyclonal",
           karyotype %in% c("2:0", "2:1", "2:2") &
-            BMix_K_B  <= 2 ~ "Monoclonal"
+            BMix_K  <= 2 ~ "Monoclonal"
         )
     ) %>%
     dplyr::select(karyotype,
@@ -209,10 +209,10 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
                   architecture,
                   K_beta,
                   tail,
-                  BMix_K_B) %>%
+                  BMix_K) %>%
     dplyr::rename(
       K_mobster = K_beta,
-      K_BMix = BMix_K_B,
+      K_BMix = BMix_K,
       mobster_QC = QC,
       mobster_QC_prob = QC_prob,
       mobster_QC_type = QC_type
