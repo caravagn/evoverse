@@ -61,9 +61,23 @@ pipeline_subclonal_deconvolution_CCF = function(
   results$input = CNAqc_input
   results$description = description
 
-  # Determine what segments can be used. Check the inputs against the QC status inside x.
-  CCF_entries = x$QC$QC_table %>% filter(type == "CCF")
-  QC_CCF = CCF_entries %>% filter(QC == "PASS") %>% pull(karyotype)
+  # Determine what segments can be used. Check the inputs against the QC status inside x
+  # only if enforce_QC_PASS = TRUE. Otherwise use all of them, in principle.
+  Peaks_entries = QC_peaks = NULL
+
+  if(enforce_QC_PASS)
+  {
+    Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
+    QC_peaks = Peaks_entries %>% dplyr::filter(QC == "PASS") %>% dplyr::pull(karyotype)
+  }
+  else
+  {
+    Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
+    QC_peaks = Peaks_entries %>% dplyr::pull(karyotype)
+
+    cli::cli_alert_warning("enforce_QC_PASS = FALSE, karyotypes will be used regardless of QC status.")
+    print(Peaks_entries)
+  }
 
   which_karyo = intersect(QC_CCF, karyotypes)
 

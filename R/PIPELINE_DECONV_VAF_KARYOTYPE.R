@@ -12,16 +12,16 @@
 #' Run \code{vignette("a3_Deconv_vaf_karyo", package = "evoverse")} to see
 #' the corresponding vignette.
 #'
-#' @param mutations Input mutations in the format for package \code{CNAqc}.
-#' @param cna Absolute Copy Number Alterations in the format for package \code{CNAqc}.
-#' @param purity Tumour purity, in [0, 1].
+#' @param x An object returned from function \code{pipeline_qc_copynumbercalls},
+#' which refers to the QC analysis of somatic mutations, CNAs and tumour purity.
 #' @param min_muts Skip analysing karyotypes with less than \code{min_muts} mutations.
 #' @param ... Parameters passed \code{mobster_fit} in package \code{mobster}.
-#' @param description
-#' @param min_VAF
-#' @param karyotypes
+#' @param description A string description of this pipeline run, it will appear
+#' in some of the produced plots.
+#' @param karyotypes Vector of ..
 #' @param N_max
-#' @param matching_epsilon_peaks
+#' @param enforce_QC_PASS If \code{TRUE}, the pipeline will only analyze samples
+#' that have PASS status from the data analysis QC
 #'
 #' @return
 #' @export
@@ -46,6 +46,7 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
   description = "VAF by karyotype deconvolution sample",
   min_muts = 150,
   N_max = 15000,
+  enforce_QC_PASS = TRUE,
   ...)
 {
   pio::pioHdr("Evoverse", crayon::italic('Raw VAF by karyotype subclonal deconvolution pipeline'))
@@ -69,9 +70,23 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
   results$input = CNAqc_input
   results$description = description
 
-  # Determine what segments can be used. Check the inputs against the QC status inside x.
-  Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
-  QC_peaks = Peaks_entries %>% filter(QC == "PASS") %>% pull(karyotype)
+  # Determine what segments can be used. Check the inputs against the QC status inside x
+  # only if enforce_QC_PASS = TRUE. Otherwise use all of them, in principle.
+  Peaks_entries = QC_peaks = NULL
+
+  if(enforce_QC_PASS)
+  {
+    Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
+    QC_peaks = Peaks_entries %>% dplyr::filter(QC == "PASS") %>% dplyr::pull(karyotype)
+  }
+  else
+  {
+    Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
+    QC_peaks = Peaks_entries %>% dplyr::pull(karyotype)
+
+    cli::cli_alert_warning("enforce_QC_PASS = FALSE, karyotypes will be used regardless of QC status.")
+    print(Peaks_entries)
+  }
 
   which_karyo = intersect(QC_peaks, karyotypes)
 
