@@ -73,10 +73,10 @@ pipeline_subclonal_deconvolution_CCF = function(
   else
   {
     Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
-    QC_peaks = Peaks_entries %>% dplyr::pull(karyotype)
+    QC_peaks = Peaks_entries %>% dplyr::filter(!is.na(QC)) %>%  dplyr::pull(karyotype)
 
     cli::cli_alert_warning("enforce_QC_PASS = FALSE, karyotypes will be used regardless of QC status.")
-    print(Peaks_entries)
+    print(Peaks_entries %>% dplyr::filter(!is.na(QC)))
   }
 
   which_karyo = intersect(QC_CCF, karyotypes)

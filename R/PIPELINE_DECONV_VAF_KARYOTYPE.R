@@ -76,16 +76,16 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
 
   if(enforce_QC_PASS)
   {
-    Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
+    Peaks_entries = x$QC$QC_table %>% dplyr::filter(type == "Peaks")
     QC_peaks = Peaks_entries %>% dplyr::filter(QC == "PASS") %>% dplyr::pull(karyotype)
   }
   else
   {
     Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
-    QC_peaks = Peaks_entries %>% dplyr::pull(karyotype)
+    QC_peaks = Peaks_entries %>% dplyr::filter(!is.na(QC)) %>%  dplyr::pull(karyotype)
 
     cli::cli_alert_warning("enforce_QC_PASS = FALSE, karyotypes will be used regardless of QC status.")
-    print(Peaks_entries)
+    print(Peaks_entries %>% dplyr::filter(!is.na(QC)))
   }
 
   which_karyo = intersect(QC_peaks, karyotypes)
@@ -156,7 +156,7 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
   cli::cli_process_start("Pipeline results assembly")
   cat("\n")
 
-  # Special case ~ nothing to time, annotate it
+  # Special case ~ nothing to use, annotate it
   if(length(all_fits) > 0) results$with_fits = TRUE
   else results$with_fits = FALSE
 
@@ -248,7 +248,8 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
   # Marginalise the architecture, the one in the top row
   # is the selected one (Monoclonal or polyclonal)
   Architecture_table = QC_table %>%
-    dplyr::filter(CNAqc_QC == "PASS", mobster_QC == "PASS") %>%
+    # dplyr::filter(CNAqc_QC == "PASS", mobster_QC == "PASS") %>% Wrong (disregard QC as it is enforced above)
+    dplyr::filter(mobster_QC == "PASS") %>% # Correct, what has been done is done..
     dplyr::group_by(architecture) %>%
     dplyr::summarise(p = sum(p), n = sum(n)) %>%
     dplyr::arrange(desc(p))
