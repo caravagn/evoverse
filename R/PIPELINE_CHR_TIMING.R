@@ -302,19 +302,19 @@ plot.evopipe_ctime = function(x, ...)
   )
 
   # Set the figure title and captions
-  figure = ggpubr::annotate_figure(figure,
-                                   # top = ggpubr::text_grob(
-                                   #   bquote(bold("Dataset. ") ~ .(x$description)),
-                                   #   hjust = 0,
-                                   #   x = 0,
-                                   #   size = 15
-                                   # ),
-                                   bottom = ggpubr::text_grob(
-                                     bquote(.(x$log)),
-                                     hjust = 0,
-                                     x = 0,
-                                     size = 10
-                                   ))
+  # figure = ggpubr::annotate_figure(figure,
+  #                                  # top = ggpubr::text_grob(
+  #                                  #   bquote(bold("Dataset. ") ~ .(x$description)),
+  #                                  #   hjust = 0,
+  #                                  #   x = 0,
+  #                                  #   size = 15
+  #                                  # ),
+  #                                  bottom = ggpubr::text_grob(
+  #                                    bquote(.(x$log)),
+  #                                    hjust = 0,
+  #                                    x = 0,
+  #                                    size = 10
+  #                                  ))
 
   return(figure)
 }
