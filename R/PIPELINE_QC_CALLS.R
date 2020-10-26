@@ -23,6 +23,9 @@
 #' @param description A sample description; will appear in the plots.
 #' @param matching_epsilon_peaks Epsilon to match peaks with \code{CNAqc}.
 #' @param smooth If \code{TRUE}, smooths copy number data with \code{CNAqc}.
+#' @param ccf_method
+#' @param peak_method
+#' @param min_VAF
 #'
 #' @return
 #' @export
@@ -37,7 +40,8 @@ pipeline_qc_copynumbercalls = function(
   smooth = TRUE,
   matching_epsilon_peaks = 0.025,
   ccf_method = 'ROUGH',
-  peak_method = 'closest'
+  peak_method = 'closest',
+  min_VAF = 0.05
  )
 {
   pio::pioHdr("Evoverse", crayon::italic(paste0('~ Pipeline to QC somatic mutations and CNA segments')))
@@ -47,7 +51,7 @@ pipeline_qc_copynumbercalls = function(
   cli::cli_h1("Creating input object (smoothing {.field {smooth}}) for sample {.field {description}}")
   cat("\n")
 
-  x = evoverse:::deconvolution_prepare_input(mutations, cna, purity, reference, min_VAF = 0)
+  x = evoverse:::deconvolution_prepare_input(mutations, cna, purity, reference, min_VAF = min_VAF)
   print(x)
 
   if(smooth) x = CNAqc::smooth_segments(x)
