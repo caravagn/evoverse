@@ -181,7 +181,7 @@ deconvolution_mobster_karyotypes_VAF = function(
 # 2- Fit CCF with MOBSTER.
 deconvolution_mobster_CCF = function(x,
                                      min_muts = 50,
-                                     min_VAF = 0.05,
+                                     # min_VAF = 0.05,
                                      BMix = FALSE,
                                      N_max = 15000,
                                      QC_type = NULL,
@@ -236,6 +236,9 @@ deconvolution_mobster_CCF = function(x,
   # Then we do something else to reflect the fact that the VAF
   # and CCF values are related, and if any filter is applied to VAF data,
   # then the same filter should be applied to CCF
+
+  min_VAF = min(x$snvs$VAF)
+
   M_VAF = CCF_entries %>%
     dplyr::group_by(karyotype) %>%
     dplyr::summarise(m = min(VAF, na.rm = T)) %>%
@@ -267,7 +270,7 @@ deconvolution_mobster_CCF = function(x,
     return(list(fits = NULL, cna_obj = x))
   }
 
-  mobster_fit = smartrun_mobster_qc(CCF_entries, QC_type, model_description = "CCF values", ...)
+  mobster_fit = evoverse:::smartrun_mobster_qc(CCF_entries, QC_type, model_description = "CCF values", ...)
 
   # BMix (optional fit)
   fit_readcounts = NULL
@@ -307,8 +310,8 @@ deconvolution_mobster_CCF = function(x,
       data.frame
 
     # As for VAF karyo fits, we test Binomial and Beta-Binomial models
-    Kbeta = min(x$Kbeta * 2, 4)
-    KbetaBin = x$Kbeta
+    Kbeta = min(mobster_fit$Kbeta * 2, 4)
+    KbetaBin = mobster_fit$Kbeta
 
     fit_readcounts = BMix::bmixfit(
       non_tail %>% dplyr::select(NV, DP),

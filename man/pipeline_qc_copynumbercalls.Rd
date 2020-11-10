@@ -13,7 +13,8 @@ pipeline_qc_copynumbercalls(
   smooth = TRUE,
   matching_epsilon_peaks = 0.025,
   ccf_method = "ROUGH",
-  peak_method = "closest"
+  peak_method = "closest",
+  min_VAF = 0.05
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ pipeline_qc_copynumbercalls(
 \item{smooth}{If \code{TRUE}, smooths copy number data with \code{CNAqc}.}
 
 \item{matching_epsilon_peaks}{Epsilon to match peaks with \code{CNAqc}.}
+
+\item{min_VAF}{}
 }
 \value{
 

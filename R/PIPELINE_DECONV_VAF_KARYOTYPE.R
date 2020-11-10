@@ -28,11 +28,11 @@
 #'
 #' @examples
 #' # We use data released with the CNAqc package
-#' x = pipeline_qc_copynumbercalls(
-#'   mutations = CNAqc::example_dataset_CNAqc$snvs,
-#'   cna = CNAqc::example_dataset_CNAqc$cna,
-#'   purity = CNAqc::example_dataset_CNAqc$purity
-#'   )
+# x = evoverse::pipeline_qc_copynumbercalls(
+#   mutations = CNAqc::example_dataset_CNAqc$snvs,
+#   cna = CNAqc::example_dataset_CNAqc$cna,
+#   purity = CNAqc::example_dataset_CNAqc$purity
+#   )
 #'
 #' print(x)
 #'

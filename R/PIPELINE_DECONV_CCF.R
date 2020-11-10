@@ -30,10 +30,9 @@
 #' # We use auto_setup = 'FAST' to speed up the analysis
 #' x = pipeline_subclonal_deconvolution_CCF(mutations, cna = cna, purity = purity,  N_max = 1000, auto_setup = 'FAST')
 #' print(x)
-pipeline_subclonal_deconvolution_CCF = function(
-  x,
-  karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
-                                                min_VAF = 0.05,
+pipeline_subclonal_deconvolution_CCF = function(x,
+                                                karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
+                                                enforce_QC_PASS = TRUE,
                                                 min_muts = 50,
                                                 description = "Example CCF deconvolution",
                                                 N_max = 15000,
@@ -43,7 +42,10 @@ pipeline_subclonal_deconvolution_CCF = function(
               crayon::italic('~ Subclonal deconvolution pipeline for CCF data'))
   cat('\n')
 
-  if(!inherits(x, "evopipe_qc")) stop("Input 'x' should be the output of the evoverse data QC pipeline. See ?pipeline_qc_copynumbercalls.")
+  if (!inherits(x, "evopipe_qc"))
+    stop(
+      "Input 'x' should be the output of the evoverse data QC pipeline. See ?pipeline_qc_copynumbercalls."
+    )
 
   # Load input data
   cli::cli_h1("Input data for sample {.field {description}}")
@@ -61,44 +63,49 @@ pipeline_subclonal_deconvolution_CCF = function(
   results$input = CNAqc_input
   results$description = description
 
-  # Determine what segments can be used. Check the inputs against the QC status inside x
+  # CCF Determine what segments can be used. Check the inputs against the QC status inside x
   # only if enforce_QC_PASS = TRUE. Otherwise use all of them, in principle.
-  Peaks_entries = QC_peaks = NULL
+  CCF_entries = QC_CCF = NULL
 
-  if(enforce_QC_PASS)
+  if (enforce_QC_PASS)
   {
-    Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
-    QC_peaks = Peaks_entries %>% dplyr::filter(QC == "PASS") %>% dplyr::pull(karyotype)
+    CCF_entries = x$QC$QC_table %>% filter(type == "CCF")
+    QC_CCF = CCF_entries %>% dplyr::filter(QC == "PASS") %>% dplyr::pull(karyotype)
   }
   else
   {
-    Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
-    QC_peaks = Peaks_entries %>% dplyr::filter(!is.na(QC)) %>%  dplyr::pull(karyotype)
+    CCF_entries = x$QC$QC_table %>% filter(type == "CCF")
+    QC_peaks = CCF_entries %>% dplyr::filter(!is.na(QC)) %>%  dplyr::pull(karyotype)
 
     cli::cli_alert_warning("enforce_QC_PASS = FALSE, karyotypes will be used regardless of QC status.")
-    print(Peaks_entries %>% dplyr::filter(!is.na(QC)))
+    print(CCF_entries %>% dplyr::filter(!is.na(QC)))
   }
 
   which_karyo = intersect(QC_CCF, karyotypes)
 
   # Handle special cases where we cannot run mobster
-  if(length(which_karyo) == 0)
+  if (length(which_karyo) == 0)
   {
     reason = case_when(
       is.null(x$QC$QC_table) ~ "There are no QC tables for input 'x', rerun the evoverse data QC pipeline",
       (nrow(v) == 0) ~ "There are no 'CCF' in the QC tables for input 'x', rerun the evoverse data QC pipeline",
       all(CCF_entries$QC != "PASS") ~ "All CCF estimation in the input data are failed, there's no CCF estimate to use here.",
-      TRUE ~ paste0("Unknown error - the following CCF karyotypes are PASS: ", paste(QC_CCF, collapse = ', '), '.')
+      TRUE ~ paste0(
+        "Unknown error - the following CCF karyotypes are PASS: ",
+        paste(QC_CCF, collapse = ', '),
+        '.'
+      )
     )
 
     cat("\n")
     cat(
       cli::boxx(
-        paste0("There is nothing to perform deconvolution here! ",reason),
+        paste0("There is nothing to perform deconvolution here! ", reason),
         padding = 1,
         col = 'white',
         float = 'center',
-        background_col = "brown")
+        background_col = "brown"
+      )
     )
     cat("\n")
 
@@ -109,14 +116,18 @@ pipeline_subclonal_deconvolution_CCF = function(
     # Data id
     results$log = paste0(
       Sys.time(),
-      '. evoverse pipeline for subclonal deconvolution from CCF: with fits ', results$with_fits
+      '. evoverse pipeline for subclonal deconvolution from CCF: with fits ',
+      results$with_fits
     )
 
     return(results)
   }
 
   cli::boxx(
-    paste0('The pipeline will analyse CCF karyotypes: ', paste0(which_karyo, collapse = ', ')),
+    paste0(
+      'The pipeline will analyse CCF karyotypes: ',
+      paste0(which_karyo, collapse = ', ')
+    ),
     background_col = "blue",
     col = 'white'
   ) %>% cat()
@@ -126,11 +137,16 @@ pipeline_subclonal_deconvolution_CCF = function(
 
   CCF_fit = evoverse:::deconvolution_mobster_CCF(
     x = CNAqc_input,
-    BMix = TRUE,                # With downstream clustering of reads
-    min_muts = min_muts,        # Skip karyotypes with less then these muts
-    QC_type = "D",              # QC with the deconvolution classifier
-    N_max = N_max,              # Downsample a karyotype if too many muts
-    min_VAF = min_VAF,          # Minimum VAF (adjusted for CCF)
+    BMix = TRUE,
+    # With downstream clustering of reads
+    min_muts = min_muts,
+    # Skip karyotypes with less then these muts
+    QC_type = "D",
+    # QC with the deconvolution classifier
+    N_max = N_max,
+    # Downsample a karyotype if too many muts
+    # min_VAF = min_VAF,
+    # Minimum VAF (adjusted for CCF)
     ...
   )
 
@@ -144,16 +160,18 @@ pipeline_subclonal_deconvolution_CCF = function(
   cat("\n")
 
   # Special case ~ nothing to do, annotate it
-  if(is_null_mobster & is_null_bmix) results$with_fits = FALSE
-  else results$with_fits = TRUE
+  if (is_null_mobster & is_null_bmix)
+    results$with_fits = FALSE
+  else
+    results$with_fits = TRUE
 
   # Table clustering assignments
   assignment_table = evoverse:::deconvolution_table_assignments(M = CCF_fit$mobster, B = CCF_fit$bmix) %>%
-      dplyr::mutate(karyotype = "CCF")
+    dplyr::mutate(karyotype = "CCF")
 
   # Table summary fits and MOBSTER QC
   summary_table = evoverse:::deconvolution_table_summary(M = CCF_fit$mobster, B = CCF_fit$bmix) %>%
-      dplyr::mutate(karyotype = "CCF")
+    dplyr::mutate(karyotype = "CCF")
 
   # Complete the S3 object with fits and input
   results$mobster = CCF_fit$mobster
@@ -174,7 +192,7 @@ pipeline_subclonal_deconvolution_CCF = function(
     dplyr::rename(CNAqc_QC = QC, CNAqc_type = type) %>%
     dplyr::mutate(n = CNAqc_input$n_karyotype[karyotype])
 
-  QC_CNAqc$p = QC_CNAqc$n/sum(QC_CNAqc$n)
+  QC_CNAqc$p = QC_CNAqc$n / sum(QC_CNAqc$n)
 
   # We assess the clonal architecture inferred with MOBSTER and BMix
   QC_mobster_CCF = results$table$summary %>%
@@ -214,7 +232,9 @@ pipeline_subclonal_deconvolution_CCF = function(
   # in Architecture_table (which requires having a PASS for both
   # CNAqc and MOBSTER fits).
   results$QC = ifelse(nrow(Architecture_table) > 0, "PASS", "FAIL")
-  results$architecture = ifelse(nrow(Architecture_table) > 0, Architecture_table$architecture[1],  NA)
+  results$architecture = ifelse(nrow(Architecture_table) > 0,
+                                Architecture_table$architecture[1],
+                                NA)
 
   cat('\n')
   cli::cli_h3("Tumour architecture: {.field {results$architecture}}.")
@@ -223,7 +243,8 @@ pipeline_subclonal_deconvolution_CCF = function(
 
   results$log = paste0(
     Sys.time(),
-    '. evoverse pipeline for deconvolution from CCF: with fits ', results$with_fits
+    '. evoverse pipeline for deconvolution from CCF: with fits ',
+    results$with_fits
   )
 
   return(results)
@@ -249,7 +270,7 @@ print.evopipe_ccf = function(x, ...)
   cat("\n")
 
   # Skinnier print
-  CNAqc:::print.cnaqc(x$input$cnaqc)
+  CNAqc:::print.cnaqc(x$input)
 
   # QC of CCFs
   cat("\n")
@@ -268,7 +289,7 @@ print.evopipe_ccf = function(x, ...)
   cat('\n')
 
   # Summary message
-  if(x$QC == "PASS")
+  if (x$QC == "PASS")
     cat(
       crayon::green(clisymbols::symbol$tick),
       "Tumour architecture:",
@@ -281,7 +302,11 @@ print.evopipe_ccf = function(x, ...)
       crayon::bgGreen(' QC PASS ')
     )
   else
-    cat(crayon::red(clisymbols::symbol$cross), "Tumour architecture cannot be assessed", crayon::bgRed(' QC FAIL '))
+    cat(
+      crayon::red(clisymbols::symbol$cross),
+      "Tumour architecture cannot be assessed",
+      crayon::bgRed(' QC FAIL ')
+    )
 }
 
 #' S3 plot for the deconvolution pipeline from raw VAF with karyotypes
@@ -311,19 +336,21 @@ plot.evopipe_ccf = function(x, ...)
 
   # BMix plots
   bmix_fits_plots = CNAqc:::eplot()
-  if(!all(is.null(x$bmix)))
+  if (!all(is.null(x$bmix)))
   {
-    subl = paste0('n = ',
-                  nrow(x$bmix$input),
-                  ", ",
-                  paste(
-                    names(x$bmix$pi),
-                    ' ',
-                    round(x$bmix$pi * 100),
-                    '%',
-                    collapse = ', ',
-                    sep = ''
-                  ))
+    subl = paste0(
+      'n = ',
+      nrow(x$bmix$input),
+      ", ",
+      paste(
+        names(x$bmix$pi),
+        ' ',
+        round(x$bmix$pi * 100),
+        '%',
+        collapse = ', ',
+        sep = ''
+      )
+    )
 
     bmix_fits_plots = BMix::plot_clusters(x$bmix, data = x$bmix$input %>% select(NV, DP)) +
       scale_fill_brewer(palette = 'Set2') +
@@ -337,23 +364,21 @@ plot.evopipe_ccf = function(x, ...)
       CNAqc::plot_segments(cna_obj, circular = TRUE, highlight = groups) + labs(title = x$description),
       mob_fits_plot,
       bmix_fits_plots,
-      nrow = 1),
+      nrow = 1
+    ),
     CNAqc::plot_CCF(cna_obj, strip = TRUE),
     nrow = 2,
     ncol = 1
   )
 
   # Set the figure title and captions
-  figure = ggpubr::annotate_figure(
-    figure,
-    bottom = ggpubr::text_grob(
-      bquote(.(x$log)),
-      hjust = 0,
-      x = 0,
-      size = 10
-    )
-  )
+  figure = ggpubr::annotate_figure(figure,
+                                   bottom = ggpubr::text_grob(
+                                     bquote(.(x$log)),
+                                     hjust = 0,
+                                     x = 0,
+                                     size = 10
+                                   ))
 
   return(figure)
 }
-

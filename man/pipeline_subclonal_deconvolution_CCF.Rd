@@ -7,7 +7,7 @@
 pipeline_subclonal_deconvolution_CCF(
   x,
   karyotypes = c("1:0", "1:1", "2:0", "2:1", "2:2"),
-  min_VAF = 0.05,
+  enforce_QC_PASS = TRUE,
   min_muts = 50,
   description = "Example CCF deconvolution",
   N_max = 15000,

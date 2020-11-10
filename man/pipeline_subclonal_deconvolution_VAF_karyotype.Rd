@@ -10,21 +10,25 @@ pipeline_subclonal_deconvolution_VAF_karyotype(
   description = "VAF by karyotype deconvolution sample",
   min_muts = 150,
   N_max = 15000,
+  enforce_QC_PASS = TRUE,
   ...
 )
 }
 \arguments{
+\item{x}{An object returned from function \code{pipeline_qc_copynumbercalls},
+which refers to the QC analysis of somatic mutations, CNAs and tumour purity.}
+
+\item{karyotypes}{Vector of ..}
+
+\item{description}{A string description of this pipeline run, it will appear
+in some of the produced plots.}
+
 \item{min_muts}{Skip analysing karyotypes with less than \code{min_muts} mutations.}
 
+\item{enforce_QC_PASS}{If \code{TRUE}, the pipeline will only analyze samples
+that have PASS status from the data analysis QC}
+
 \item{...}{Parameters passed \code{mobster_fit} in package \code{mobster}.}
-
-\item{mutations}{Input mutations in the format for package \code{CNAqc}.}
-
-\item{cna}{Absolute Copy Number Alterations in the format for package \code{CNAqc}.}
-
-\item{purity}{Tumour purity, in [0, 1].}
-
-\item{matching_epsilon_peaks}{}
 }
 \value{
 
@@ -42,11 +46,6 @@ the corresponding vignette.
 }
 \examples{
 # We use data released with the CNAqc package
-x = pipeline_qc_copynumbercalls(
-  mutations = CNAqc::example_dataset_CNAqc$snvs,
-  cna = CNAqc::example_dataset_CNAqc$cna,
-  purity = CNAqc::example_dataset_CNAqc$purity
-  )
 
 print(x)
 
