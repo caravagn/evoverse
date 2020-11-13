@@ -25,7 +25,8 @@
 #' @param smooth If \code{TRUE}, smooths copy number data with \code{CNAqc}.
 #' @param ccf_method
 #' @param peak_method
-#' @param min_VAF
+#' @param min_CCF
+#' @param only_SNVs
 #'
 #' @return
 #' @export
@@ -36,12 +37,13 @@ pipeline_qc_copynumbercalls = function(
   cna,
   purity,
   reference = 'GRCh38',
-  description = "MyPAT00XX1",
+  description = "My sample",
   smooth = TRUE,
   matching_epsilon_peaks = 0.025,
   ccf_method = 'ROUGH',
   peak_method = 'closest',
-  min_VAF = 0.05
+  min_CCF = 0.1,
+  only_SNVs = TRUE
  )
 {
   pio::pioHdr("Evoverse", crayon::italic(paste0('~ Pipeline to QC somatic mutations and CNA segments')))
@@ -51,7 +53,7 @@ pipeline_qc_copynumbercalls = function(
   cli::cli_h1("Creating input object (smoothing {.field {smooth}}) for sample {.field {description}}")
   cat("\n")
 
-  x = evoverse:::deconvolution_prepare_input(mutations, cna, purity, reference, min_VAF = min_VAF)
+  x = evoverse:::deconvolution_prepare_input(mutations, cna, purity, reference, min_CCF = min_CCF, only_SNVs = only_SNVs)
   print(x)
 
   if(smooth) x = CNAqc::smooth_segments(x)
