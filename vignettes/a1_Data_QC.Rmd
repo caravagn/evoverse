@@ -26,18 +26,17 @@ library(evoverse)
 
 ## Input requirements
 
-The following data are required to run this pipeline.
-
-* one [CNAqc](https://caravagn.github.io/CNAqc/) input dataset, which consists of: 
   * somatic mutations (with read counts data), `mutations`;
   * absolute copy number segments, `cna`;
   * tumour purity, `purity`;
   * a genome reference supported by [CNAqc](https://caravagn.github.io/CNAqc/).
   
-* pipeline parameters, which allow to:
-   * identify a run by a `description`;
-   * decide if input segments should be [smoothed by CNAqc](https://caravagn.github.io/CNAqcarticles/a5_smoothing.html), `smooth`;
-   * decide how peaks  should be [matched by CNAqc](https://caravagn.github.io/CNAqc/articles/a3_peaks_detection.html), `matching_epsilon_peaks`;
+  A [CNAqc](https://caravagn.github.io/CNAqc/) object with these data is created. 
+
+  * Computation:
+  ** load data for a run;
+  ** [smooth](https://caravagn.github.io/CNAqcarticles/a5_smoothing.html) input CNA segments;
+  ** perform  [peak detection analysis](https://caravagn.github.io/CNAqc/articles/a3_peaks_detection.html);
    * decide how CCF should be [computed by CNAqc](https://caravagn.github.io/CNAqc/articles/a4_ccf_computation.html), `CCF_computation`;
 
 
@@ -104,6 +103,6 @@ print(pipeline$QC)
 
 A multi-panel figure is assembled by the S3 `plot` method, wich reports (by row) CNA segments and genome-wide depth of sequencing, CCF and raw data histograms, results from peak-detection and a strip plot of mutation multiplicity estimates that are used to compute CCFs.
 
-```{r, fig.width=15, fig.height=16.5, eval=TRUE}
+```{r, fig.width=10, fig.height=11, eval=TRUE}
 plot(pipeline)
 ```

@@ -29,11 +29,11 @@
 #'
 #' @examples
 #' # We use data released with the CNAqc package
-#' x = pipeline_qc_copynumbercalls(
-#'   mutations = CNAqc::example_dataset_CNAqc$snvs,
-#'   cna = CNAqc::example_dataset_CNAqc$cna,
-#'   purity = CNAqc::example_dataset_CNAqc$purity
-#'   )
+# x = pipeline_qc_copynumbercalls(
+#   mutations = CNAqc::example_dataset_CNAqc$snvs,
+#   cna = CNAqc::example_dataset_CNAqc$cna,
+#   purity = CNAqc::example_dataset_CNAqc$purity
+#   )
 #'
 #' print(x)
 #'
@@ -182,12 +182,51 @@ pipeline_chromosome_timing =
     })
     summary_table = Reduce(dplyr::bind_rows, summary_table)
 
+    # Data QC table
+    QC_CNAqc = CNAqc:::compute_QC_table(CNAqc_input)$QC_table %>%
+      dplyr::filter(karyotype %in% which_karyo, type == 'Peaks') %>%
+      dplyr::rename(CNAqc_QC = QC, CNAqc_type = type) %>%
+      dplyr::mutate(n = CNAqc_input$n_karyotype[karyotype])
+
+    QC_CNAqc$p = QC_CNAqc$n / sum(QC_CNAqc$n)
+
+    # We assess QC of the analysis
+    QC_mobster_karyotypes = summary_table %>%
+      dplyr::select(karyotype,
+                    QC,
+                    QC_type,
+                    QC_prob,
+                    K_beta,
+                    tail) %>%
+      dplyr::rename(
+        K_mobster = K_beta,
+        mobster_QC = QC,
+        mobster_QC_prob = QC_prob,
+        mobster_QC_type = QC_type
+      )
+
+    # Merge together both CNAqc and evoverse QC tables
+    QC_table = dplyr::full_join(QC_CNAqc, QC_mobster_karyotypes, by = 'karyotype') %>%
+      dplyr::select(karyotype,
+                    n,
+                    p,
+                    K_mobster,
+                    tail,
+                    ends_with('QC'),
+                    dplyr::everything())
+
+    # The final QC result is PASS iff there is at least one timeable karyotype
+    results$QC = ifelse(any(QC_table$mobster_QC == "PASS", na.rm = TRUE),
+                        "PASS",
+                        "FAIL")
+
     # Complete the S3 object with fits and input
     results$mobster = subset_mobster_fits
 
     # Tables
     results$table$summary = summary_table
     results$table$clustering_assignments = assignment_table
+    results$table$QC_table = QC_table
 
     # Data id
     results$description = description
@@ -223,25 +262,34 @@ print.evopipe_ctime = function(x, ...)
   CNAqc:::print.cnaqc(x$input)
 
 
-  # PASS/FAIL
-  pass = x$table$summary %>% dplyr::filter(QC == "PASS") %>% dplyr::select(karyotype, starts_with('QC'))
-  fail = x$table$summary %>% dplyr::filter(QC == "FAIL") %>% dplyr::select(karyotype, starts_with('QC'))
+  # QC of the analysis
+  cat("\n")
+  cli::cli_rule("QC table for the analysis")
+  cat("\n")
 
-  if (nrow(pass) > 0) {
-    cat("\n")
-    cli::cli_rule(crayon::bgGreen(" QC PASS "),
-                  right = paste0("PASS rate (%): ", x$QC$f_PASS))
-    print(pass)
-  }
+  pio::pioDisp(x$table$QC_table)
+  cat('\n')
 
-  if (nrow(fail) > 0) {
-    cat("\n")
-    cli::cli_rule(crayon::bgRed(" QC PASS "),
-                  right = paste0("FAIL rate (%): ", 100 - x$QC$f_PASS))
-    print(fail)
-  }
+  # Summary message
+  if (x$QC == "PASS")
+    cat(
+      crayon::green(clisymbols::symbol$tick),
+      "Timeable karyotypes",
+      paste(
+        x$table$QC_table %>% filter(mobster_QC == "PASS") %>% pull(karyotype),
+        collapse = ', '
+      ),
+      crayon::bgGreen(' QC PASS ')
+    )
+  else
+    cat(
+      crayon::red(clisymbols::symbol$cross),
+      "No timeable karyotypesd",
+      crayon::bgRed(' QC FAIL ')
+    )
 
-  cat('\n', crayon::bgBlue(" LOG "), x$log)
+
+  cat('\n\n', crayon::bgBlue(crayon::white(" LOG ")), x$log)
 }
 
 # S3 plot for the chromosome timing pipeline results.
@@ -291,15 +339,13 @@ plot.evopipe_ctime = function(x, ...)
   )
 
   # Set the figure title and captions
-  figure = ggpubr::annotate_figure(
-    figure,
-    bottom = ggpubr::text_grob(
-      bquote(.(x$log)),
-      hjust = 0,
-      x = 0,
-      size = 10
-    )
-  )
+  figure = ggpubr::annotate_figure(figure,
+                                   bottom = ggpubr::text_grob(
+                                     bquote(.(x$log)),
+                                     hjust = 0,
+                                     x = 0,
+                                     size = 10
+                                   ))
 
   # Set the figure title and captions
   # figure = ggpubr::annotate_figure(figure,

@@ -35,3 +35,15 @@
     options(evoverse_welcome_message = FALSE)
   }
 }
+
+
+self_install = function()
+{
+  devtools::install("~/Documents/GitHub/evoverse/")
+}
+
+self_load = function()
+{
+  devtools::load_all("~/Documents/GitHub/evoverse/")
+}
+

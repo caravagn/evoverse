@@ -1,10 +1,4 @@
 base
-methods
-datasets
-utils
-grDevices
-graphics
-stats
 tidyverse
 ggplot2
 tibble
@@ -21,7 +15,6 @@ ggpubr
 peakPick
 RColorBrewer
 easypar
-stats4
 bbmle
 sads
 mobster

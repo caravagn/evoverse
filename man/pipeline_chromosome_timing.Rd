@@ -43,11 +43,6 @@ consists in n = 377 colorectal whole genome samples.
 }
 \examples{
 # We use data released with the CNAqc package
-x = pipeline_qc_copynumbercalls(
-  mutations = CNAqc::example_dataset_CNAqc$snvs,
-  cna = CNAqc::example_dataset_CNAqc$cna,
-  purity = CNAqc::example_dataset_CNAqc$purity
-  )
 
 print(x)
 

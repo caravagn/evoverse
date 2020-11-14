@@ -9,12 +9,13 @@ pipeline_qc_copynumbercalls(
   cna,
   purity,
   reference = "GRCh38",
-  description = "MyPAT00XX1",
+  description = "My sample",
   smooth = TRUE,
   matching_epsilon_peaks = 0.025,
   ccf_method = "ROUGH",
   peak_method = "closest",
-  min_VAF = 0.05
+  min_CCF = 0.1,
+  only_SNVs = TRUE
 )
 }
 \arguments{
@@ -32,7 +33,7 @@ pipeline_qc_copynumbercalls(
 
 \item{matching_epsilon_peaks}{Epsilon to match peaks with \code{CNAqc}.}
 
-\item{min_VAF}{}
+\item{only_SNVs}{}
 }
 \value{
 
