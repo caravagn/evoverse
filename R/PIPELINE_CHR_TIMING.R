@@ -271,7 +271,7 @@ print.evopipe_ctime = function(x, ...)
   cat('\n')
 
   # Summary message
-  if (x$QC == "PASS")
+  if (!is.null(x$QC) && x$QC == "PASS")
     cat(
       crayon::green(clisymbols::symbol$tick),
       "Timeable karyotypes",
@@ -284,10 +284,9 @@ print.evopipe_ctime = function(x, ...)
   else
     cat(
       crayon::red(clisymbols::symbol$cross),
-      "No timeable karyotypesd",
+      "No timeable karyotypes",
       crayon::bgRed(' QC FAIL ')
     )
-
 
   cat('\n\n', crayon::bgBlue(crayon::white(" LOG ")), x$log)
 }
