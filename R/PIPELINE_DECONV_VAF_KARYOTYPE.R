@@ -306,7 +306,7 @@ print.evopipe_rawk = function(x, ...)
   cat('\n')
 
   # Summary message
-  if(x$QC == "PASS")
+  if (!is.null(x$QC) && x$QC == "PASS")
     cat(
       crayon::green(clisymbols::symbol$tick),
       "Tumour architecture:",
