@@ -375,7 +375,7 @@ postfit_fix = function(x)
   n_tot = sum(n_tot, na.rm = T)
 
 
-  x$QC$QC_table %>%
+  x$QC$QC_table = x$QC$QC_table %>%
     dplyr::mutate(n_karyotype = cnaqc_counts[karyotype], p_karyotype = n_karyotype /
                     n_tot)
 
