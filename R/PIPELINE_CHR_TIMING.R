@@ -363,3 +363,21 @@ plot.evopipe_ctime = function(x, ...)
 
   return(figure)
 }
+
+
+
+postfit_fix = function(x)
+{
+  cnaqc_counts = as.numeric(x$cnaqc$n_karyotype)
+  names(cnaqc_counts) = names(x$cnaqc$n_karyotype)
+
+  n_tot = cnaqc_counts[unique(x$QC$QC_table$karyotype)]
+  n_tot = sum(n_tot, na.rm = T)
+
+
+  x$QC$QC_table %>%
+    dplyr::mutate(n_karyotype = cnaqc_counts[karyotype], p_karyotype = n_karyotype /
+                    n_tot)
+
+  return(x);
+}
