@@ -94,6 +94,7 @@ deconvolution_mobster_karyotypes_VAF = function(
   min_muts = 50,
   N_max = 15000,
   QC_type = NULL,
+  BMix_entropy = TRUE,
   ...
   )
 {
@@ -167,6 +168,7 @@ deconvolution_mobster_karyotypes_VAF = function(
         non_tail %>% dplyr::select(NV, DP),
         K.BetaBinomials = 1:KbetaBin,
         K.Binomials = 1:Kbeta,
+        entropy = BMix_entropy,
         samples = 3
       )
 
@@ -193,6 +195,7 @@ deconvolution_mobster_CCF = function(x,
                                      BMix = FALSE,
                                      N_max = 15000,
                                      QC_type = NULL,
+                                     BMix_entropy = TRUE,
                                      ...)
 {
   if (all(is.null(x$CCF_estimates))) {
@@ -325,7 +328,9 @@ deconvolution_mobster_CCF = function(x,
       non_tail %>% dplyr::select(NV, DP),
       K.BetaBinomials = 1:KbetaBin,
       K.Binomials = 1:Kbeta,
-      samples = 3)
+      samples = 3,
+      entropy = BMix_entropy
+    )
 
     fit_readcounts$input = non_tail
   }

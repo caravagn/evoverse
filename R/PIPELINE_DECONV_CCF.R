@@ -32,10 +32,11 @@
 #' print(x)
 pipeline_subclonal_deconvolution_CCF = function(x,
                                                 karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
-                                                enforce_QC_PASS = TRUE,
                                                 min_muts = 50,
                                                 description = "Example CCF deconvolution",
                                                 N_max = 15000,
+                                                enforce_QC_PASS = TRUE,
+                                                BMix_entropy = TRUE,
                                                 ...)
 {
   pio::pioHdr("Evoverse",
@@ -75,7 +76,7 @@ pipeline_subclonal_deconvolution_CCF = function(x,
   else
   {
     CCF_entries = x$QC$QC_table %>% filter(type == "CCF")
-    QC_peaks = CCF_entries %>% dplyr::filter(!is.na(QC)) %>%  dplyr::pull(karyotype)
+    QC_CCF = CCF_entries %>% dplyr::filter(!is.na(QC)) %>%  dplyr::pull(karyotype)
 
     cli::cli_alert_warning("enforce_QC_PASS = FALSE, karyotypes will be used regardless of QC status.")
     print(CCF_entries %>% dplyr::filter(!is.na(QC)))
@@ -88,7 +89,7 @@ pipeline_subclonal_deconvolution_CCF = function(x,
   {
     reason = case_when(
       is.null(x$QC$QC_table) ~ "There are no QC tables for input 'x', rerun the evoverse data QC pipeline",
-      (nrow(v) == 0) ~ "There are no 'CCF' in the QC tables for input 'x', rerun the evoverse data QC pipeline",
+      (nrow(CCF_entries) == 0) ~ "There are no 'CCF' in the QC tables for input 'x', rerun the evoverse data QC pipeline",
       all(CCF_entries$QC != "PASS") ~ "All CCF estimation in the input data are failed, there's no CCF estimate to use here.",
       TRUE ~ paste0(
         "Unknown error - the following CCF karyotypes are PASS: ",
@@ -137,14 +138,11 @@ pipeline_subclonal_deconvolution_CCF = function(x,
 
   CCF_fit = evoverse:::deconvolution_mobster_CCF(
     x = CNAqc_input,
-    BMix = TRUE,
-    # With downstream clustering of reads
-    min_muts = min_muts,
-    # Skip karyotypes with less then these muts
-    QC_type = "D",
-    # QC with the deconvolution classifier
-    N_max = N_max,
-    # Downsample a karyotype if too many muts
+    BMix = TRUE,         # With downstream clustering of reads
+    min_muts = min_muts, # Skip karyotypes with less then these muts
+    QC_type = "D",  # QC with the deconvolution classifier
+    N_max = N_max,  # Downsample a karyotype if too many muts
+    BMix_entropy = BMix_entropy,# Entropy for model selection in BMix
     # min_VAF = min_VAF,
     # Minimum VAF (adjusted for CCF)
     ...
@@ -358,18 +356,34 @@ plot.evopipe_ccf = function(x, ...)
 
   }
 
-  # Figure assembly
-  figure = ggpubr::ggarrange(
-    ggpubr::ggarrange(
-      CNAqc::plot_segments(cna_obj, circular = TRUE, highlight = groups) + labs(title = x$description),
-      mob_fits_plot,
-      bmix_fits_plots,
-      nrow = 1
-    ),
-    CNAqc::plot_CCF(cna_obj, strip = TRUE),
-    nrow = 2,
+  # left panel
+  left_panel = pipeline_qc_plots(x)
+
+  # right panel plot
+  ccf_panel = CNAqc::plot_data_histogram(x$input, which = "CCF")
+
+  right_panel = ggpubr::ggarrange(
+    ccf_panel,
+    mob_fits_plot,
+    bmix_fits_plots,
     ncol = 1
   )
+
+  figure = ggpubr::ggarrange(left_panel, right_panel, nrow = 1, widths = c(1, .3))
+
+
+  # Figure assembly
+  # figure = ggpubr::ggarrange(
+  #   ggpubr::ggarrange(
+  #     CNAqc::plot_segments(cna_obj, circular = TRUE, highlight = groups) + labs(title = x$description),
+  #     mob_fits_plot,
+  #     bmix_fits_plots,
+  #     nrow = 1
+  #   ),
+  #   CNAqc::plot_CCF(cna_obj, strip = TRUE),
+  #   nrow = 2,
+  #   ncol = 1
+  # )
 
   # Set the figure title and captions
   figure = ggpubr::annotate_figure(figure,

@@ -47,6 +47,7 @@ pipeline_chromosome_timing =
            min_muts = 150,
            description = "Chromosomal timing sample",
            N_max = 15000,
+           enforce_QC_PASS = TRUE,
            ...)
   {
     pio::pioHdr("Evoverse", crayon::italic('Chromosomal timing pipeline'))
@@ -73,9 +74,20 @@ pipeline_chromosome_timing =
     results$input = CNAqc_input
     results$description = description
 
-    # Determine what segments can be used. Check the required inputs against the QC status inside x.
-    Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
-    QC_peaks = Peaks_entries %>% filter(QC == "PASS") %>% pull(karyotype)
+    if(enforce_QC_PASS)
+    {
+      # Determine what segments can be used. Check the required inputs against the QC status inside x.
+      Peaks_entries = x$QC$QC_table %>% dplyr::filter(type == "Peaks")
+      QC_peaks = Peaks_entries %>% dplyr::filter(QC == "PASS") %>% dplyr::pull(karyotype)
+    }
+    else
+    {
+      Peaks_entries = x$QC$QC_table %>% filter(type == "Peaks")
+      QC_peaks = Peaks_entries %>% dplyr::filter(!is.na(QC)) %>%  dplyr::pull(karyotype)
+
+      cli::cli_alert_warning("enforce_QC_PASS = FALSE, karyotypes will be used regardless of QC status.")
+      print(Peaks_entries %>% dplyr::filter(!is.na(QC)))
+    }
 
     which_karyo = intersect(QC_peaks, karyotypes)
 
@@ -311,7 +323,7 @@ plot.evopipe_ctime = function(x, ...)
 
   # 2 x 1 CNAqc plot
   groups = names(mobster_fits)
-  karyotypes_list = c("2:0", "2:1", "2:2")
+  karyotypes_list = c("1:0", '1:1', "2:0", "2:1", "2:2")
 
   # MOBSTER plots, sourrounded by a coloured box by QC
   mob_fits_plot = lapply(karyotypes_list,
