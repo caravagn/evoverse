@@ -1,12 +1,7 @@
-# Downloaded example PCAWG
-# x = readRDS("~/Downloads/evoverse_dataqc.rds")
-# snvs = x$cnaqc$snvs %>% select(chr, from, to, ref, alt, NV, DP, VAF, gene, is_driver, driver_label)
-# cna = x$cnaqc$cna %>% select(chr, from, to, Major, minor)
-# purity = x$cnaqc$purity
-# reference = x$cnaqc$reference_genome
-
 require(tidyverse)
 
+# Example data in the CNAqc package - input formats are discussed
+# here: https://caravagnalab.github.io/CNAqc/articles/a1_Introduction.html
 snvs = CNAqc::example_dataset_CNAqc$snvs
 cna = CNAqc::example_dataset_CNAqc$cna
 purity = CNAqc::example_dataset_CNAqc$purity
@@ -20,41 +15,26 @@ data_qc = pipeline_qc_copynumbercalls(
   mutations = snvs,
   cna = cna,
   purity = purity,
-  reference = 'hg19',
+  reference = 'GRCh38',
   description = "Data QC example",
   smooth = TRUE,
   matching_epsilon_peaks = 0.035,
-  ccf_method = 'ROUGH',
+  ccf_method = 'ENTROPY',
   peak_method = 'closest',
   min_CCF = 0.1,
   only_SNVs = TRUE
 )
 
-saveRDS(data_qc, file = "R/nobuild/dataqc.rds")
+saveRDS(data_qc, file = "dataqc.rds")
 
-ggsave("R/nobuild/dataqc.pdf", plot = plot(data_qc), width = 10, height = 12)
-
-# Timing deconvolution
-
-timing_fit = pipeline_chromosome_timing(
-  data_qc,
-  karyotypes = c('2:0', '2:1', '2:2'),
-  min_muts = 50,
-  description = "Chromosomal timing sample",
-  N_max = 15000,
-  enforce_QC_PASS = FALSE,
-  auto_setup = "FAST"
-)
-
-saveRDS(timing_fit, file = "R/nobuild/timing_fit.rds")
-
-ggsave("R/nobuild/timingfitc.pdf", plot = plot(timing_fit), width = 10, height = 10)
+ggsave("dataqc.pdf", plot = plot(data_qc), width = 10, height = 12)
 
 # VAF deconvolution
 
 vaf_fit = pipeline_subclonal_deconvolution_VAF_karyotype(
   data_qc,
   min_muts = 50,
+  karyotypes = c('1:0', '1:1', '2:0', '2:1', '2:2'),
   description = "VAF deconvolution by karyotype",
   N_max = 15000,
   enforce_QC_PASS = FALSE,
