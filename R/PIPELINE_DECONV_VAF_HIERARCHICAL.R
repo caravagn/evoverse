@@ -173,7 +173,7 @@ plot.evopipe_rawkh = function(x, ...)
 
   figure = ggpubr::ggarrange(
     CNAqc::plot_segments(cna_obj, circular = FALSE, highlight = groups) + labs(title = x$description),
-    CNAqc::plot_peaks_analysis(cna_obj),
+    CNAqc::plot_peaks_analysis(cna_obj, empty_plot = F),
     mob_fits_plot,
     nrow = 3,
     ncol = 1
