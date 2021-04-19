@@ -64,8 +64,8 @@ pipeline_subclonal_deconvolution_hierarchical_VAF = function(
     # Complete the S3 object with fits and input
     results$mobster <-  all_fits$best
 
-    results$table$summary <- list(beta = get_beta(all_fits$best),pareto = get_pareto(all_fits$best),
-                                  mixture_weights = get_mixture_weights(all_fits$best),assignment_probs = get_assignment_probs(all_fits$best)
+    results$table$summary <- list(beta = mobster:::get_beta(all_fits$best),pareto = mobster:::get_pareto(all_fits$best),
+                                  mixture_weights = mobster:::get_mixture_weights(all_fits$best),assignment_probs = mobster:::get_assignment_probs(all_fits$best)
                                   )
     results$table$clustering_assignments <- all_fits$best$data
     results$table$QC_table <- x$QC$QC_table
@@ -108,7 +108,7 @@ pipeline_subclonal_deconvolution_hierarchical_VAF = function(
 #' @examples
 print.evopipe_rawkh = function(x, ...)
 {
-  stopifnot(inherits(x, 'evopipe_rawk'))
+  stopifnot(inherits(x, 'evopipe_rawkh'))
 
   # Print pipeline objects
   cli::cli_rule(paste(crayon::bgYellow(
