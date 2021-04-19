@@ -10,6 +10,7 @@ pipeline_chromosome_timing(
   min_muts = 150,
   description = "Chromosomal timing sample",
   N_max = 15000,
+  enforce_QC_PASS = TRUE,
   ...
 )
 }

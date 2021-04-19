@@ -11,6 +11,7 @@ pipeline_subclonal_deconvolution_VAF_karyotype(
   min_muts = 150,
   N_max = 15000,
   enforce_QC_PASS = TRUE,
+  BMix_entropy = TRUE,
   ...
 )
 }
