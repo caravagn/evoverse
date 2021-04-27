@@ -36,7 +36,7 @@ pipeline_subclonal_deconvolution_CCF = function(x,
                                                 description = "Example CCF deconvolution",
                                                 N_max = 15000,
                                                 enforce_QC_PASS = TRUE,
-                                                BMix_entropy = TRUE,
+                                                BMix_score = "ICL",
                                                 ...)
 {
   pio::pioHdr("Evoverse",
@@ -142,7 +142,7 @@ pipeline_subclonal_deconvolution_CCF = function(x,
     min_muts = min_muts, # Skip karyotypes with less then these muts
     QC_type = "D",  # QC with the deconvolution classifier
     N_max = N_max,  # Downsample a karyotype if too many muts
-    BMix_entropy = BMix_entropy,# Entropy for model selection in BMix
+    BMix_score = BMix_score,# Entropy for model selection in BMix
     # min_VAF = min_VAF,
     # Minimum VAF (adjusted for CCF)
     ...
@@ -168,7 +168,7 @@ pipeline_subclonal_deconvolution_CCF = function(x,
     dplyr::mutate(karyotype = "CCF")
 
   # Table summary fits and MOBSTER QC
-  summary_table = evoverse:::deconvolution_table_summary(M = CCF_fit$mobster, B = CCF_fit$bmix) %>%
+  summary_table = deconvolution_table_summary(M = CCF_fit$mobster, B = CCF_fit$bmix) %>%
     dplyr::mutate(karyotype = "CCF")
 
   # Complete the S3 object with fits and input

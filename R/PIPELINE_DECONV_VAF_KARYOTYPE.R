@@ -47,7 +47,7 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
   min_muts = 150,
   N_max = 15000,
   enforce_QC_PASS = TRUE,
-  BMix_entropy = TRUE,
+  BMix_score = 'ICL',
   ...)
 {
   pio::pioHdr("Evoverse", crayon::italic('Raw VAF by karyotype subclonal deconvolution pipeline'))
@@ -138,7 +138,7 @@ pipeline_subclonal_deconvolution_VAF_karyotype = function(
     min_muts = min_muts,        # Skip karyotypes with less then these muts
     QC_type = "D",              # QC with the deconvolution classifier
     N_max = N_max,              # Downsample a karyotype if too many muts
-    BMix_entropy = BMix_entropy,# Entropy for model selection in BMix
+    BMix_score = BMix_score,# Entropy for model selection in BMix
     ...
   )
 
