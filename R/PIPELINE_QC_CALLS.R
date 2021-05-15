@@ -21,7 +21,8 @@
 #' @param purity Tumour purity, in \code{CNAqc} input format.
 #' @param reference A reference supported by package \code{CNAqc}.
 #' @param description A sample description; will appear in the plots.
-#' @param matching_epsilon_peaks Epsilon to match peaks with \code{CNAqc}.
+#' @param purity_error Error on purity accepted \code{CNAqc}.
+#' @param VAF_tolerance Accepted tolerance on VAF picks calling \code{CNAqc}.
 #' @param smooth If \code{TRUE}, smooths copy number data with \code{CNAqc}.
 #' @param ccf_method
 #' @param peak_method
@@ -39,8 +40,9 @@ pipeline_qc_copynumbercalls = function(
   reference = 'GRCh38',
   description = "My sample",
   smooth = TRUE,
-  matching_epsilon_peaks = 0.025,
-  ccf_method = 'ROUGH',
+  purity_error = 0.05,
+  VAF_tolerance = 0.015,
+  ccf_method = 'ENTROPY',
   peak_method = 'closest',
   min_CCF = 0.1,
   only_SNVs = TRUE
@@ -67,7 +69,8 @@ pipeline_qc_copynumbercalls = function(
 
   x = CNAqc::analyze_peaks(
     x,
-    matching_epsilon = matching_epsilon_peaks,
+    purity_error = purity_error,
+    VAF_tolerance = VAF_tolerance, 
     karyotypes = USE_KARYOTYPES,
     matching_strategy = peak_method
     )
