@@ -87,8 +87,13 @@ pipeline_qc_copynumbercalls = function(
 
   x = CNAqc::detect_arm_overfragmentation(x)
   # x =  CNAqc::detect_wg_overfragmentation(x)
+  
+  # 5. Advanced phasing
+  cli::cli_h1("Calculating multiplicieties for complex karyotypes")
+  phas = CNAqc:::advanced_phasing(x)
+  x$advanced_phasing = phas$phasing
 
-  # 5. Final QC is inside CNAqc
+  # 6. Final QC is inside CNAqc
   xqc = CNAqc:::compute_QC_table(x)
 
   # Assemble a special object to return this information
