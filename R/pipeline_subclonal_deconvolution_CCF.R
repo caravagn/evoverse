@@ -52,7 +52,7 @@ pipeline_subclonal_deconvolution_CCF = function(mutations,
   cli::cli_process_start("Loading input data")
   cat("\n")
 
-  CNAqc_input = evoverse:::deconvolution_prepare_input(mutations, cna, purity, min_VAF = min_VAF)
+  CNAqc_input = deconvolution_prepare_input(mutations, cna, purity, min_VAF = min_VAF)
 
   # Downsample data if too many mutations
   if(CNAqc_input$n_snvs > N_max) {
