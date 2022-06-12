@@ -1,5 +1,5 @@
 # Transforms input data into a CNAqc object.
-deconvolution_prepare_input = function(mutations, cna, purity, reference, min_CCF, only_SNVs)
+deconvolution_prepare_input = function(mutations, cna, purity, reference, only_SNVs)
 {
   cat("\n")
   cli::cli_h1("Preparing input for deconvolution")
@@ -26,9 +26,6 @@ deconvolution_prepare_input = function(mutations, cna, purity, reference, min_CC
 
   # Apply CNA mapping and retain only mappable mutations
   mapped_data = CNAqc::init(snvs = mutations, cna = cna, purity = purity, ref = reference)
-
-  # Filter by CCF
-  mapped_data = CNAqc::subset_by_minimum_CCF(mapped_data, min_CCF)
 
   # Retain only SNVs
   if(only_SNVs)   mapped_data = CNAqc::subset_snvs(mapped_data)
