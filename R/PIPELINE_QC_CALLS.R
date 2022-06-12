@@ -44,7 +44,6 @@ pipeline_qc_copynumbercalls = function(
   VAF_tolerance = 0.015,
   ccf_method = 'ENTROPY',
   peak_method = 'closest',
-  min_CCF = 0.1,
   only_SNVs = TRUE
  )
 {
@@ -55,7 +54,7 @@ pipeline_qc_copynumbercalls = function(
   cli::cli_h1("Creating input object (smoothing {.field {smooth}}) for sample {.field {description}}")
   cat("\n")
 
-  x = evoverse:::deconvolution_prepare_input(mutations, cna, purity, reference, min_CCF = min_CCF, only_SNVs = only_SNVs)
+  x = evoverse:::deconvolution_prepare_input(mutations, cna, purity, reference, only_SNVs = only_SNVs)
   print(x)
 
   if(smooth) x = CNAqc::smooth_segments(x)
