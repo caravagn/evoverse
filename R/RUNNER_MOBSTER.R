@@ -25,7 +25,7 @@ deconvolution_prepare_input = function(mutations, cna, purity, reference, only_S
   # }
 
   # Apply CNA mapping and retain only mappable mutations
-  mapped_data = CNAqc::init(snvs = mutations, cna = cna, purity = purity, ref = reference)
+  mapped_data = CNAqc::init(mutations = mutations, cna = cna, purity = purity, ref = reference)
 
   # Retain only SNVs
   if(only_SNVs)   mapped_data = CNAqc::subset_snvs(mapped_data)
