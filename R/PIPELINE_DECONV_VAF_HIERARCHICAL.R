@@ -20,6 +20,7 @@ pipeline_subclonal_deconvolution_hierarchical_VAF = function(
   min_muts = 150,
   min_vaf = 0.,
   enforce_QC_PASS = TRUE,
+  save_all_fits = TRUE,
   ...) {
 
   pio::pioHdr("Evoverse", crayon::italic('Raw VAF by karyotype hierarchical subclonal deconvolution pipeline'))
@@ -77,7 +78,13 @@ pipeline_subclonal_deconvolution_hierarchical_VAF = function(
                             pull(karyotype) %>%  unique()) %in% "FAIL"),
                          "FAIL", "PASS")
     results$architecture <- ifelse(all_fits$best$run_parameters$K == 0, "Monoclonal", "Polyclonal")
-
+    if(save_all_fits){
+      
+      results$mobster_all_runs <- all_fits$runs
+      results$fits.table <- all_fits$fits.table
+      results$model.selection <- all_fits$model.selection
+    }
+    
     cat('\n')
     cli::cli_h3("Tumour architecture: {.field {results$architecture}}.")
 
