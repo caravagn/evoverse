@@ -43,6 +43,7 @@ pipeline_subclonal_deconvolution_hierarchical_VAF = function(
                                     n_t = min_muts,
                                     vaf_filter = min_vaf,
                                     karyotypes = karyotypes,
+                                    enforce_QC_PASS = enforce_QC_PASS,
                                     ...)
 
 
